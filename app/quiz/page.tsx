@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import { AppSidebar } from "@/components/app-sidebar";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,6 +17,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Separator } from "@/components/ui/separator";
+import { QuizUploadDocument } from "@/components/dialogs/quiz/QuizUploadDocument";
 import { Plus, Edit, Trash2, Eye, Clock, FileText } from "lucide-react";
 import Link from "next/link";
 
@@ -67,6 +71,8 @@ const quizData = [
 ];
 
 export default function QuizPage() {
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
   return (
     <SidebarProvider>
       <AppSidebar />
@@ -90,13 +96,17 @@ export default function QuizPage() {
                 Manage and create quizzes for your students
               </p>
             </div>
-            <Button asChild>
-              <Link href="/quiz/create">
-                <Plus className="mr-2 size-4" />
-                Create New Quiz
-              </Link>
+            <Button onClick={() => setIsDialogOpen(true)}>
+              <Plus className="mr-2 size-4" />
+              Create New Quiz
             </Button>
           </div>
+
+          {/* Dialog for Upload Document */}
+          <QuizUploadDocument
+            open={isDialogOpen}
+            onOpenChange={setIsDialogOpen}
+          />
 
           {/* Table */}
           <div className="rounded-md border">
@@ -177,11 +187,9 @@ export default function QuizPage() {
               <p className="text-muted-foreground mb-4">
                 Get started by creating your first quiz
               </p>
-              <Button asChild>
-                <Link href="/quiz/create">
-                  <Plus className="mr-2 size-4" />
-                  Create New Quiz
-                </Link>
+              <Button onClick={() => setIsDialogOpen(true)}>
+                <Plus className="mr-2 size-4" />
+                Create New Quiz
               </Button>
             </div>
           )}
