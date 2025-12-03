@@ -1,8 +1,31 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-## Getting Started
+## 🚀 Quick Start
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 18+ 
+- Docker Desktop (untuk Supabase local)
+- Supabase CLI (`brew install supabase/tap/supabase`)
+
+### Setup
+
+1. **Install dependencies:**
+
+```bash
+npm install
+```
+
+2. **Start Supabase local development:**
+
+```bash
+npm run supabase:start
+```
+
+> 📝 **Note**: Port Supabase dikonfigurasi khusus (54421-54427) agar tidak bentrok dengan project lain.
+> Lihat [SUPABASE_SETUP.md](./SUPABASE_SETUP.md) untuk detail lengkap.
+
+3. **Run the development server:**
 
 ```bash
 npm run dev
@@ -16,9 +39,52 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+4. **Access Supabase Studio:**
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Open [http://127.0.0.1:54423](http://127.0.0.1:54423) to access the Supabase Studio dashboard.
+
+## 📚 Documentation
+
+- **[SUPABASE_SUCCESS.md](./SUPABASE_SUCCESS.md)** - Setup status dan quick reference
+- **[SUPABASE_SETUP.md](./SUPABASE_SETUP.md)** - Dokumentasi lengkap Supabase
+- **[SUPABASE_QUICKREF.md](./SUPABASE_QUICKREF.md)** - Command reference cepat
+
+## 🛠️ Available Scripts
+
+```bash
+# Development
+npm run dev              # Start Next.js dev server
+npm run build            # Build for production
+npm run start            # Start production server
+
+# Supabase
+npm run supabase:start   # Start Supabase local
+npm run supabase:stop    # Stop Supabase
+npm run supabase:status  # Check Supabase status
+npm run supabase:reset   # Reset database
+npm run supabase:types   # Generate TypeScript types
+```
+
+## 🏗️ Tech Stack
+
+- **Frontend**: Next.js 16 (App Router)
+- **UI**: Tailwind CSS, Radix UI
+- **Backend**: Supabase (Auth, Database, Storage)
+- **Database**: PostgreSQL (via Supabase)
+- **Language**: TypeScript
+
+## 📁 Project Structure
+
+```
+echo-test-app/
+├── app/                 # Next.js app directory
+├── components/          # React components
+├── lib/
+│   ├── supabase/       # Supabase clients & utilities
+│   └── utils.ts        # Helper functions
+├── supabase/           # Supabase config & migrations
+└── types/              # TypeScript types
+```
 
 ## Learn More
 

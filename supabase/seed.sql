@@ -1,0 +1,30 @@
+-- Seed data for echo-test-app
+-- This file is run after migrations during: supabase start, supabase db reset
+
+-- ============================================
+-- Default Users (Already created in migration)
+-- ============================================
+-- 
+-- Login credentials:
+-- 
+-- 1. Administrator:
+--    Email: administrator@echotest.com
+--    Password: Password123
+--    Role: admin
+--
+-- 2. User - Ashandi:
+--    Email: ashandi@echotest.com
+--    Password: Password123
+--    Role: user
+--
+-- 3. User - Farhan:
+--    Email: farhan@echotest.com
+--    Password: Password123
+--    Role: user
+--
+-- ============================================
+
+-- Add additional seed data here if needed
+-- Example:
+-- INSERT INTO your_table (column1, column2) 
+-- VALUES ('value1', 'value2');
