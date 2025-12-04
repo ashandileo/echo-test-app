@@ -22,16 +22,6 @@ export interface MistralOCRResponse {
   pages?: MistralOCRPage[];
 }
 
-// Helper function to get API key (read at runtime, not at module load)
-const getApiKey = (): string => {
-  // FIXME: Add this to process.env.MISTRAL_API_KEY;
-  const apiKey = "mIg2RxFCKu13u0J0MiRoXLoK4PnJi9ty";
-  if (!apiKey) {
-    throw new Error("MISTRAL_API_KEY is not defined in environment variables");
-  }
-  return apiKey;
-};
-
 // Validation
 export const validateFile = (file: File): ValidationResult => {
   if (
@@ -66,13 +56,10 @@ export const uploadFileToMistral = async (file: File): Promise<string> => {
   formData.append("file", blob, file.name);
   formData.append("purpose", "ocr");
 
-  const apiKey = getApiKey();
-  console.log("API KEY", apiKey);
-
   const response = await fetch(`${MISTRAL_API_BASE_URL}/files`, {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${apiKey}`,
+      Authorization: `Bearer ${process.env.MISTERAL_API_KEY}`,
     },
     body: formData,
   });
@@ -99,12 +86,11 @@ export const processOCR = async (fileId: string): Promise<string> => {
     include_image_base64: false,
   };
 
-  const apiKey = getApiKey();
   const response = await fetch(`${MISTRAL_API_BASE_URL}/ocr`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
+      Authorization: `Bearer ${process.env.MISTERAL_API_KEY}`,
     },
     body: JSON.stringify(payload),
   });
