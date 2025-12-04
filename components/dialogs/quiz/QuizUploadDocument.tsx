@@ -42,23 +42,17 @@ export function QuizUploadDocument({
     setSelectedFile(null);
   };
 
-  const handleUpload = () => {
+  const handleUpload = async () => {
     if (selectedFile) {
-      // Generate a unique ID for the quiz
-      const quizId = `quiz-${Date.now()}-${Math.random()
-        .toString(36)
-        .substr(2, 9)}`;
+      const ocrFormData = new FormData();
+      ocrFormData.append("file", selectedFile);
 
-      // Save file info to localStorage
-      const fileInfo = {
-        name: selectedFile.name,
-        size: selectedFile.size,
-      };
-      localStorage.setItem("uploadedQuizDocument", JSON.stringify(fileInfo));
+      const ocrResponse = await fetch("/api/ocr/extract", {
+        method: "POST",
+        body: ocrFormData,
+      });
 
-      // Close dialog and redirect to quiz detail page
-      onOpenChange(false);
-      router.push(`/quiz/${quizId}`);
+      console.log("ocrResponse", ocrResponse);
     }
   };
 
