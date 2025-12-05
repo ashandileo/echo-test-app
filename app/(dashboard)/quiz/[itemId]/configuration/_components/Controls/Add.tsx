@@ -18,7 +18,8 @@ const Add = () => {
   const queryClient = useQueryClient();
   const supabase = createClient();
 
-  const addQuestionMutation = useMutation({
+  // Mutation for adding multiple choice questions
+  const addMultipleChoiceMutation = useMutation({
     mutationFn: async (question: QuestionFormValues) => {
       const { data, error } = await supabase
         .from("quiz_question_multiple_choice")
@@ -27,6 +28,7 @@ const Add = () => {
           question_text: question.question,
           options: question.options,
           correct_answer: question.correctAnswer?.toString() || "",
+          points: 1,
           explanation: question.explanation || null,
         })
         .select()
@@ -36,19 +38,52 @@ const Add = () => {
       return data;
     },
     onSuccess: () => {
-      toast.success("Question added successfully!");
+      toast.success("Multiple choice question added successfully!");
       toggleDialogOpen();
       queryClient.invalidateQueries({
         queryKey: ["quiz-questions", params.itemId],
       });
     },
     onError: (error: Error) => {
-      toast.error(`Failed to add question: ${error.message}`);
+      toast.error(`Failed to add multiple choice question: ${error.message}`);
+    },
+  });
+
+  // Mutation for adding essay questions
+  const addEssayMutation = useMutation({
+    mutationFn: async (question: QuestionFormValues) => {
+      const { data, error } = await supabase
+        .from("quiz_question_essay")
+        .insert({
+          quiz_id: params.itemId as string,
+          question_text: question.question,
+          points: 1,
+          rubric: question.sampleAnswer || null,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      toast.success("Essay question added successfully!");
+      toggleDialogOpen();
+      queryClient.invalidateQueries({
+        queryKey: ["quiz-questions", params.itemId],
+      });
+    },
+    onError: (error: Error) => {
+      toast.error(`Failed to add essay question: ${error.message}`);
     },
   });
 
   const handleAddQuestion = (question: QuestionFormValues) => {
-    addQuestionMutation.mutate(question);
+    if (question.type === "multiple_choice") {
+      addMultipleChoiceMutation.mutate(question);
+    } else if (question.type === "essay") {
+      addEssayMutation.mutate(question);
+    }
   };
 
   return (
@@ -56,7 +91,9 @@ const Add = () => {
       <Button
         onClick={toggleDialogOpen}
         className="gap-2"
-        disabled={addQuestionMutation.isPending}
+        disabled={
+          addMultipleChoiceMutation.isPending || addEssayMutation.isPending
+        }
       >
         <Plus className="size-4" />
         Add Question

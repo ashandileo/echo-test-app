@@ -17,10 +17,10 @@ export type Database = {
     Functions: {
       graphql: {
         Args: {
-          query?: string
+          operationName?: string
           extensions?: Json
           variables?: Json
-          operationName?: string
+          query?: string
         }
         Returns: Json
       }
@@ -149,8 +149,6 @@ export type Database = {
         Row: {
           created_at: string | null
           id: string
-          max_length: number | null
-          order_index: number
           points: number
           question_text: string
           quiz_id: string
@@ -160,8 +158,6 @@ export type Database = {
         Insert: {
           created_at?: string | null
           id?: string
-          max_length?: number | null
-          order_index?: number
           points?: number
           question_text: string
           quiz_id: string
@@ -171,8 +167,6 @@ export type Database = {
         Update: {
           created_at?: string | null
           id?: string
-          max_length?: number | null
-          order_index?: number
           points?: number
           question_text?: string
           quiz_id?: string
@@ -196,7 +190,6 @@ export type Database = {
           explanation: string | null
           id: string
           options: Json
-          order_index: number
           points: number
           question_text: string
           quiz_id: string
@@ -208,7 +201,6 @@ export type Database = {
           explanation?: string | null
           id?: string
           options: Json
-          order_index?: number
           points?: number
           question_text: string
           quiz_id: string
@@ -220,7 +212,6 @@ export type Database = {
           explanation?: string | null
           id?: string
           options?: Json
-          order_index?: number
           points?: number
           question_text?: string
           quiz_id?: string
@@ -300,18 +291,18 @@ export type Database = {
       search_document_chunks: {
         Args: {
           query_embedding: string
-          match_count?: number
           match_user_id: string
+          match_count?: number
         }
         Returns: {
-          total_chunks: number
-          chunk_index: number
-          chunk_text: string
-          file_path: string
-          similarity: number
-          file_name: string
-          user_id: string
           id: string
+          user_id: string
+          file_name: string
+          similarity: number
+          file_path: string
+          chunk_text: string
+          chunk_index: number
+          total_chunks: number
         }[]
       }
       sparsevec_out: {
