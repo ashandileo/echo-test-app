@@ -14,21 +14,21 @@ import { createClient } from "@/lib/supabase/client";
 
 const Add = () => {
   const [isDialogOpen, toggleDialogOpen] = useToggle(false);
-  const params = useParams();
   const queryClient = useQueryClient();
-  const supabase = createClient();
+
+  const { itemId } = useParams<{ itemId: string }>();
 
   // Mutation for adding multiple choice questions
   const addMultipleChoiceMutation = useMutation({
     mutationFn: async (question: QuestionFormValues) => {
+      const supabase = createClient();
       const { data, error } = await supabase
         .from("quiz_question_multiple_choice")
         .insert({
-          quiz_id: params.itemId as string,
+          quiz_id: itemId,
           question_text: question.question,
           options: question.options,
           correct_answer: question.correctAnswer?.toString() || "",
-          points: 1,
           explanation: question.explanation || null,
         })
         .select()
@@ -38,10 +38,18 @@ const Add = () => {
       return data;
     },
     onSuccess: () => {
+      // Show success toast
       toast.success("Multiple choice question added successfully!");
+
+      // Close
       toggleDialogOpen();
+
+      // Invalidate queries to refetch updated data
       queryClient.invalidateQueries({
-        queryKey: ["quiz-questions", params.itemId],
+        queryKey: ["quiz-questions-multiple-choice", itemId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["quiz-question-counts", itemId],
       });
     },
     onError: (error: Error) => {
@@ -52,12 +60,12 @@ const Add = () => {
   // Mutation for adding essay questions
   const addEssayMutation = useMutation({
     mutationFn: async (question: QuestionFormValues) => {
+      const supabase = createClient();
       const { data, error } = await supabase
         .from("quiz_question_essay")
         .insert({
-          quiz_id: params.itemId as string,
+          quiz_id: itemId,
           question_text: question.question,
-          points: 1,
           rubric: question.sampleAnswer || null,
         })
         .select()
@@ -67,10 +75,18 @@ const Add = () => {
       return data;
     },
     onSuccess: () => {
+      // Show success toast
       toast.success("Essay question added successfully!");
+
+      // Close dialog
       toggleDialogOpen();
+
+      // Invalidate queries to refetch updated data
       queryClient.invalidateQueries({
-        queryKey: ["quiz-questions", params.itemId],
+        queryKey: ["quiz-questions-essay", itemId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["quiz-question-counts", itemId],
       });
     },
     onError: (error: Error) => {
@@ -81,8 +97,12 @@ const Add = () => {
   const handleAddQuestion = (question: QuestionFormValues) => {
     if (question.type === "multiple_choice") {
       addMultipleChoiceMutation.mutate(question);
-    } else if (question.type === "essay") {
+      return;
+    }
+
+    if (question.type === "essay") {
       addEssayMutation.mutate(question);
+      return;
     }
   };
 

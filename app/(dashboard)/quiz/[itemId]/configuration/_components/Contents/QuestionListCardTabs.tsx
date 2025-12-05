@@ -1,5 +1,3 @@
-import React from "react";
-
 import { Button } from "@/components/ui/button";
 
 export enum Tabs {
@@ -7,23 +5,34 @@ export enum Tabs {
   ESSAY = "essay",
 }
 
-const listTabs = [
-  {
-    id: Tabs.MULTIPLE_CHOICE,
-    label: "Multiple Choice",
-  },
-  {
-    id: Tabs.ESSAY,
-    label: "Essay",
-  },
-];
-
 interface Props {
   activeTab: Tabs;
   setActiveTab: (tab: Tabs) => void;
+  multipleChoiceCount: number;
+  essayCount: number;
+  isLoading: boolean;
 }
 
-const QuestionListCardTabs = ({ activeTab, setActiveTab }: Props) => {
+const QuestionListCardTabs = ({
+  activeTab,
+  setActiveTab,
+  multipleChoiceCount,
+  essayCount,
+  isLoading,
+}: Props) => {
+  const listTabs = [
+    {
+      id: Tabs.MULTIPLE_CHOICE,
+      label: "Multiple Choice",
+      count: multipleChoiceCount,
+    },
+    {
+      id: Tabs.ESSAY,
+      label: "Essay",
+      count: essayCount,
+    },
+  ];
+
   return (
     <div className="border-b px-6">
       <div className="flex gap-1">
@@ -38,7 +47,7 @@ const QuestionListCardTabs = ({ activeTab, setActiveTab }: Props) => {
             }`}
             onClick={() => setActiveTab(tab.id)}
           >
-            {tab.label} (5)
+            {tab.label} ({isLoading ? "..." : tab.count})
           </Button>
         ))}
       </div>
