@@ -23,14 +23,14 @@ import {
 
 interface QuestionAddDialogProps {
   open: boolean;
-  onOpenChange: (open: boolean) => void;
   onAddQuestion: (question: QuestionFormValues) => void;
+  closeDialog: () => void;
 }
 
 const QuestionAddDialog = ({
   open,
-  onOpenChange,
   onAddQuestion,
+  closeDialog,
 }: QuestionAddDialogProps) => {
   const form = useForm<QuestionFormValues>({
     resolver: zodResolver(questionFormSchema),
@@ -47,14 +47,12 @@ const QuestionAddDialog = ({
   const handleSubmit = (values: QuestionFormValues) => {
     onAddQuestion(values);
     form.reset();
-    onOpenChange(false);
   };
 
   const handleDialogOpenChange = (open: boolean) => {
     if (!open) {
       form.reset();
     }
-    onOpenChange(open);
   };
 
   // Get form state for validation
@@ -65,7 +63,7 @@ const QuestionAddDialog = ({
     formValues.options?.some((opt) => !opt?.trim());
 
   return (
-    <Dialog open={open} onOpenChange={handleDialogOpenChange}>
+    <Dialog open={open}>
       <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col p-0">
         {/* Sticky Header */}
         <DialogHeader className="sticky top-0 z-10 bg-background border-b p-6 pb-4 shrink-0">
@@ -85,7 +83,10 @@ const QuestionAddDialog = ({
         <DialogFooter className="border-t p-6 pt-4 shrink-0">
           <Button
             variant="outline"
-            onClick={() => handleDialogOpenChange(false)}
+            onClick={() => {
+              handleDialogOpenChange(false);
+              closeDialog();
+            }}
           >
             Cancel
           </Button>
