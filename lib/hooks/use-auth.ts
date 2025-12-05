@@ -34,7 +34,7 @@ export function useLogin() {
       toast.success("Login successful!", {
         description: `Welcome back, ${data.user.email}`,
       });
-      router.push("/dashboard");
+      router.push("/quiz");
       router.refresh();
     },
     onError: (error: Error) => {
@@ -69,9 +69,9 @@ export function useRegister() {
     onSuccess: (data) => {
       if (data.user) {
         toast.success("Registration successful!", {
-          description: "Welcome to EchoTest. Redirecting to dashboard...",
+          description: "Welcome to EchoTest. Redirecting to quiz...",
         });
-        router.push("/dashboard");
+        router.push("/quiz");
         router.refresh();
       }
     },

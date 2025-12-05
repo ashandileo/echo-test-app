@@ -17,9 +17,7 @@ interface UploadedDocument {
   size: number;
 }
 
-export default function QuizInformationPage({
-  params,
-}: {
+export default function QuizInformationPage({}: {
   params: Promise<{ id: string }>;
 }) {
   const router = useRouter();
