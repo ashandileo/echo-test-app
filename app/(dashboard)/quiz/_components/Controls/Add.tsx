@@ -1,7 +1,9 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
+
 import { Plus } from "lucide-react";
+
 import { QuizUploadDocument } from "@/components/dialogs/quiz/QuizUploadDocument";
+import { Button } from "@/components/ui/button";
 
 const Add = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
