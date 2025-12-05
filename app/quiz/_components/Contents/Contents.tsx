@@ -8,63 +8,30 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import startCase from "lodash/startCase";
 
 import { Edit, Trash2, Eye, Clock, FileText } from "lucide-react";
 import Link from "next/link";
 import Add from "../Controls/Add";
-
-const quizData = [
-  {
-    id: 1,
-    name: "Basic Grammar",
-    totalQuestions: 20,
-    duration: 30, // dalam menit
-    status: "Published",
-    createdAt: "2025-01-15",
-    totalParticipants: 45,
-  },
-  {
-    id: 2,
-    name: "Vocabulary Building",
-    totalQuestions: 25,
-    duration: 45,
-    status: "Published",
-    createdAt: "2025-01-14",
-    totalParticipants: 32,
-  },
-  {
-    id: 3,
-    name: "Advanced Reading Comprehension",
-    totalQuestions: 15,
-    duration: 60,
-    status: "Draft",
-    createdAt: "2025-01-13",
-    totalParticipants: 0,
-  },
-  {
-    id: 4,
-    name: "Speaking Practice",
-    totalQuestions: 10,
-    duration: 20,
-    status: "Published",
-    createdAt: "2025-01-12",
-    totalParticipants: 28,
-  },
-  {
-    id: 5,
-    name: "Listening Skills",
-    totalQuestions: 18,
-    duration: 35,
-    status: "Published",
-    createdAt: "2025-01-11",
-    totalParticipants: 51,
-  },
-];
+import { useQuery } from "@tanstack/react-query";
+import { createClient } from "@/lib/supabase/client";
 
 const Contents = () => {
+  const { data } = useQuery({
+    queryKey: ["quizzes"],
+    queryFn: async () => {
+      const supabase = createClient();
+      const { data, error } = await supabase.from("quiz").select("*");
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const quizzes = data ?? [];
+
   return (
     <div className="rounded-md border">
-      {quizData.length > 0 ? (
+      {quizzes.length > 0 ? (
         <Table>
           <TableHeader>
             <TableRow>
@@ -82,42 +49,40 @@ const Contents = () => {
                 </div>
               </TableHead>
               <TableHead>Status</TableHead>
-              <TableHead>Participants</TableHead>
               <TableHead>Created Date</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {quizData.map((quiz) => (
+            {quizzes.map((quiz) => (
               <TableRow key={quiz.id}>
-                <TableCell className="font-medium">{quiz.name}</TableCell>
-                <TableCell>{quiz.totalQuestions} questions</TableCell>
-                <TableCell>{quiz.duration} minutes</TableCell>
+                <TableCell className="font-medium">{quiz?.name}</TableCell>
+                <TableCell>{quiz?.questions?.length} questions</TableCell>
+                <TableCell>{quiz?.duration} minutes</TableCell>
                 <TableCell>
                   <span
                     className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                      quiz.status === "Published"
+                      quiz?.status === "published"
                         ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
                         : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
                     }`}
                   >
-                    {quiz.status}
+                    {startCase(quiz?.status)}
                   </span>
                 </TableCell>
-                <TableCell>{quiz.totalParticipants} students</TableCell>
                 <TableCell className="text-muted-foreground">
-                  {quiz.createdAt}
+                  {quiz?.createdAt}
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex items-center justify-end gap-2">
                     <Button variant="ghost" size="icon" asChild>
-                      <Link href={`/quiz/${quiz.id}`}>
+                      <Link href={`/quiz/${quiz?.id}`}>
                         <Eye className="size-4" />
                         <span className="sr-only">View</span>
                       </Link>
                     </Button>
                     <Button variant="ghost" size="icon" asChild>
-                      <Link href={`/quiz/${quiz.id}/edit`}>
+                      <Link href={`/quiz/${quiz?.id}/edit`}>
                         <Edit className="size-4" />
                         <span className="sr-only">Edit</span>
                       </Link>
