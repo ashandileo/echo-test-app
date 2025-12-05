@@ -1,5 +1,3 @@
-import { useState } from "react";
-
 import Link from "next/link";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -17,16 +15,25 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import useActions from "@/lib/hooks/useAction";
 import { createClient } from "@/lib/supabase/client";
 
 import Add from "../Controls/Add";
 
+enum Actions {
+  DELETE = "DELETE",
+}
+
+type ActionMetadata = {
+  id: string;
+  name: string;
+};
+
 const Contents = () => {
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [quizToDelete, setQuizToDelete] = useState<{
-    id: string;
-    name: string;
-  } | null>(null);
+  const { action, setAction, clearAction, isAction } = useActions<
+    Actions,
+    ActionMetadata
+  >();
 
   const queryClient = useQueryClient();
 
@@ -81,13 +88,13 @@ const Contents = () => {
   });
 
   const handleDeleteClick = (quiz: { id: string; name: string }) => {
-    setQuizToDelete(quiz);
-    setDeleteDialogOpen(true);
+    setAction(Actions.DELETE, quiz);
   };
 
   const handleDeleteConfirm = async () => {
-    if (quizToDelete) {
-      await deleteMutation.mutateAsync(quizToDelete.id);
+    if (action.data) {
+      await deleteMutation.mutateAsync(action.data.id);
+      clearAction();
     }
   };
 
@@ -172,10 +179,10 @@ const Contents = () => {
       )}
 
       <SharedDelete
-        open={deleteDialogOpen}
-        onOpenChange={setDeleteDialogOpen}
+        open={isAction(Actions.DELETE)}
+        onOpenChange={clearAction}
         onConfirm={handleDeleteConfirm}
-        itemName={quizToDelete?.name}
+        itemName={action.data?.name}
       />
     </div>
   );
