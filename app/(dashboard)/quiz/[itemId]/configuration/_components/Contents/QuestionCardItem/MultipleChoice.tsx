@@ -1,7 +1,17 @@
-import { CheckCircle2, Trash2 } from "lucide-react";
+"use client";
 
+import { useState } from "react";
+
+import { useParams } from "next/navigation";
+
+import { useQueryClient } from "@tanstack/react-query";
+import { CheckCircle2, Pencil, Trash2 } from "lucide-react";
+
+import { SharedDelete } from "@/components/dialogs";
+import QuestionEditDialog from "@/components/dialogs/quiz/QuestionEdit";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { createClient } from "@/lib/supabase/client";
 import { type MultipleChoiceOption } from "@/lib/utils/jsonb";
 import { Database } from "@/types/supabase";
 
@@ -21,11 +31,36 @@ interface Props {
 }
 
 const MultipleChoice = ({ question, questionNumber }: Props) => {
-  // Pastikan options adalah array
-  const options = Array.isArray(question.options) ? question.options : [];
+  const { itemId } = useParams<{ itemId: string }>();
+  const queryClient = useQueryClient();
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
-  // correct_answer adalah index (string), convert ke number
+  const options = Array.isArray(question.options) ? question.options : [];
   const correctIndex = parseInt(question.correct_answer, 10);
+
+  const handleDelete = async () => {
+    try {
+      const supabase = createClient();
+
+      const { error } = await supabase
+        .from("quiz_question_multiple_choice")
+        .delete()
+        .eq("id", question.id);
+
+      if (error) throw error;
+
+      // Invalidate query cache
+      queryClient.invalidateQueries({
+        queryKey: ["quiz-questions-multiple-choice", itemId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["quiz-question-counts", itemId],
+      });
+    } catch (error) {
+      console.error("Failed to delete question:", error);
+    }
+  };
 
   return (
     <Card className="border">
@@ -76,16 +111,43 @@ const MultipleChoice = ({ question, questionNumber }: Props) => {
               </p>
             )}
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => null}
-            className="shrink-0 text-red-500 hover:bg-red-100 hover:text-red-600"
-          >
-            <Trash2 className="size-4" />
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => setIsEditDialogOpen(true)}
+            >
+              <Pencil className="size-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsDeleteDialogOpen(true)}
+              className="shrink-0 text-red-500 hover:bg-red-100 hover:text-red-600"
+            >
+              <Trash2 className="size-4" />
+            </Button>
+          </div>
         </div>
       </CardContent>
+
+      {/* Edit Dialog */}
+      <QuestionEditDialog
+        open={isEditDialogOpen}
+        onOpenChange={setIsEditDialogOpen}
+        question={question}
+        questionType="multiple_choice"
+        quizId={itemId}
+      />
+
+      {/* Delete Dialog */}
+      <SharedDelete
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+        onConfirm={handleDelete}
+        itemName={`Question ${questionNumber}`}
+      />
     </Card>
   );
 };

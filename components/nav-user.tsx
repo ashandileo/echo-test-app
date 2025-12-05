@@ -27,11 +27,27 @@ export function NavUser({
     name: string;
     email: string;
     avatar: string;
+    role: "admin" | "user";
   };
 }) {
   const { isMobile } = useSidebar();
 
   const logoutMutation = useLogout();
+
+  // Get user initials for avatar fallback
+  const getInitials = (name: string) => {
+    const names = name.split(" ");
+    if (names.length >= 2) {
+      return `${names[0][0]}${names[1][0]}`.toUpperCase();
+    }
+    return name.slice(0, 2).toUpperCase();
+  };
+
+  const roleLabel = user.role === "admin" ? "Admin" : "User";
+  const roleBadgeClass =
+    user.role === "admin"
+      ? "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400"
+      : "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400";
 
   return (
     <SidebarMenu>
@@ -44,11 +60,17 @@ export function NavUser({
             >
               <Avatar className="h-8 w-8 rounded-lg">
                 <AvatarImage src={user.avatar} alt={user.name} />
-                <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                <AvatarFallback className="rounded-lg">
+                  {getInitials(user.name)}
+                </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{user.name}</span>
-                <span className="truncate text-xs">{user.email}</span>
+                <span
+                  className={`inline-flex items-center w-fit px-1.5 py-0.5 rounded text-[10px] font-medium ${roleBadgeClass}`}
+                >
+                  {roleLabel}
+                </span>
               </div>
               <ChevronsUpDown className="ml-auto size-4" />
             </SidebarMenuButton>
@@ -63,11 +85,20 @@ export function NavUser({
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
                   <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                  <AvatarFallback className="rounded-lg">
+                    {getInitials(user.name)}
+                  </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">{user.name}</span>
-                  <span className="truncate text-xs">{user.email}</span>
+                  <span className="truncate text-xs text-muted-foreground">
+                    {user.email}
+                  </span>
+                  <span
+                    className={`inline-flex items-center w-fit px-1.5 py-0.5 mt-1 rounded text-[10px] font-medium ${roleBadgeClass}`}
+                  >
+                    {roleLabel}
+                  </span>
                 </div>
               </div>
             </DropdownMenuLabel>

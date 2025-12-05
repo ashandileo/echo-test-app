@@ -1,7 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { GraduationCap, ClipboardList } from "lucide-react";
+
+import Link from "next/link";
+
+import { ClipboardList, GraduationCap } from "lucide-react";
 
 import { NavMain } from "@/components/nav-main";
 import { NavUser } from "@/components/nav-user";
@@ -10,31 +13,41 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
-  SidebarRail,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarRail,
 } from "@/components/ui/sidebar";
-import Link from "next/link";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useProfile } from "@/lib/hooks/use-profile";
 
-// Sample data for EchoTest
-const data = {
-  user: {
-    name: "John Doe",
-    email: "john@example.com",
-    avatar: "",
+// Navigation items for EchoTest
+const navMain = [
+  {
+    title: "Quiz",
+    url: "/quiz",
+    icon: ClipboardList,
+    isActive: true,
   },
-  navMain: [
-    {
-      title: "Quiz",
-      url: "/quiz",
-      icon: ClipboardList,
-      isActive: true,
-    },
-  ],
-};
+];
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { data: profile, isLoading } = useProfile();
+
+  const userData = profile
+    ? {
+        name: profile.full_name || profile.email || "User",
+        email: profile.email || "",
+        avatar: profile.avatar_url || "",
+        role: profile.role,
+      }
+    : {
+        name: "Loading...",
+        email: "",
+        avatar: "",
+        role: "user" as const,
+      };
+
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
@@ -57,10 +70,20 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
+        <NavMain items={navMain} />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        {isLoading ? (
+          <div className="flex items-center gap-2 px-2 py-1.5">
+            <Skeleton className="h-8 w-8 rounded-lg" />
+            <div className="flex-1 space-y-1">
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-3 w-32" />
+            </div>
+          </div>
+        ) : (
+          <NavUser user={userData} />
+        )}
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

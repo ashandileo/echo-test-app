@@ -20,9 +20,10 @@ import { QuestionFormValues } from "./schema";
 
 interface QuestionAddFormProps {
   form: UseFormReturn<QuestionFormValues>;
+  isEditing?: boolean;
 }
 
-const QuestionAddForm = ({ form }: QuestionAddFormProps) => {
+const QuestionAddForm = ({ form, isEditing = false }: QuestionAddFormProps) => {
   const questionType = form.watch("type");
   const currentQuestion = form.watch("question");
 
@@ -42,34 +43,36 @@ const QuestionAddForm = ({ form }: QuestionAddFormProps) => {
 
   return (
     <FieldGroup>
-      {/* Select Question Type */}
-      <Field>
-        <FieldLabel>Question Type</FieldLabel>
-        <FieldContent>
-          <div className="flex gap-2">
-            <Button
-              type="button"
-              variant={
-                questionType === "multiple_choice" ? "default" : "outline"
-              }
-              onClick={() => handleQuestionTypeChange("multiple_choice")}
-              className="flex-1"
-            >
-              <List className="size-4" />
-              Multiple Choice
-            </Button>
-            <Button
-              type="button"
-              variant={questionType === "essay" ? "default" : "outline"}
-              onClick={() => handleQuestionTypeChange("essay")}
-              className="flex-1"
-            >
-              <FileText className="size-4" />
-              Essay
-            </Button>
-          </div>
-        </FieldContent>
-      </Field>
+      {/* Select Question Type - Hidden when editing */}
+      {!isEditing && (
+        <Field>
+          <FieldLabel>Question Type</FieldLabel>
+          <FieldContent>
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                variant={
+                  questionType === "multiple_choice" ? "default" : "outline"
+                }
+                onClick={() => handleQuestionTypeChange("multiple_choice")}
+                className="flex-1"
+              >
+                <List className="size-4" />
+                Multiple Choice
+              </Button>
+              <Button
+                type="button"
+                variant={questionType === "essay" ? "default" : "outline"}
+                onClick={() => handleQuestionTypeChange("essay")}
+                className="flex-1"
+              >
+                <FileText className="size-4" />
+                Essay
+              </Button>
+            </div>
+          </FieldContent>
+        </Field>
+      )}
 
       {/* Question */}
       <Field>
