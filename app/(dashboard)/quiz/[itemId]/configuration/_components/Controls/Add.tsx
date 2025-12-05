@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { useToggle } from "usehooks-ts";
 
 import QuestionAddDialog from "@/components/dialogs/quiz/QuestionAdd";
-import { QuestionFormValues } from "@/components/forms/quiz/schema";
+import { QuestionFormValues } from "@/components/forms/quiz/QuestionAddForm/schema";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
 
