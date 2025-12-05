@@ -1,11 +1,13 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { SidebarTrigger } from "@/components/ui/sidebar";
-import { Separator } from "@/components/ui/separator";
-import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
+
+import { ArrowLeft } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 
 const navigations = [
   {
@@ -15,6 +17,10 @@ const navigations = [
   {
     id: "configuration",
     label: "Configuration",
+  },
+  {
+    id: "configuration-v2",
+    label: "Configuration V2",
   },
   {
     id: "settings",

@@ -1,7 +1,11 @@
 "use client";
 
 import { useState } from "react";
+
+import { BookOpen, FileText, Upload, X } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -12,8 +16,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent } from "@/components/ui/card";
-import { BookOpen, FileText, Upload, X } from "lucide-react";
 
 interface QuizUploadDocumentProps {
   open: boolean;
