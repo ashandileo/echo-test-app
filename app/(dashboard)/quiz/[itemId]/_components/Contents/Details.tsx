@@ -1,3 +1,9 @@
+import { useParams } from "next/navigation";
+
+import { useQuery } from "@tanstack/react-query";
+import { Pencil } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -5,10 +11,83 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Pencil } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { createClient } from "@/lib/supabase/client";
 
 const Details = () => {
+  const params = useParams();
+  const supabase = createClient();
+
+  // Fetch quiz details
+  const { data: quiz, isLoading } = useQuery({
+    queryKey: ["quiz-details", params.itemId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("quiz")
+        .select("*")
+        .eq("id", params.itemId as string)
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div className="flex-1">
+              <CardTitle>Quiz Information</CardTitle>
+              <CardDescription>
+                Basic information about your quiz
+              </CardDescription>
+            </div>
+            <Button variant="ghost" size="icon" className="h-8 w-8" disabled>
+              <Pencil className="size-4" />
+              <span className="sr-only">Edit quiz information</span>
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent className="grid gap-6">
+          <div>
+            <p className="text-sm font-medium text-muted-foreground mb-2">
+              Quiz Name
+            </p>
+            <Skeleton className="h-6 w-3/4" />
+          </div>
+          <div>
+            <p className="text-sm font-medium text-muted-foreground mb-2">
+              Quiz Description
+            </p>
+            <Skeleton className="h-6 w-full" />
+          </div>
+          <div>
+            <p className="text-sm font-medium text-muted-foreground mb-2">
+              Status
+            </p>
+            <Skeleton className="h-6 w-24" />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground mb-2">
+                Created At
+              </p>
+              <Skeleton className="h-6 w-full" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-muted-foreground mb-2">
+                Last Updated
+              </p>
+              <Skeleton className="h-6 w-full" />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -28,13 +107,67 @@ const Details = () => {
           <p className="text-sm font-medium text-muted-foreground mb-2">
             Quiz Name
           </p>
-          <p className="text-base">Quiz Name</p>
+          <p className="text-base">{quiz?.name || "Untitled Quiz"}</p>
         </div>
         <div>
           <p className="text-sm font-medium text-muted-foreground mb-2">
             Quiz Description
           </p>
-          <p className="text-base">Quiz Description</p>
+          <p className="text-base">
+            {quiz?.description || "No description provided"}
+          </p>
+        </div>
+        <div>
+          <p className="text-sm font-medium text-muted-foreground mb-2">
+            Status
+          </p>
+          <div className="flex items-center gap-2">
+            <span
+              className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                quiz?.status === "published"
+                  ? "bg-green-100 text-green-800"
+                  : quiz?.status === "draft"
+                    ? "bg-yellow-100 text-yellow-800"
+                    : "bg-gray-100 text-gray-800"
+              }`}
+            >
+              {quiz?.status?.charAt(0).toUpperCase() + quiz?.status?.slice(1)}
+            </span>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <p className="text-sm font-medium text-muted-foreground mb-2">
+              Created At
+            </p>
+            <p className="text-base">
+              {quiz?.created_at
+                ? new Date(quiz.created_at).toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })
+                : "-"}
+            </p>
+          </div>
+          <div>
+            <p className="text-sm font-medium text-muted-foreground mb-2">
+              Last Updated
+            </p>
+            <p className="text-base">
+              {quiz?.updated_at
+                ? new Date(quiz.updated_at).toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })
+                : "-"}
+            </p>
+          </div>
         </div>
       </CardContent>
     </Card>

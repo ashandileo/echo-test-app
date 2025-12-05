@@ -1,5 +1,10 @@
-import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
+import { useQuery } from "@tanstack/react-query";
+import startCase from "lodash/startCase";
+import { Clock, Edit, Eye, FileText, Trash2 } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -8,13 +13,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import startCase from "lodash/startCase";
-
-import { Edit, Trash2, Eye, Clock, FileText } from "lucide-react";
-import Link from "next/link";
-import Add from "../Controls/Add";
-import { useQuery } from "@tanstack/react-query";
 import { createClient } from "@/lib/supabase/client";
+
+import Add from "../Controls/Add";
 
 const Contents = () => {
   const { data } = useQuery({
