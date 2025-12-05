@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { useQuery } from "@tanstack/react-query";
 import startCase from "lodash/startCase";
-import { Clock, Edit, Eye, FileText, Trash2 } from "lucide-react";
+import { Eye, FileText, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -22,9 +22,22 @@ const Contents = () => {
     queryKey: ["quizzes"],
     queryFn: async () => {
       const supabase = createClient();
-      const { data, error } = await supabase.from("quiz").select("*");
+      const { data, error } = await supabase.from("quiz").select(`
+        *,
+        quiz_question_multiple_choice(count),
+        quiz_question_essay(count)
+      `);
       if (error) throw error;
-      return data;
+
+      // Calculate total questions for each quiz
+      return (
+        data?.map((quiz) => ({
+          ...quiz,
+          totalQuestions:
+            (quiz.quiz_question_multiple_choice?.[0]?.count || 0) +
+            (quiz.quiz_question_essay?.[0]?.count || 0),
+        })) || []
+      );
     },
   });
 
@@ -43,12 +56,6 @@ const Contents = () => {
                   Questions
                 </div>
               </TableHead>
-              <TableHead>
-                <div className="flex items-center gap-1">
-                  <Clock className="size-4" />
-                  Duration
-                </div>
-              </TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Created Date</TableHead>
               <TableHead className="text-right">Actions</TableHead>
@@ -58,8 +65,7 @@ const Contents = () => {
             {quizzes.map((quiz) => (
               <TableRow key={quiz.id}>
                 <TableCell className="font-medium">{quiz?.name}</TableCell>
-                <TableCell>{quiz?.questions?.length} questions</TableCell>
-                <TableCell>{quiz?.duration} minutes</TableCell>
+                <TableCell>{quiz?.totalQuestions || 0} questions</TableCell>
                 <TableCell>
                   <span
                     className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
@@ -72,7 +78,13 @@ const Contents = () => {
                   </span>
                 </TableCell>
                 <TableCell className="text-muted-foreground">
-                  {quiz?.createdAt}
+                  {new Date(quiz.created_at).toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex items-center justify-end gap-2">
@@ -80,12 +92,6 @@ const Contents = () => {
                       <Link href={`/quiz/${quiz?.id}`}>
                         <Eye className="size-4" />
                         <span className="sr-only">View</span>
-                      </Link>
-                    </Button>
-                    <Button variant="ghost" size="icon" asChild>
-                      <Link href={`/quiz/${quiz?.id}/edit`}>
-                        <Edit className="size-4" />
-                        <span className="sr-only">Edit</span>
                       </Link>
                     </Button>
                     <Button variant="ghost" size="icon">

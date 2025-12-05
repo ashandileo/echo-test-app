@@ -141,15 +141,13 @@ const Details = () => {
               Created At
             </p>
             <p className="text-base">
-              {quiz?.created_at
-                ? new Date(quiz.created_at).toLocaleDateString("en-US", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })
-                : "-"}
+              {new Date(quiz.created_at).toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
             </p>
           </div>
           <div>
@@ -157,15 +155,13 @@ const Details = () => {
               Last Updated
             </p>
             <p className="text-base">
-              {quiz?.updated_at
-                ? new Date(quiz.updated_at).toLocaleDateString("en-US", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })
-                : "-"}
+              {new Date(quiz.updated_at).toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
             </p>
           </div>
         </div>

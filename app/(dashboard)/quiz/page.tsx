@@ -1,9 +1,11 @@
 "use client";
 
+import { Separator } from "@radix-ui/react-separator";
+
 import { SidebarTrigger } from "@/components/ui/sidebar";
+
 import Contents from "./_components/Contents/Contents";
 import Add from "./_components/Controls/Add";
-import { Separator } from "@radix-ui/react-separator";
 
 export default function QuizPage() {
   return (
