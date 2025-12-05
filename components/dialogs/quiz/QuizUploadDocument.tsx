@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+import { useRouter } from "next/navigation";
+
 import { BookOpen, FileText, Upload, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -26,6 +28,7 @@ export function QuizUploadDocument({
   open,
   onOpenChange,
 }: QuizUploadDocumentProps) {
+  const router = useRouter();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState("");
@@ -67,7 +70,6 @@ export function QuizUploadDocument({
       }
 
       const ocrData = await ocrResponse.json();
-      console.log("OCR Response:", ocrData);
 
       // Step 2: Convert file to base64 for storage
       setUploadProgress("Processing document and generating embeddings...");
@@ -102,7 +104,6 @@ export function QuizUploadDocument({
       }
 
       const processData = await processResponse.json();
-      console.log("Process Response:", processData);
 
       // Step 4: Create quiz with AI-generated name and description
       setUploadProgress("Creating quiz...");
@@ -122,20 +123,16 @@ export function QuizUploadDocument({
       }
 
       const quizData = await createQuizResponse.json();
-      console.log("Quiz Created:", quizData);
 
       setUploadProgress("Quiz created successfully!");
 
-      // Close dialog and redirect to quiz configuration page
-      setTimeout(() => {
-        onOpenChange(false);
-        setSelectedFile(null);
-        setUploadProgress("");
-        // Redirect to quiz configuration page
-        window.location.href = `/quiz/${quizData.data.id}/configuration`;
-      }, 1500);
+      onOpenChange(false);
+      setSelectedFile(null);
+      setUploadProgress("");
+
+      // Redirect to quiz configuration page
+      router.push(`/quiz/${quizData.data.id}/configuration`);
     } catch (error) {
-      console.error("Upload error:", error);
       setUploadProgress(
         error instanceof Error ? error.message : "Failed to upload document"
       );

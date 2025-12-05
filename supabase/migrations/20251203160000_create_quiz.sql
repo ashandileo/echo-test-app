@@ -4,7 +4,6 @@ CREATE TABLE IF NOT EXISTS public.quiz (
   name TEXT NOT NULL,
   description TEXT,
   status TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('published', 'draft', 'archived')),
-  questions JSONB NOT NULL DEFAULT '[]'::jsonb,
   created_by UUID REFERENCES auth.users(id) ON DELETE CASCADE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
@@ -12,9 +11,6 @@ CREATE TABLE IF NOT EXISTS public.quiz (
 
 -- Create index on created_by for faster queries
 CREATE INDEX IF NOT EXISTS idx_quiz_created_by ON public.quiz(created_by);
-
--- Create index on questions for JSONB queries
-CREATE INDEX IF NOT EXISTS idx_quiz_questions ON public.quiz USING gin(questions);
 
 -- Enable Row Level Security for quiz
 ALTER TABLE public.quiz ENABLE ROW LEVEL SECURITY;
@@ -49,12 +45,11 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Create trigger for quiz table
+-- Create trigger for updated_at timestamp
 CREATE TRIGGER set_updated_at
   BEFORE UPDATE ON public.quiz
   FOR EACH ROW
   EXECUTE FUNCTION public.handle_updated_at();
 
 -- Add comments for documentation
-COMMENT ON TABLE public.quiz IS 'Stores quiz information including questions in JSONB format';
-COMMENT ON COLUMN public.quiz.questions IS 'Array of question objects stored as JSONB';
+COMMENT ON TABLE public.quiz IS 'Stores quiz information';

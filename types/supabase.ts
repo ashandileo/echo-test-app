@@ -17,10 +17,10 @@ export type Database = {
     Functions: {
       graphql: {
         Args: {
-          variables?: Json
-          extensions?: Json
-          operationName?: string
           query?: string
+          extensions?: Json
+          variables?: Json
+          operationName?: string
         }
         Returns: Json
       }
@@ -119,7 +119,6 @@ export type Database = {
           description: string | null
           id: string
           name: string
-          questions: Json
           source_document_path: string | null
           status: string
           updated_at: string | null
@@ -130,7 +129,6 @@ export type Database = {
           description?: string | null
           id?: string
           name: string
-          questions?: Json
           source_document_path?: string | null
           status?: string
           updated_at?: string | null
@@ -141,44 +139,96 @@ export type Database = {
           description?: string | null
           id?: string
           name?: string
-          questions?: Json
           source_document_path?: string | null
           status?: string
           updated_at?: string | null
         }
         Relationships: []
       }
-      quiz_submission: {
+      quiz_question_essay: {
         Row: {
-          answers: Json
-          completed: boolean | null
+          created_at: string | null
           id: string
+          max_length: number | null
+          order_index: number
+          points: number
+          question_text: string
           quiz_id: string
-          score: number | null
-          submitted_at: string | null
-          user_id: string
+          rubric: string | null
+          updated_at: string | null
         }
         Insert: {
-          answers?: Json
-          completed?: boolean | null
+          created_at?: string | null
           id?: string
+          max_length?: number | null
+          order_index?: number
+          points?: number
+          question_text: string
           quiz_id: string
-          score?: number | null
-          submitted_at?: string | null
-          user_id: string
+          rubric?: string | null
+          updated_at?: string | null
         }
         Update: {
-          answers?: Json
-          completed?: boolean | null
+          created_at?: string | null
           id?: string
+          max_length?: number | null
+          order_index?: number
+          points?: number
+          question_text?: string
           quiz_id?: string
-          score?: number | null
-          submitted_at?: string | null
-          user_id?: string
+          rubric?: string | null
+          updated_at?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "quiz_submission_quiz_id_fkey"
+            foreignKeyName: "quiz_question_essay_quiz_id_fkey"
+            columns: ["quiz_id"]
+            isOneToOne: false
+            referencedRelation: "quiz"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quiz_question_multiple_choice: {
+        Row: {
+          correct_answer: string
+          created_at: string | null
+          explanation: string | null
+          id: string
+          options: Json
+          order_index: number
+          points: number
+          question_text: string
+          quiz_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          correct_answer: string
+          created_at?: string | null
+          explanation?: string | null
+          id?: string
+          options: Json
+          order_index?: number
+          points?: number
+          question_text: string
+          quiz_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          correct_answer?: string
+          created_at?: string | null
+          explanation?: string | null
+          id?: string
+          options?: Json
+          order_index?: number
+          points?: number
+          question_text?: string
+          quiz_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quiz_question_multiple_choice_quiz_id_fkey"
             columns: ["quiz_id"]
             isOneToOne: false
             referencedRelation: "quiz"
@@ -249,19 +299,19 @@ export type Database = {
       }
       search_document_chunks: {
         Args: {
+          query_embedding: string
           match_count?: number
           match_user_id: string
-          query_embedding: string
         }
         Returns: {
           total_chunks: number
-          similarity: number
-          id: string
           chunk_index: number
-          file_path: string
           chunk_text: string
+          file_path: string
+          similarity: number
           file_name: string
           user_id: string
+          id: string
         }[]
       }
       sparsevec_out: {

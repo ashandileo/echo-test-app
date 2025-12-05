@@ -1,5 +1,7 @@
 import OpenAI from "openai";
+
 import { createClient } from "@/lib/supabase/server";
+
 import { ERROR_MESSAGES } from "./consts";
 
 const openai = new OpenAI({
@@ -99,7 +101,6 @@ export async function createQuiz(
       description: description,
       source_document_path: sourceDocumentPath,
       created_by: userId,
-      questions: [], // Empty array initially
     })
     .select()
     .single();
