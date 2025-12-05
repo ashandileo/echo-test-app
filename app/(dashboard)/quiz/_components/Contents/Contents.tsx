@@ -1,9 +1,13 @@
+import { useState } from "react";
+
 import Link from "next/link";
 
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import startCase from "lodash/startCase";
 import { Eye, FileText, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 
+import { SharedDelete } from "@/components/dialogs";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -18,15 +22,30 @@ import { createClient } from "@/lib/supabase/client";
 import Add from "../Controls/Add";
 
 const Contents = () => {
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [quizToDelete, setQuizToDelete] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
+
+  const queryClient = useQueryClient();
+
   const { data } = useQuery({
     queryKey: ["quizzes"],
     queryFn: async () => {
       const supabase = createClient();
-      const { data, error } = await supabase.from("quiz").select(`
+      const { data, error } = await supabase
+        .from("quiz")
+        .select(
+          `
         *,
-        quiz_question_multiple_choice(count),
-        quiz_question_essay(count)
-      `);
+        quiz_question_multiple_choice!inner(count),
+        quiz_question_essay!inner(count)
+      `
+        )
+        .is("deleted_at", null) // Only fetch non-deleted quizzes
+        .is("quiz_question_multiple_choice.deleted_at", null) // Only count non-deleted multiple choice questions
+        .is("quiz_question_essay.deleted_at", null); // Only count non-deleted essay questions
       if (error) throw error;
 
       // Calculate total questions for each quiz
@@ -40,6 +59,37 @@ const Contents = () => {
       );
     },
   });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (quizId: string) => {
+      const supabase = createClient();
+      // Soft delete: set deleted_at to current timestamp
+      const { error } = await supabase
+        .from("quiz")
+        .update({ deleted_at: new Date().toISOString() })
+        .eq("id", quizId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["quizzes"] });
+      toast.success("Quiz deleted successfully");
+    },
+    onError: (error) => {
+      console.error("Failed to delete quiz:", error);
+      toast.error("Failed to delete quiz. Please try again.");
+    },
+  });
+
+  const handleDeleteClick = (quiz: { id: string; name: string }) => {
+    setQuizToDelete(quiz);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (quizToDelete) {
+      await deleteMutation.mutateAsync(quizToDelete.id);
+    }
+  };
 
   const quizzes = data ?? [];
 
@@ -94,7 +144,13 @@ const Contents = () => {
                         <span className="sr-only">View</span>
                       </Link>
                     </Button>
-                    <Button variant="ghost" size="icon">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() =>
+                        handleDeleteClick({ id: quiz.id, name: quiz.name })
+                      }
+                    >
                       <Trash2 className="size-4 text-destructive" />
                       <span className="sr-only">Delete</span>
                     </Button>
@@ -114,6 +170,13 @@ const Contents = () => {
           <Add />
         </div>
       )}
+
+      <SharedDelete
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onConfirm={handleDeleteConfirm}
+        itemName={quizToDelete?.name}
+      />
     </div>
   );
 };

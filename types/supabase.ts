@@ -4,361 +4,370 @@ export type Json =
   | boolean
   | null
   | { [key: string]: Json | undefined }
-  | Json[];
+  | Json[]
 
 export type Database = {
   graphql_public: {
     Tables: {
-      [_ in never]: never;
-    };
+      [_ in never]: never
+    }
     Views: {
-      [_ in never]: never;
-    };
+      [_ in never]: never
+    }
     Functions: {
       graphql: {
         Args: {
-          operationName?: string;
-          extensions?: Json;
-          variables?: Json;
-          query?: string;
-        };
-        Returns: Json;
-      };
-    };
+          operationName?: string
+          extensions?: Json
+          variables?: Json
+          query?: string
+        }
+        Returns: Json
+      }
+    }
     Enums: {
-      [_ in never]: never;
-    };
+      [_ in never]: never
+    }
     CompositeTypes: {
-      [_ in never]: never;
-    };
-  };
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
       document_learnings: {
         Row: {
-          chunk_index: number;
-          chunk_text: string;
-          created_at: string | null;
-          embedding: string | null;
-          file_name: string;
-          file_path: string;
-          file_size: number;
-          file_type: string;
-          id: string;
-          mistral_file_id: string | null;
-          total_chunks: number;
-          updated_at: string | null;
-          user_id: string | null;
-        };
+          chunk_index: number
+          chunk_text: string
+          created_at: string | null
+          embedding: string | null
+          file_name: string
+          file_path: string
+          file_size: number
+          file_type: string
+          id: string
+          mistral_file_id: string | null
+          total_chunks: number
+          updated_at: string | null
+          user_id: string | null
+        }
         Insert: {
-          chunk_index: number;
-          chunk_text: string;
-          created_at?: string | null;
-          embedding?: string | null;
-          file_name: string;
-          file_path: string;
-          file_size: number;
-          file_type: string;
-          id?: string;
-          mistral_file_id?: string | null;
-          total_chunks: number;
-          updated_at?: string | null;
-          user_id?: string | null;
-        };
+          chunk_index: number
+          chunk_text: string
+          created_at?: string | null
+          embedding?: string | null
+          file_name: string
+          file_path: string
+          file_size: number
+          file_type: string
+          id?: string
+          mistral_file_id?: string | null
+          total_chunks: number
+          updated_at?: string | null
+          user_id?: string | null
+        }
         Update: {
-          chunk_index?: number;
-          chunk_text?: string;
-          created_at?: string | null;
-          embedding?: string | null;
-          file_name?: string;
-          file_path?: string;
-          file_size?: number;
-          file_type?: string;
-          id?: string;
-          mistral_file_id?: string | null;
-          total_chunks?: number;
-          updated_at?: string | null;
-          user_id?: string | null;
-        };
-        Relationships: [];
-      };
+          chunk_index?: number
+          chunk_text?: string
+          created_at?: string | null
+          embedding?: string | null
+          file_name?: string
+          file_path?: string
+          file_size?: number
+          file_type?: string
+          id?: string
+          mistral_file_id?: string | null
+          total_chunks?: number
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
-          avatar_url: string | null;
-          created_at: string | null;
-          email: string | null;
-          full_name: string | null;
-          id: string;
-          role: string | null;
-          updated_at: string | null;
-        };
+          avatar_url: string | null
+          created_at: string | null
+          email: string | null
+          full_name: string | null
+          id: string
+          role: string | null
+          updated_at: string | null
+        }
         Insert: {
-          avatar_url?: string | null;
-          created_at?: string | null;
-          email?: string | null;
-          full_name?: string | null;
-          id: string;
-          role?: string | null;
-          updated_at?: string | null;
-        };
+          avatar_url?: string | null
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          id: string
+          role?: string | null
+          updated_at?: string | null
+        }
         Update: {
-          avatar_url?: string | null;
-          created_at?: string | null;
-          email?: string | null;
-          full_name?: string | null;
-          id?: string;
-          role?: string | null;
-          updated_at?: string | null;
-        };
-        Relationships: [];
-      };
+          avatar_url?: string | null
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          role?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       quiz: {
         Row: {
-          created_at: string | null;
-          created_by: string | null;
-          description: string | null;
-          id: string;
-          name: string;
-          source_document_path: string | null;
-          status: string;
-          updated_at: string | null;
-        };
+          created_at: string | null
+          created_by: string | null
+          deleted_at: string | null
+          description: string | null
+          id: string
+          name: string
+          source_document_path: string | null
+          status: string
+          updated_at: string | null
+        }
         Insert: {
-          created_at?: string | null;
-          created_by?: string | null;
-          description?: string | null;
-          id?: string;
-          name: string;
-          source_document_path?: string | null;
-          status?: string;
-          updated_at?: string | null;
-        };
+          created_at?: string | null
+          created_by?: string | null
+          deleted_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          source_document_path?: string | null
+          status?: string
+          updated_at?: string | null
+        }
         Update: {
-          created_at?: string | null;
-          created_by?: string | null;
-          description?: string | null;
-          id?: string;
-          name?: string;
-          source_document_path?: string | null;
-          status?: string;
-          updated_at?: string | null;
-        };
-        Relationships: [];
-      };
+          created_at?: string | null
+          created_by?: string | null
+          deleted_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          source_document_path?: string | null
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       quiz_question_essay: {
         Row: {
-          created_at: string | null;
-          id: string;
-          points: number;
-          question_text: string;
-          quiz_id: string;
-          rubric: string | null;
-          updated_at: string | null;
-        };
+          created_at: string | null
+          deleted_at: string | null
+          id: string
+          points: number
+          question_text: string
+          quiz_id: string
+          rubric: string | null
+          updated_at: string | null
+        }
         Insert: {
-          created_at?: string | null;
-          id?: string;
-          points?: number;
-          question_text: string;
-          quiz_id: string;
-          rubric?: string | null;
-          updated_at?: string | null;
-        };
+          created_at?: string | null
+          deleted_at?: string | null
+          id?: string
+          points?: number
+          question_text: string
+          quiz_id: string
+          rubric?: string | null
+          updated_at?: string | null
+        }
         Update: {
-          created_at?: string | null;
-          id?: string;
-          points?: number;
-          question_text?: string;
-          quiz_id?: string;
-          rubric?: string | null;
-          updated_at?: string | null;
-        };
+          created_at?: string | null
+          deleted_at?: string | null
+          id?: string
+          points?: number
+          question_text?: string
+          quiz_id?: string
+          rubric?: string | null
+          updated_at?: string | null
+        }
         Relationships: [
           {
-            foreignKeyName: "quiz_question_essay_quiz_id_fkey";
-            columns: ["quiz_id"];
-            isOneToOne: false;
-            referencedRelation: "quiz";
-            referencedColumns: ["id"];
+            foreignKeyName: "quiz_question_essay_quiz_id_fkey"
+            columns: ["quiz_id"]
+            isOneToOne: false
+            referencedRelation: "quiz"
+            referencedColumns: ["id"]
           },
-        ];
-      };
+        ]
+      }
       quiz_question_multiple_choice: {
         Row: {
-          correct_answer: string;
-          created_at: string | null;
-          explanation: string | null;
-          id: string;
-          options: Json;
-          points: number;
-          question_text: string;
-          quiz_id: string;
-          updated_at: string | null;
-        };
+          correct_answer: string
+          created_at: string | null
+          deleted_at: string | null
+          explanation: string | null
+          id: string
+          options: Json
+          points: number
+          question_text: string
+          quiz_id: string
+          updated_at: string | null
+        }
         Insert: {
-          correct_answer: string;
-          created_at?: string | null;
-          explanation?: string | null;
-          id?: string;
-          options: Json;
-          points?: number;
-          question_text: string;
-          quiz_id: string;
-          updated_at?: string | null;
-        };
+          correct_answer: string
+          created_at?: string | null
+          deleted_at?: string | null
+          explanation?: string | null
+          id?: string
+          options: Json
+          points?: number
+          question_text: string
+          quiz_id: string
+          updated_at?: string | null
+        }
         Update: {
-          correct_answer?: string;
-          created_at?: string | null;
-          explanation?: string | null;
-          id?: string;
-          options?: Json;
-          points?: number;
-          question_text?: string;
-          quiz_id?: string;
-          updated_at?: string | null;
-        };
+          correct_answer?: string
+          created_at?: string | null
+          deleted_at?: string | null
+          explanation?: string | null
+          id?: string
+          options?: Json
+          points?: number
+          question_text?: string
+          quiz_id?: string
+          updated_at?: string | null
+        }
         Relationships: [
           {
-            foreignKeyName: "quiz_question_multiple_choice_quiz_id_fkey";
-            columns: ["quiz_id"];
-            isOneToOne: false;
-            referencedRelation: "quiz";
-            referencedColumns: ["id"];
+            foreignKeyName: "quiz_question_multiple_choice_quiz_id_fkey"
+            columns: ["quiz_id"]
+            isOneToOne: false
+            referencedRelation: "quiz"
+            referencedColumns: ["id"]
           },
-        ];
-      };
-    };
+        ]
+      }
+    }
     Views: {
-      [_ in never]: never;
-    };
+      [_ in never]: never
+    }
     Functions: {
       binary_quantize: {
-        Args: { "": string } | { "": unknown };
-        Returns: unknown;
-      };
+        Args: { "": string } | { "": unknown }
+        Returns: unknown
+      }
       halfvec_avg: {
-        Args: { "": number[] };
-        Returns: unknown;
-      };
+        Args: { "": number[] }
+        Returns: unknown
+      }
       halfvec_out: {
-        Args: { "": unknown };
-        Returns: unknown;
-      };
+        Args: { "": unknown }
+        Returns: unknown
+      }
       halfvec_send: {
-        Args: { "": unknown };
-        Returns: string;
-      };
+        Args: { "": unknown }
+        Returns: string
+      }
       halfvec_typmod_in: {
-        Args: { "": unknown[] };
-        Returns: number;
-      };
+        Args: { "": unknown[] }
+        Returns: number
+      }
       hnsw_bit_support: {
-        Args: { "": unknown };
-        Returns: unknown;
-      };
+        Args: { "": unknown }
+        Returns: unknown
+      }
       hnsw_halfvec_support: {
-        Args: { "": unknown };
-        Returns: unknown;
-      };
+        Args: { "": unknown }
+        Returns: unknown
+      }
       hnsw_sparsevec_support: {
-        Args: { "": unknown };
-        Returns: unknown;
-      };
+        Args: { "": unknown }
+        Returns: unknown
+      }
       hnswhandler: {
-        Args: { "": unknown };
-        Returns: unknown;
-      };
+        Args: { "": unknown }
+        Returns: unknown
+      }
       ivfflat_bit_support: {
-        Args: { "": unknown };
-        Returns: unknown;
-      };
+        Args: { "": unknown }
+        Returns: unknown
+      }
       ivfflat_halfvec_support: {
-        Args: { "": unknown };
-        Returns: unknown;
-      };
+        Args: { "": unknown }
+        Returns: unknown
+      }
       ivfflathandler: {
-        Args: { "": unknown };
-        Returns: unknown;
-      };
+        Args: { "": unknown }
+        Returns: unknown
+      }
       l2_norm: {
-        Args: { "": unknown } | { "": unknown };
-        Returns: number;
-      };
+        Args: { "": unknown } | { "": unknown }
+        Returns: number
+      }
       l2_normalize: {
-        Args: { "": string } | { "": unknown } | { "": unknown };
-        Returns: string;
-      };
+        Args: { "": string } | { "": unknown } | { "": unknown }
+        Returns: string
+      }
       search_document_chunks: {
         Args: {
-          query_embedding: string;
-          match_user_id: string;
-          match_count?: number;
-        };
+          query_embedding: string
+          match_user_id: string
+          match_count?: number
+        }
         Returns: {
-          id: string;
-          user_id: string;
-          file_name: string;
-          similarity: number;
-          file_path: string;
-          chunk_text: string;
-          chunk_index: number;
-          total_chunks: number;
-        }[];
-      };
+          id: string
+          user_id: string
+          file_name: string
+          similarity: number
+          total_chunks: number
+          chunk_index: number
+          chunk_text: string
+          file_path: string
+        }[]
+      }
       sparsevec_out: {
-        Args: { "": unknown };
-        Returns: unknown;
-      };
+        Args: { "": unknown }
+        Returns: unknown
+      }
       sparsevec_send: {
-        Args: { "": unknown };
-        Returns: string;
-      };
+        Args: { "": unknown }
+        Returns: string
+      }
       sparsevec_typmod_in: {
-        Args: { "": unknown[] };
-        Returns: number;
-      };
+        Args: { "": unknown[] }
+        Returns: number
+      }
       vector_avg: {
-        Args: { "": number[] };
-        Returns: string;
-      };
+        Args: { "": number[] }
+        Returns: string
+      }
       vector_dims: {
-        Args: { "": string } | { "": unknown };
-        Returns: number;
-      };
+        Args: { "": string } | { "": unknown }
+        Returns: number
+      }
       vector_norm: {
-        Args: { "": string };
-        Returns: number;
-      };
+        Args: { "": string }
+        Returns: number
+      }
       vector_out: {
-        Args: { "": string };
-        Returns: unknown;
-      };
+        Args: { "": string }
+        Returns: unknown
+      }
       vector_send: {
-        Args: { "": string };
-        Returns: string;
-      };
+        Args: { "": string }
+        Returns: string
+      }
       vector_typmod_in: {
-        Args: { "": unknown[] };
-        Returns: number;
-      };
-    };
+        Args: { "": unknown[] }
+        Returns: number
+      }
+    }
     Enums: {
-      [_ in never]: never;
-    };
+      [_ in never]: never
+    }
     CompositeTypes: {
-      [_ in never]: never;
-    };
-  };
-};
+      [_ in never]: never
+    }
+  }
+}
 
-type DefaultSchema = Database[Extract<keyof Database, "public">];
+type DefaultSchema = Database[Extract<keyof Database, "public">]
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof Database },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof Database;
+    schema: keyof Database
   }
     ? keyof (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
@@ -366,7 +375,7 @@ export type Tables<
 > = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
   ? (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
       Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
-      Row: infer R;
+      Row: infer R
     }
     ? R
     : never
@@ -374,64 +383,64 @@ export type Tables<
         DefaultSchema["Views"])
     ? (DefaultSchema["Tables"] &
         DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
-        Row: infer R;
+        Row: infer R
       }
       ? R
       : never
-    : never;
+    : never
 
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof Database },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof Database;
+    schema: keyof Database
   }
     ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
 > = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
   ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Insert: infer I;
+      Insert: infer I
     }
     ? I
     : never
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
     ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Insert: infer I;
+        Insert: infer I
       }
       ? I
       : never
-    : never;
+    : never
 
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof Database },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof Database;
+    schema: keyof Database
   }
     ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
 > = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
   ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Update: infer U;
+      Update: infer U
     }
     ? U
     : never
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
     ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Update: infer U;
+        Update: infer U
       }
       ? U
       : never
-    : never;
+    : never
 
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
     | { schema: keyof Database },
   EnumName extends DefaultSchemaEnumNameOrOptions extends {
-    schema: keyof Database;
+    schema: keyof Database
   }
     ? keyof Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
     : never = never,
@@ -439,14 +448,14 @@ export type Enums<
   ? Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
     ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
-    : never;
+    : never
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof Database },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
-    schema: keyof Database;
+    schema: keyof Database
   }
     ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
     : never = never,
@@ -454,7 +463,7 @@ export type CompositeTypes<
   ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
   : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
     ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
-    : never;
+    : never
 
 export const Constants = {
   graphql_public: {
@@ -463,4 +472,5 @@ export const Constants = {
   public: {
     Enums: {},
   },
-} as const;
+} as const
+
