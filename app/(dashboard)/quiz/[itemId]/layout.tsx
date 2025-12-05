@@ -19,10 +19,6 @@ const navigations = [
     label: "Configuration",
   },
   {
-    id: "configuration-v2",
-    label: "Configuration V2",
-  },
-  {
     id: "settings",
     label: "Settings",
   },
