@@ -6,11 +6,11 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus } from "lucide-react";
 
-import QuestionAddForm from "@/components/forms/quiz/QuestionAddForm";
+import QuestionAddForm from "@/components/forms/quiz/QuestionAddForm/QuestionAddForm";
 import {
   questionFormSchema,
   type QuestionFormValues,
-} from "@/components/forms/quiz/schema";
+} from "@/components/forms/quiz/QuestionAddForm/schema";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,

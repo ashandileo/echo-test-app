@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { UseFormReturn } from "react-hook-form";
 
 import { Loader2, Sparkles } from "lucide-react";
