@@ -6,7 +6,6 @@ import Add from "./_components/Controls/Add";
 export default function QuizPage() {
   return (
     <div className="flex flex-1 flex-col gap-4 p-4 md:p-6">
-      {/* Header with Create button */}
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">Quiz List</h2>
@@ -16,8 +15,6 @@ export default function QuizPage() {
         </div>
         <Add />
       </div>
-
-      {/* Table */}
       <Contents />
     </div>
   );
