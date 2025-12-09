@@ -1,7 +1,7 @@
 import { useParams } from "next/navigation";
 
 import { useQuery } from "@tanstack/react-query";
-import { Pencil } from "lucide-react";
+import { FileText, Pencil } from "lucide-react";
 
 import QuizEditDetails from "@/components/dialogs/quiz/QuizEditDetails";
 import { Button } from "@/components/ui/button";
@@ -45,6 +45,31 @@ const Details = () => {
 
       if (error) throw error;
       return data;
+    },
+  });
+
+  // Fetch question breakdown count
+  const { data: questionCountData } = useQuery({
+    queryKey: ["quiz-question-breakdown", itemId],
+    queryFn: async () => {
+      const { count: countMultipleChoice } = await supabase
+        .from("quiz_question_multiple_choice")
+        .select("id", {
+          count: "exact",
+          head: true,
+        });
+
+      const { count: countEssay } = await supabase
+        .from("quiz_question_essay")
+        .select("id", {
+          count: "exact",
+          head: true,
+        });
+
+      return {
+        multipleChoice: countMultipleChoice || 0,
+        essay: countEssay || 0,
+      };
     },
   });
 
@@ -190,6 +215,35 @@ const Details = () => {
                   minute: "2-digit",
                 })}
               </p>
+            </div>
+          </div>
+          <div>
+            <p className="text-sm font-medium text-muted-foreground mb-3">
+              Question Breakdown
+            </p>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="rounded-lg border p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm text-muted-foreground">
+                    Multiple Choice
+                  </span>
+                  <FileText className="h-4 w-4 text-blue-500" />
+                </div>
+                <p className="text-2xl font-bold">
+                  {questionCountData?.multipleChoice ?? 0}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">questions</p>
+              </div>
+              <div className="rounded-lg border p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm text-muted-foreground">Essay</span>
+                  <FileText className="h-4 w-4 text-purple-500" />
+                </div>
+                <p className="text-2xl font-bold">
+                  {questionCountData?.essay ?? 0}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">questions</p>
+              </div>
             </div>
           </div>
         </CardContent>
