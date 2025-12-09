@@ -1,13 +1,15 @@
-"use client";
-
 import { Separator } from "@radix-ui/react-separator";
 
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { requireAdmin } from "@/lib/auth/get-user";
 
 import Contents from "./_components/Contents/Contents";
 import Add from "./_components/Controls/Add";
 
-export default function QuizPage() {
+export default async function QuizPage() {
+  // Only admin can access this page
+  await requireAdmin();
+
   return (
     <>
       <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">

@@ -2,10 +2,13 @@ import { Separator } from "@radix-ui/react-separator";
 import { BookOpen } from "lucide-react";
 
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { requireUser } from "@/lib/auth/get-user";
 
 import Contents from "./_components/Contents/Contents";
 
-export default function QuizzesPage() {
+export default async function QuizzesPage() {
+  // Only allow regular users (not admin)
+  await requireUser();
   return (
     <div>
       <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">

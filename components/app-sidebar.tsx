@@ -19,17 +19,24 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useProfile } from "@/lib/hooks/use-profile";
+import { useProfile, type UserProfile } from "@/lib/hooks/use-profile";
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { data: profile, isLoading } = useProfile();
+interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
+  initialProfile?: UserProfile;
+}
 
-  const userData = profile
+export function AppSidebar({ initialProfile, ...props }: AppSidebarProps) {
+  const { data: profile, isLoading } = useProfile(initialProfile);
+
+  // Use initialProfile if profile data is not yet available to prevent flickering
+  const currentProfile = profile || initialProfile;
+
+  const userData = currentProfile
     ? {
-        name: profile.full_name || profile.email || "User",
-        email: profile.email || "",
-        avatar: profile.avatar_url || "",
-        role: profile.role,
+        name: currentProfile.full_name || currentProfile.email || "User",
+        email: currentProfile.email || "",
+        avatar: currentProfile.avatar_url || "",
+        role: currentProfile.role,
       }
     : {
         name: "Loading...",
@@ -38,7 +45,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         role: "user" as const,
       };
 
-  const role = profile?.role || "user";
+  const role = currentProfile?.role || "user";
   const isAdmin = role === "admin";
 
   const navMain = [

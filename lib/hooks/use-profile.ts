@@ -14,7 +14,7 @@ export interface UserProfile {
   updated_at: string;
 }
 
-export function useProfile() {
+export function useProfile(initialData?: UserProfile) {
   return useQuery({
     queryKey: ["user-profile"],
     queryFn: async () => {
@@ -43,6 +43,7 @@ export function useProfile() {
 
       return profile as UserProfile;
     },
+    initialData, // Use server-provided initial data to prevent flickering
     retry: false,
   });
 }

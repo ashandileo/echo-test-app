@@ -1,7 +1,9 @@
-import { createClient } from "@/lib/supabase/client";
-import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+
+import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
+
+import { createClient } from "@/lib/supabase/client";
 
 // Types
 export interface LoginCredentials {
@@ -28,13 +30,23 @@ export function useLogin() {
       });
 
       if (error) throw error;
-      return data;
+
+      // Get user profile to determine role
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", data.user.id)
+        .single();
+
+      return { ...data, role: profile?.role || "user" };
     },
     onSuccess: (data) => {
       toast.success("Login successful!", {
         description: `Welcome back, ${data.user.email}`,
       });
-      router.push("/quiz");
+      // Redirect based on role
+      const redirectPath = data.role === "admin" ? "/quiz" : "/quizzes";
+      router.push(redirectPath);
       router.refresh();
     },
     onError: (error: Error) => {
@@ -69,9 +81,10 @@ export function useRegister() {
     onSuccess: (data) => {
       if (data.user) {
         toast.success("Registration successful!", {
-          description: "Welcome to EchoTest. Redirecting to quiz...",
+          description: "Welcome to EchoTest. Redirecting...",
         });
-        router.push("/quiz");
+        // New users are always "user" role, redirect to /quizzes
+        router.push("/quizzes");
         router.refresh();
       }
     },

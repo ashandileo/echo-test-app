@@ -1,5 +1,6 @@
-import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+
+import { createClient } from "@/lib/supabase/server";
 
 export async function getCurrentUser() {
   const supabase = await createClient();
@@ -35,4 +36,41 @@ export async function getProfile(userId: string) {
   }
 
   return profile;
+}
+
+export async function requireAdmin() {
+  const user = await requireAuth();
+  const profile = await getProfile(user.id);
+
+  if (!profile || profile.role !== "admin") {
+    redirect("/quizzes");
+  }
+
+  return { user, profile };
+}
+
+export async function requireUser() {
+  const user = await requireAuth();
+  const profile = await getProfile(user.id);
+
+  if (!profile) {
+    redirect("/login");
+  }
+
+  if (profile.role === "admin") {
+    redirect("/quiz");
+  }
+
+  return { user, profile };
+}
+
+export async function getUserWithProfile() {
+  const user = await requireAuth();
+  const profile = await getProfile(user.id);
+
+  if (!profile) {
+    redirect("/login");
+  }
+
+  return { user, profile };
 }
