@@ -116,10 +116,7 @@ const Details = () => {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div className="flex-1">
-              <CardTitle>Quiz Information</CardTitle>
-              <CardDescription>
-                Basic information about your quiz
-              </CardDescription>
+              <CardTitle>Details</CardTitle>
             </div>
             <Button
               variant="ghost"

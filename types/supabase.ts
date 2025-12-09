@@ -18,9 +18,9 @@ export type Database = {
       graphql: {
         Args: {
           operationName?: string
-          extensions?: Json
-          variables?: Json
           query?: string
+          variables?: Json
+          extensions?: Json
         }
         Returns: Json
       }
@@ -187,6 +187,13 @@ export type Database = {
             referencedRelation: "quiz"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "quiz_question_essay_quiz_id_fkey"
+            columns: ["quiz_id"]
+            isOneToOne: false
+            referencedRelation: "quiz_enriched_view"
+            referencedColumns: ["id"]
+          },
         ]
       }
       quiz_question_multiple_choice: {
@@ -234,11 +241,159 @@ export type Database = {
             referencedRelation: "quiz"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "quiz_question_multiple_choice_quiz_id_fkey"
+            columns: ["quiz_id"]
+            isOneToOne: false
+            referencedRelation: "quiz_enriched_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quiz_submission_essay: {
+        Row: {
+          answer_text: string
+          feedback: string | null
+          graded_at: string | null
+          graded_by: string | null
+          id: string
+          points_earned: number | null
+          question_id: string
+          quiz_id: string
+          submitted_at: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          answer_text: string
+          feedback?: string | null
+          graded_at?: string | null
+          graded_by?: string | null
+          id?: string
+          points_earned?: number | null
+          question_id: string
+          quiz_id: string
+          submitted_at?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          answer_text?: string
+          feedback?: string | null
+          graded_at?: string | null
+          graded_by?: string | null
+          id?: string
+          points_earned?: number | null
+          question_id?: string
+          quiz_id?: string
+          submitted_at?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quiz_submission_essay_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "quiz_question_essay"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quiz_submission_essay_quiz_id_fkey"
+            columns: ["quiz_id"]
+            isOneToOne: false
+            referencedRelation: "quiz"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quiz_submission_essay_quiz_id_fkey"
+            columns: ["quiz_id"]
+            isOneToOne: false
+            referencedRelation: "quiz_enriched_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quiz_submission_multiple_choice: {
+        Row: {
+          id: string
+          is_correct: boolean
+          points_earned: number
+          question_id: string
+          quiz_id: string
+          selected_answer: string
+          submitted_at: string | null
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          is_correct: boolean
+          points_earned?: number
+          question_id: string
+          quiz_id: string
+          selected_answer: string
+          submitted_at?: string | null
+          user_id: string
+        }
+        Update: {
+          id?: string
+          is_correct?: boolean
+          points_earned?: number
+          question_id?: string
+          quiz_id?: string
+          selected_answer?: string
+          submitted_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quiz_submission_multiple_choice_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "quiz_question_multiple_choice"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quiz_submission_multiple_choice_quiz_id_fkey"
+            columns: ["quiz_id"]
+            isOneToOne: false
+            referencedRelation: "quiz"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quiz_submission_multiple_choice_quiz_id_fkey"
+            columns: ["quiz_id"]
+            isOneToOne: false
+            referencedRelation: "quiz_enriched_view"
+            referencedColumns: ["id"]
+          },
         ]
       }
     }
     Views: {
-      [_ in never]: never
+      quiz_enriched_view: {
+        Row: {
+          completed_at: string | null
+          correct_answers: number | null
+          created_at: string | null
+          created_by: string | null
+          creator_id: string | null
+          description: string | null
+          id: string | null
+          is_completed: boolean | null
+          published_at: string | null
+          score: number | null
+          status: string | null
+          title: string | null
+          total_answered_questions: number | null
+          total_essay_questions: number | null
+          total_multiple_choice_questions: number | null
+          total_points: number | null
+          total_questions: number | null
+          updated_at: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       binary_quantize: {
@@ -308,10 +463,10 @@ export type Database = {
           user_id: string
           file_name: string
           similarity: number
+          file_path: string
           total_chunks: number
           chunk_index: number
           chunk_text: string
-          file_path: string
         }[]
       }
       sparsevec_out: {

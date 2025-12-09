@@ -152,9 +152,6 @@ const LearningDocument = () => {
           <div className="flex items-center justify-between">
             <div className="flex-1">
               <CardTitle>Learning Document</CardTitle>
-              <CardDescription>
-                The document you uploaded for quiz generation
-              </CardDescription>
             </div>
             <Button variant="ghost" size="icon" className="h-8 w-8">
               <Pencil className="size-4" />
