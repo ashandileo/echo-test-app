@@ -11,7 +11,7 @@ const PAGE_SIZE = 10;
 
 const Contents = () => {
   const { data } = useInfiniteQuery({
-    queryKey: ["quizzes"],
+    queryKey: ["infinite-quizzes"],
     queryFn: async ({ pageParam = 0 }) => {
       const supabase = createClient();
 
@@ -27,25 +27,26 @@ const Contents = () => {
       if (error) throw error;
 
       return {
-        data: data || [],
-        nextPage: data && data.length === PAGE_SIZE ? pageParam + 1 : undefined,
+        quizzes: data || [],
+        nextPage:
+          data && data?.length === PAGE_SIZE ? pageParam + 1 : undefined,
       };
     },
     getNextPageParam: (lastPage) => lastPage.nextPage,
     initialPageParam: 0,
   });
 
-  const allQuizzes = data?.pages.flatMap((page) => page.data) || [];
+  const listQuizzes = data?.pages?.flatMap((page) => page.quizzes) || [];
 
   return (
     <>
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {allQuizzes.map((quiz) => {
+        {listQuizzes?.map((quiz) => {
           return <QuizCard key={quiz.id} quiz={quiz} />;
         })}
       </div>
 
-      {allQuizzes.length === 0 && (
+      {listQuizzes?.length === 0 && (
         <div className="flex flex-col items-center justify-center py-16 text-center">
           <BookOpen className="h-16 w-16 text-muted-foreground mb-4" />
           <h3 className="text-xl font-semibold mb-2">No Quizzes Available</h3>
