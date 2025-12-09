@@ -1,11 +1,11 @@
 "use client";
 
-import Details from "./_components/Contents/Details";
+import Contents from "./_components/Contents/Contents";
 
-export default function QuizInformationPage() {
+export default function QuizDetail() {
   return (
     <div className="flex flex-1 flex-col gap-6 p-4 md:p-6">
-      <Details />
+      <Contents />
     </div>
   );
 }
