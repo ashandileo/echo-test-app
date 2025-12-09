@@ -21,22 +21,6 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { useProfile } from "@/lib/hooks/use-profile";
 
-// Navigation items for EchoTest
-const navMain = [
-  {
-    title: "Quiz",
-    url: "/quiz",
-    icon: ClipboardList,
-    isActive: true,
-  },
-  {
-    title: "Quizzes",
-    url: "/quizzes",
-    icon: ClipboardList,
-    isActive: true,
-  },
-];
-
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { data: profile, isLoading } = useProfile();
 
@@ -53,6 +37,25 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         avatar: "",
         role: "user" as const,
       };
+
+  const role = profile?.role || "user";
+  const isAdmin = role === "admin";
+
+  const navMain = [
+    isAdmin
+      ? {
+          title: "Quiz",
+          url: "/quiz",
+          icon: ClipboardList,
+          isActive: true,
+        }
+      : {
+          title: "Quizzes",
+          url: "/quizzes",
+          icon: ClipboardList,
+          isActive: false,
+        },
+  ];
 
   return (
     <Sidebar collapsible="icon" {...props}>
