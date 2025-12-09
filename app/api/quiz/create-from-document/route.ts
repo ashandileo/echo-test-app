@@ -1,7 +1,17 @@
 import { NextResponse } from "next/server";
+
 import { createClient } from "@/lib/supabase/server";
+
 import { ERROR_MESSAGES } from "./consts";
-import { generateQuizMetadata, getDocumentContext, createQuiz } from "./utils";
+import {
+  createQuiz,
+  generateEssayQuestions,
+  generateMultipleChoiceQuestions,
+  generateQuizMetadata,
+  getDocumentContext,
+  saveEssayQuestions,
+  saveMultipleChoiceQuestions,
+} from "./utils";
 
 export async function POST(request: Request) {
   try {
@@ -30,13 +40,11 @@ export async function POST(request: Request) {
       );
     }
 
-    console.log(`Creating quiz from document: ${filePath}`);
-
-    // Get document context (first 3 chunks)
+    // Get document context (use more chunks for better question generation)
     const { fileName, context } = await getDocumentContext(
       filePath,
       user.id,
-      3
+      5
     );
 
     // Generate quiz title and description using AI
@@ -44,8 +52,6 @@ export async function POST(request: Request) {
       fileName,
       context.slice(0, 2000) // Limit to ~500 tokens
     );
-
-    console.log(`Generated quiz metadata:`, metadata);
 
     // Create quiz in database
     const quiz = await createQuiz(
@@ -55,20 +61,31 @@ export async function POST(request: Request) {
       filePath
     );
 
-    console.log(`Quiz created successfully: ${quiz.id}`);
+    // Generate questions in parallel
+    const [mcQuestions, essayQuestions] = await Promise.all([
+      generateMultipleChoiceQuestions(context, 5),
+      generateEssayQuestions(context, 3),
+    ]);
+
+    // Save questions to database
+    await Promise.all([
+      saveMultipleChoiceQuestions(quiz.id, mcQuestions),
+      saveEssayQuestions(quiz.id, essayQuestions),
+    ]);
 
     return NextResponse.json({
       success: true,
-      message: "Quiz created successfully",
+      message: "Quiz created successfully with questions",
       data: {
         id: quiz.id,
         name: quiz.name,
         description: quiz.description,
         sourceDocumentPath: filePath,
+        multipleChoiceCount: mcQuestions.length,
+        essayCount: essayQuestions.length,
       },
     });
   } catch (error) {
-    console.error("Error creating quiz from document:", error);
     return NextResponse.json(
       {
         error: error instanceof Error ? error.message : "Failed to create quiz",

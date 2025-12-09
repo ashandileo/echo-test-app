@@ -1,16 +1,18 @@
 import { NextResponse } from "next/server";
+
 import { createClient } from "@/lib/supabase/server";
+
 import {
-  ERROR_MESSAGES,
-  DEFAULT_NUM_QUESTIONS,
   DEFAULT_DIFFICULTY,
+  DEFAULT_NUM_QUESTIONS,
+  ERROR_MESSAGES,
 } from "./consts";
 import {
-  getQuiz,
-  getDocumentChunks,
   generateQuestions,
-  updateQuizQuestions,
+  getDocumentChunks,
+  getQuiz,
   prepareContext,
+  updateQuizQuestions,
 } from "./utils";
 
 export async function POST(request: Request) {

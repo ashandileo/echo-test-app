@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS public.quiz_question_multiple_choice (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   quiz_id UUID NOT NULL REFERENCES public.quiz(id) ON DELETE CASCADE,
   question_text TEXT NOT NULL,
-  options JSONB NOT NULL, -- Array of options: [{"id": "a", "text": "Option A"}, ...]
+  options JSONB NOT NULL, -- Array of options: ["Options 1", "Option 2", ...]
   correct_answer TEXT NOT NULL, -- The ID of the correct option
   points INTEGER NOT NULL DEFAULT 1,
   explanation TEXT, -- Optional explanation for the answer
@@ -64,5 +64,5 @@ CREATE TRIGGER set_updated_at_mc
 
 -- Add comments for documentation
 COMMENT ON TABLE public.quiz_question_multiple_choice IS 'Stores multiple choice questions for quizzes';
-COMMENT ON COLUMN public.quiz_question_multiple_choice.options IS 'Array of option objects with id and text fields';
-COMMENT ON COLUMN public.quiz_question_multiple_choice.correct_answer IS 'The ID of the correct option';
+COMMENT ON COLUMN public.quiz_question_multiple_choice.options IS 'Array of option strings: ["Option 1", "Option 2", "Option 3", "Option 4"]';
+COMMENT ON COLUMN public.quiz_question_multiple_choice.correct_answer IS 'Index of the correct option as string: "0", "1", "2", or "3"';

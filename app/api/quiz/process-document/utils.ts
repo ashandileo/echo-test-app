@@ -1,11 +1,13 @@
 import OpenAI from "openai";
+
 import { createClient } from "@/lib/supabase/server";
 import { chunkBySentence } from "@/lib/utils/text-chunking";
+
 import {
-  OPENAI_MODEL_EMBEDDING,
-  STORAGE_BUCKET_NAME,
   DEFAULT_CHUNK_SIZE,
   ERROR_MESSAGES,
+  OPENAI_MODEL_EMBEDDING,
+  STORAGE_BUCKET_NAME,
 } from "./consts";
 
 // Types

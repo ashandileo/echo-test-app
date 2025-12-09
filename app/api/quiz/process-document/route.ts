@@ -1,14 +1,16 @@
 import { NextResponse } from "next/server";
+
 import { createClient } from "@/lib/supabase/server";
+
 import { ERROR_MESSAGES } from "./consts";
 import {
-  validateRequest,
-  uploadFileToStorage,
   chunkDocument,
   createDocumentChunks,
-  saveDocumentChunks,
   getFilePublicUrl,
   type ProcessDocumentRequest,
+  saveDocumentChunks,
+  uploadFileToStorage,
+  validateRequest,
 } from "./utils";
 
 export async function POST(request: Request) {

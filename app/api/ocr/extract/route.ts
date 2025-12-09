@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+
 import { processOCR, uploadFileToMistral, validateFile } from "./../utils";
 
 export async function POST(request: Request) {
