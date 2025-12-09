@@ -1,5 +1,7 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+
 import { Separator } from "@radix-ui/react-separator";
 import {
   Award,
@@ -97,8 +99,11 @@ const mockQuizzes = [
 ];
 
 export default function QuizzesPage() {
+  const router = useRouter();
+
   const handleStartQuiz = (quizId: string, quizTitle: string) => {
     console.log(`Starting quiz: ${quizTitle} (${quizId})`);
+    router.push(`/quizzes/${quizId}`);
   };
 
   return (
