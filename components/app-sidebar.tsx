@@ -29,6 +29,12 @@ const navMain = [
     icon: ClipboardList,
     isActive: true,
   },
+  {
+    title: "Quizzes",
+    url: "/quizzes",
+    icon: ClipboardList,
+    isActive: true,
+  },
 ];
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
