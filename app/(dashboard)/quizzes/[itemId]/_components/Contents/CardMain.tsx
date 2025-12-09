@@ -1,5 +1,5 @@
 'use client";';
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 
 import { useQuery } from "@tanstack/react-query";
 import { Award, BookOpen, Clock, FileText, GraduationCap } from "lucide-react";
@@ -18,6 +18,7 @@ import { createClient } from "@/lib/supabase/client";
 
 const CardMain = () => {
   const { itemId } = useParams<{ itemId: string }>();
+  const router = useRouter();
 
   const { data: quiz, isLoading: isLoadingQuiz } = useQuery({
     queryKey: ["quiz-details", itemId],
@@ -61,8 +62,7 @@ const CardMain = () => {
   const isLoading = isLoadingQuiz || isLoadingQuizCount;
 
   const handleStartQuiz = () => {
-    console.log(`Starting quiz: ${itemId}`);
-    // TODO: Navigate to quiz taking page
+    router.push(`/take-quiz/${itemId}`);
   };
 
   const estimatedTime = questionsData
