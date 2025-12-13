@@ -8,12 +8,7 @@ SELECT
   q.created_by,
   q.created_at,
   q.updated_at,
-  
-  -- Published date (use created_at when status is published)
-  CASE 
-    WHEN q.status = 'published' THEN q.created_at
-    ELSE NULL
-  END AS published_at,
+  q.published_at,
   
   -- Count total questions (multiple choice + essay)
   COALESCE(mc_count.total, 0) + COALESCE(essay_count.total, 0) AS total_questions,
@@ -77,9 +72,6 @@ LEFT JOIN LATERAL (
   WHERE (mc.quiz_id = q.id OR essay.quiz_id = q.id)
     AND (mc.user_id = auth.uid() OR essay.user_id = auth.uid())
 ) user_completion ON TRUE;
-
--- Add comments for documentation
-COMMENT ON VIEW public.quiz_enriched_view IS 'Enriched view of quizzes with aggregated question counts, points, and user completion status';
 
 -- Grant access to authenticated users
 GRANT SELECT ON public.quiz_enriched_view TO authenticated;

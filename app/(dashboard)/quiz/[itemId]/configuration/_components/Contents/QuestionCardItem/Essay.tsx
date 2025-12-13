@@ -11,6 +11,7 @@ import { SharedDelete } from "@/components/dialogs";
 import QuestionEditDialog from "@/components/dialogs/quiz/QuestionEdit";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { QUIZ_QUESTION_COUNT, QUIZ_QUESTION_ESSAY } from "@/lib/queryKeys/quiz";
 import { createClient } from "@/lib/supabase/client";
 import { Database } from "@/types/supabase";
 
@@ -40,10 +41,10 @@ const Essay = ({ question, questionNumber }: Props) => {
 
       // Invalidate query cache
       queryClient.invalidateQueries({
-        queryKey: ["quiz-questions-essay", itemId],
+        queryKey: QUIZ_QUESTION_ESSAY(itemId),
       });
       queryClient.invalidateQueries({
-        queryKey: ["quiz-question-counts", itemId],
+        queryKey: QUIZ_QUESTION_COUNT(itemId),
       });
     } catch (error) {
       console.error("Failed to delete question:", error);

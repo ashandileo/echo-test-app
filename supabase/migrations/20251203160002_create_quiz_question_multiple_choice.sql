@@ -8,11 +8,15 @@ CREATE TABLE IF NOT EXISTS public.quiz_question_multiple_choice (
   points INTEGER NOT NULL DEFAULT 1,
   explanation TEXT, -- Optional explanation for the answer
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  deleted_at TIMESTAMP WITH TIME ZONE DEFAULT NULL
 );
 
 -- Create indexes for multiple choice questions
 CREATE INDEX IF NOT EXISTS idx_quiz_question_mc_quiz_id ON public.quiz_question_multiple_choice(quiz_id);
+
+-- Create index on deleted_at for faster queries
+CREATE INDEX IF NOT EXISTS idx_quiz_question_mc_deleted_at ON public.quiz_question_multiple_choice(deleted_at);
 
 -- Enable Row Level Security
 ALTER TABLE public.quiz_question_multiple_choice ENABLE ROW LEVEL SECURITY;
@@ -61,8 +65,3 @@ CREATE TRIGGER set_updated_at_mc
   BEFORE UPDATE ON public.quiz_question_multiple_choice
   FOR EACH ROW
   EXECUTE FUNCTION public.handle_updated_at();
-
--- Add comments for documentation
-COMMENT ON TABLE public.quiz_question_multiple_choice IS 'Stores multiple choice questions for quizzes';
-COMMENT ON COLUMN public.quiz_question_multiple_choice.options IS 'Array of option strings: ["Option 1", "Option 2", "Option 3", "Option 4"]';
-COMMENT ON COLUMN public.quiz_question_multiple_choice.correct_answer IS 'Index of the correct option as string: "0", "1", "2", or "3"';

@@ -54,9 +54,3 @@ CREATE POLICY "Users can delete their own submissions"
 -- Add unique constraint to prevent duplicate submissions for the same question
 CREATE UNIQUE INDEX idx_unique_user_question_mc 
   ON public.quiz_submission_multiple_choice(user_id, question_id);
-
--- Add comments for documentation
-COMMENT ON TABLE public.quiz_submission_multiple_choice IS 'Stores user submissions for multiple choice quiz questions';
-COMMENT ON COLUMN public.quiz_submission_multiple_choice.selected_answer IS 'Index of the selected option as string: "0", "1", "2", or "3"';
-COMMENT ON COLUMN public.quiz_submission_multiple_choice.is_correct IS 'Whether the submitted answer is correct';
-COMMENT ON COLUMN public.quiz_submission_multiple_choice.points_earned IS 'Points earned for this answer';

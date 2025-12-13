@@ -10,6 +10,11 @@ import { useToggle } from "usehooks-ts";
 import QuestionAddDialog from "@/components/dialogs/quiz/QuestionAdd";
 import { QuestionFormValues } from "@/components/forms/quiz/QuestionAddForm/schema";
 import { Button } from "@/components/ui/button";
+import {
+  QUIZ_QUESTION_COUNT,
+  QUIZ_QUESTION_ESSAY,
+  QUIZ_QUESTION_MULTIPLE_CHOICE,
+} from "@/lib/queryKeys/quiz";
 import { createClient } from "@/lib/supabase/client";
 
 const Add = () => {
@@ -46,10 +51,10 @@ const Add = () => {
 
       // Invalidate queries to refetch updated data
       queryClient.invalidateQueries({
-        queryKey: ["quiz-questions-multiple-choice", itemId],
+        queryKey: QUIZ_QUESTION_MULTIPLE_CHOICE(itemId),
       });
       queryClient.invalidateQueries({
-        queryKey: ["quiz-question-counts", itemId],
+        queryKey: QUIZ_QUESTION_COUNT(itemId),
       });
     },
     onError: (error: Error) => {
@@ -83,10 +88,10 @@ const Add = () => {
 
       // Invalidate queries to refetch updated data
       queryClient.invalidateQueries({
-        queryKey: ["quiz-questions-essay", itemId],
+        queryKey: QUIZ_QUESTION_ESSAY(itemId),
       });
       queryClient.invalidateQueries({
-        queryKey: ["quiz-question-counts", itemId],
+        queryKey: QUIZ_QUESTION_COUNT(itemId),
       });
     },
     onError: (error: Error) => {

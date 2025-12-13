@@ -19,6 +19,20 @@ import { createClient } from "@/lib/supabase/client";
 const CardMain = () => {
   const { itemId } = useParams<{ itemId: string }>();
   const router = useRouter();
+  const supabase = createClient();
+
+  // Get current user
+  const { data: userData } = useQuery({
+    queryKey: ["current-user"],
+    queryFn: async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      return user;
+    },
+  });
+
+  const userId = userData?.id;
 
   const { data: quiz, isLoading: isLoadingQuiz } = useQuery({
     queryKey: ["quiz-details", itemId],
@@ -59,10 +73,41 @@ const CardMain = () => {
     },
   });
 
+  // Check if user has submissions
+  const { data: hasSubmissions } = useQuery({
+    queryKey: ["user-has-submissions", itemId, userId],
+    queryFn: async () => {
+      if (!userId) return false;
+      const supabase = createClient();
+
+      const [mcSubmissions, essaySubmissions] = await Promise.all([
+        supabase
+          .from("quiz_submission_multiple_choice")
+          .select("id", { count: "exact", head: true })
+          .eq("quiz_id", itemId)
+          .eq("user_id", userId),
+        supabase
+          .from("quiz_submission_essay")
+          .select("id", { count: "exact", head: true })
+          .eq("quiz_id", itemId)
+          .eq("user_id", userId),
+      ]);
+
+      return (
+        (mcSubmissions.count || 0) > 0 || (essaySubmissions.count || 0) > 0
+      );
+    },
+    enabled: !!userId,
+  });
+
   const isLoading = isLoadingQuiz || isLoadingQuizCount;
 
   const handleStartQuiz = () => {
     router.push(`/take-quiz/${itemId}`);
+  };
+
+  const handleViewResults = () => {
+    router.push(`/quizzes/${itemId}/results`);
   };
 
   const estimatedTime = questionsData
@@ -151,14 +196,28 @@ const CardMain = () => {
         </div>
       </CardContent>
       <CardFooter className="border-t pt-6">
-        <Button
-          className="w-full"
-          size="lg"
-          onClick={handleStartQuiz}
-          disabled={!questionsData?.total || questionsData.total === 0}
-        >
-          {questionsData?.total === 0 ? "No Questions Available" : "Start Quiz"}
-        </Button>
+        <div className="w-full flex gap-3">
+          <Button
+            className="flex-1"
+            size="lg"
+            onClick={handleStartQuiz}
+            disabled={!questionsData?.total || questionsData.total === 0}
+          >
+            {questionsData?.total === 0
+              ? "No Questions Available"
+              : "Start Quiz"}
+          </Button>
+          {hasSubmissions && (
+            <Button
+              variant="outline"
+              className="flex-1"
+              size="lg"
+              onClick={handleViewResults}
+            >
+              View Results
+            </Button>
+          )}
+        </div>
       </CardFooter>
     </Card>
   );

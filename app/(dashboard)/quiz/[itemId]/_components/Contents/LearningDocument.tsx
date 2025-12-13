@@ -4,10 +4,8 @@ import { useState } from "react";
 
 import { useParams } from "next/navigation";
 
-import { useQuery } from "@tanstack/react-query";
-import { ExternalLink, FileText, Pencil } from "lucide-react";
+import { ExternalLink, FileText } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -23,47 +21,24 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  useQuizDetails,
+  useQuizDocumentLearning,
+} from "@/lib/hooks/api/useQuiz";
 import { createClient } from "@/lib/supabase/client";
 
 const LearningDocument = () => {
-  const params = useParams();
+  const { itemId } = useParams<{ itemId: string }>();
   const supabase = createClient();
   const [previewOpen, setPreviewOpen] = useState(false);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
 
   // Fetch quiz to get source_document_path
-  const { data: quiz, isLoading: isLoadingQuiz } = useQuery({
-    queryKey: ["quiz-source-document", params.itemId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("quiz")
-        .select("source_document_path")
-        .eq("id", params.itemId as string)
-        .single();
-
-      if (error) throw error;
-      return data;
-    },
-  });
+  const { data: quiz, isLoading: isLoadingQuiz } = useQuizDetails(itemId);
 
   // Fetch document details from document_learnings
-  const { data: document, isLoading: isLoadingDocument } = useQuery({
-    queryKey: ["learning-document", quiz?.source_document_path],
-    queryFn: async () => {
-      if (!quiz?.source_document_path) return null;
-
-      const { data, error } = await supabase
-        .from("document_learnings")
-        .select("file_name, file_path, file_size, file_type")
-        .eq("file_path", quiz.source_document_path)
-        .limit(1)
-        .single();
-
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!quiz?.source_document_path,
-  });
+  const { data: document, isLoading: isLoadingDocument } =
+    useQuizDocumentLearning(itemId, quiz?.source_document_path);
 
   const isLoading = isLoadingQuiz || isLoadingDocument;
 
@@ -104,10 +79,6 @@ const LearningDocument = () => {
                 The document you uploaded for quiz generation
               </CardDescription>
             </div>
-            <Button variant="ghost" size="icon" className="h-8 w-8" disabled>
-              <Pencil className="size-4" />
-              <span className="sr-only">Edit learning document</span>
-            </Button>
           </div>
         </CardHeader>
         <CardContent>
@@ -153,10 +124,6 @@ const LearningDocument = () => {
             <div className="flex-1">
               <CardTitle>Learning Document</CardTitle>
             </div>
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              <Pencil className="size-4" />
-              <span className="sr-only">Edit learning document</span>
-            </Button>
           </div>
         </CardHeader>
         <CardContent>

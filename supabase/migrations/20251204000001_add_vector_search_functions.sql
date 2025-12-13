@@ -33,6 +33,3 @@ BEGIN
   LIMIT match_count;
 END;
 $$;
-
--- Add comment
-COMMENT ON FUNCTION search_document_chunks IS 'Search for similar document chunks using vector similarity (cosine distance)';

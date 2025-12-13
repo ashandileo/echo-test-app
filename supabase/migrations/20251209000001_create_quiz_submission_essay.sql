@@ -76,10 +76,3 @@ CREATE TRIGGER set_updated_at_essay_submission
   FOR EACH ROW
   EXECUTE FUNCTION public.handle_updated_at();
 
--- Add comments for documentation
-COMMENT ON TABLE public.quiz_submission_essay IS 'Stores user submissions for essay quiz questions';
-COMMENT ON COLUMN public.quiz_submission_essay.answer_text IS 'The essay answer text submitted by the user';
-COMMENT ON COLUMN public.quiz_submission_essay.points_earned IS 'Points earned for this answer (NULL until graded)';
-COMMENT ON COLUMN public.quiz_submission_essay.feedback IS 'Optional feedback provided by the grader';
-COMMENT ON COLUMN public.quiz_submission_essay.graded_by IS 'User ID of who graded this submission';
-COMMENT ON COLUMN public.quiz_submission_essay.graded_at IS 'Timestamp when the submission was graded';

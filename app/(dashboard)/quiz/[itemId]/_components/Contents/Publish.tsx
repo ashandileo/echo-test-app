@@ -2,15 +2,13 @@
 
 import { useParams } from "next/navigation";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CheckCircle, XCircle } from "lucide-react";
-import { toast } from "sonner";
 
 import { QuizPublish } from "@/components/dialogs";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useQuizDetails, useQuizStatusUpdate } from "@/lib/hooks/api/useQuiz";
 import useActions from "@/lib/hooks/useAction";
-import { createClient } from "@/lib/supabase/client";
 
 enum Actions {
   PUBLISH = "PUBLISH",
@@ -24,51 +22,16 @@ type ActionMetadata = {
 
 const Publish = () => {
   const { itemId } = useParams<{ itemId: string }>();
-  const supabase = createClient();
-  const queryClient = useQueryClient();
   const { action, setAction, clearAction, isAction } = useActions<
     Actions,
     ActionMetadata
   >();
 
   // Fetch quiz details
-  const { data: quiz, isLoading } = useQuery({
-    queryKey: ["quiz-details", itemId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("quiz")
-        .select("*")
-        .eq("id", itemId)
-        .single();
-
-      if (error) throw error;
-      return data;
-    },
-  });
+  const { data: quiz, isLoading } = useQuizDetails(itemId);
 
   // Mutation for updating quiz status
-  const updateStatusMutation = useMutation({
-    mutationFn: async (newStatus: "draft" | "published") => {
-      const { error } = await supabase
-        .from("quiz")
-        .update({ status: newStatus })
-        .eq("id", itemId);
-
-      if (error) throw error;
-    },
-    onSuccess: (_, newStatus) => {
-      queryClient.invalidateQueries({ queryKey: ["quiz-details", itemId] });
-      queryClient.invalidateQueries({ queryKey: ["quizzes"] });
-      toast.success(
-        `Quiz ${newStatus === "published" ? "published" : "unpublished"} successfully`
-      );
-      clearAction();
-    },
-    onError: (error) => {
-      console.error("Failed to update quiz status:", error);
-      toast.error("Failed to update quiz status. Please try again.");
-    },
-  });
+  const { mutate: updateStatus } = useQuizStatusUpdate(itemId);
 
   const handlePublishClick = () => {
     if (!quiz) return;
@@ -88,9 +51,12 @@ const Publish = () => {
 
   const handleConfirm = async () => {
     if (!quiz) return;
-
     const newStatus = quiz.status === "published" ? "draft" : "published";
-    await updateStatusMutation.mutateAsync(newStatus);
+    updateStatus(newStatus, {
+      onSuccess: () => {
+        clearAction();
+      },
+    });
   };
 
   if (isLoading) {

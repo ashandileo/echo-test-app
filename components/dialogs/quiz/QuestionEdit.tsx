@@ -22,6 +22,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  QUIZ_QUESTION_COUNT,
+  QUIZ_QUESTION_ESSAY,
+  QUIZ_QUESTION_MULTIPLE_CHOICE,
+} from "@/lib/queryKeys/quiz";
 import { createClient } from "@/lib/supabase/client";
 import { parseMultipleChoiceOptions } from "@/lib/utils/jsonb";
 import { Database } from "@/types/supabase";
@@ -108,7 +113,7 @@ const QuestionEditDialog = ({
         if (error) throw error;
 
         queryClient.invalidateQueries({
-          queryKey: ["quiz-questions-multiple-choice", quizId],
+          queryKey: QUIZ_QUESTION_MULTIPLE_CHOICE(quizId),
         });
       } else {
         const { error } = await supabase
@@ -122,12 +127,12 @@ const QuestionEditDialog = ({
         if (error) throw error;
 
         queryClient.invalidateQueries({
-          queryKey: ["quiz-questions-essay", quizId],
+          queryKey: QUIZ_QUESTION_ESSAY(quizId),
         });
       }
 
       queryClient.invalidateQueries({
-        queryKey: ["quiz-question-counts", quizId],
+        queryKey: QUIZ_QUESTION_COUNT(quizId),
       });
 
       toast.success("Question updated successfully");

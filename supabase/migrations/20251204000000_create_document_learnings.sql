@@ -87,8 +87,3 @@ CREATE POLICY "Users can delete their own documents"
     auth.uid()::text = (storage.foldername(name))[1]
   );
 
--- Add comments for documentation
-COMMENT ON TABLE public.document_learnings IS 'Stores learning documents with text embeddings for semantic search';
-COMMENT ON COLUMN public.document_learnings.embedding IS 'OpenAI text-embedding-3-small vector (1536 dimensions)';
-COMMENT ON COLUMN public.document_learnings.chunk_text IS 'Chunked text for embedding generation';
-COMMENT ON COLUMN public.document_learnings.file_path IS 'Path to original PDF file in storage bucket. Use this to access full document content.';

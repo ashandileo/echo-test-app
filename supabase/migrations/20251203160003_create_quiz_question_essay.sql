@@ -6,11 +6,15 @@ CREATE TABLE IF NOT EXISTS public.quiz_question_essay (
   rubric TEXT, -- Optional rubric/criteria for grading
   points INTEGER NOT NULL DEFAULT 1,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  deleted_at TIMESTAMP WITH TIME ZONE DEFAULT NULL
 );
 
 -- Create indexes for essay questions
 CREATE INDEX IF NOT EXISTS idx_quiz_question_essay_quiz_id ON public.quiz_question_essay(quiz_id);
+
+-- Create index on deleted_at for faster queries
+CREATE INDEX IF NOT EXISTS idx_quiz_question_essay_deleted_at ON public.quiz_question_essay(deleted_at);
 
 -- Enable Row Level Security
 ALTER TABLE public.quiz_question_essay ENABLE ROW LEVEL SECURITY;

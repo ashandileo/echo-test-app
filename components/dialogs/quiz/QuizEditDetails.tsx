@@ -12,6 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { QUIZ_DETAILS, QUIZZES } from "@/lib/queryKeys/quiz";
 import { createClient } from "@/lib/supabase/client";
 
 interface QuizEditDetailsProps {
@@ -43,8 +44,8 @@ const QuizEditDetails = ({
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["quiz-details", quizId] });
-      queryClient.invalidateQueries({ queryKey: ["quizzes"] });
+      queryClient.invalidateQueries({ queryKey: QUIZ_DETAILS(quizId) });
+      queryClient.invalidateQueries({ queryKey: QUIZZES });
       toast.success("Quiz details updated successfully");
       onOpenChange(false);
     },

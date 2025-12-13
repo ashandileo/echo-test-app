@@ -14,6 +14,10 @@ const navigations = [
     id: "information",
     label: "Information",
   },
+  {
+    id: "results",
+    label: "Results",
+  },
 ];
 
 export default function QuizDetailLayout({

@@ -1,10 +1,8 @@
 "use client";
 import Link from "next/link";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import startCase from "lodash/startCase";
 import { Eye, FileText, Trash2 } from "lucide-react";
-import { toast } from "sonner";
 
 import { SharedDelete } from "@/components/dialogs";
 import { Button } from "@/components/ui/button";
@@ -16,8 +14,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useQuizDelete, useQuizzes } from "@/lib/hooks/api/useQuiz";
 import useActions from "@/lib/hooks/useAction";
-import { createClient } from "@/lib/supabase/client";
 
 import Add from "../Controls/Add";
 
@@ -36,57 +34,8 @@ const Contents = () => {
     ActionMetadata
   >();
 
-  const queryClient = useQueryClient();
-
-  const { data } = useQuery({
-    queryKey: ["quizzes"],
-    queryFn: async () => {
-      const supabase = createClient();
-      const { data, error } = await supabase
-        .from("quiz")
-        .select(
-          `
-        *,
-        quiz_question_multiple_choice!inner(count),
-        quiz_question_essay!inner(count)
-      `
-        )
-        .is("deleted_at", null) // Only fetch non-deleted quizzes
-        .is("quiz_question_multiple_choice.deleted_at", null) // Only count non-deleted multiple choice questions
-        .is("quiz_question_essay.deleted_at", null); // Only count non-deleted essay questions
-      if (error) throw error;
-
-      // Calculate total questions for each quiz
-      return (
-        data?.map((quiz) => ({
-          ...quiz,
-          totalQuestions:
-            (quiz.quiz_question_multiple_choice?.[0]?.count || 0) +
-            (quiz.quiz_question_essay?.[0]?.count || 0),
-        })) || []
-      );
-    },
-  });
-
-  const deleteMutation = useMutation({
-    mutationFn: async (quizId: string) => {
-      const supabase = createClient();
-      // Soft delete: set deleted_at to current timestamp
-      const { error } = await supabase
-        .from("quiz")
-        .update({ deleted_at: new Date().toISOString() })
-        .eq("id", quizId);
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["quizzes"] });
-      toast.success("Quiz deleted successfully");
-    },
-    onError: (error) => {
-      console.error("Failed to delete quiz:", error);
-      toast.error("Failed to delete quiz. Please try again.");
-    },
-  });
+  const { data: quizzes } = useQuizzes();
+  const { mutateAsync: deleteQuiz } = useQuizDelete();
 
   const handleDeleteClick = (quiz: { id: string; name: string }) => {
     setAction(Actions.DELETE, quiz);
@@ -94,16 +43,14 @@ const Contents = () => {
 
   const handleDeleteConfirm = async () => {
     if (action.data) {
-      await deleteMutation.mutateAsync(action.data.id);
+      await deleteQuiz(action.data.id);
       clearAction();
     }
   };
 
-  const quizzes = data ?? [];
-
   return (
     <div className="rounded-md border">
-      {quizzes.length > 0 ? (
+      {quizzes && quizzes?.length > 0 ? (
         <Table>
           <TableHeader>
             <TableRow>
