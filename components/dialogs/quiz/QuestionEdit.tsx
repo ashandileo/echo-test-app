@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 
+import { useParams } from "next/navigation";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
 import { Loader2, Save } from "lucide-react";
@@ -40,7 +42,6 @@ interface QuestionEditDialogProps {
   onOpenChange: (open: boolean) => void;
   question: MultipleChoiceQuestion | EssayQuestion;
   questionType: "multiple_choice" | "essay";
-  quizId: string;
 }
 
 const QuestionEditDialog = ({
@@ -48,8 +49,8 @@ const QuestionEditDialog = ({
   onOpenChange,
   question,
   questionType,
-  quizId,
 }: QuestionEditDialogProps) => {
+  const { itemId } = useParams<{ itemId: string }>();
   const queryClient = useQueryClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -113,7 +114,7 @@ const QuestionEditDialog = ({
         if (error) throw error;
 
         queryClient.invalidateQueries({
-          queryKey: QUIZ_QUESTION_MULTIPLE_CHOICE(quizId),
+          queryKey: QUIZ_QUESTION_MULTIPLE_CHOICE(itemId),
         });
       } else {
         const { error } = await supabase
@@ -127,12 +128,12 @@ const QuestionEditDialog = ({
         if (error) throw error;
 
         queryClient.invalidateQueries({
-          queryKey: QUIZ_QUESTION_ESSAY(quizId),
+          queryKey: QUIZ_QUESTION_ESSAY(itemId),
         });
       }
 
       queryClient.invalidateQueries({
-        queryKey: QUIZ_QUESTION_COUNT(quizId),
+        queryKey: QUIZ_QUESTION_COUNT(itemId),
       });
 
       toast.success("Question updated successfully");

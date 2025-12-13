@@ -1,4 +1,7 @@
+import { useParams } from "next/navigation";
+
 import { CardDescription, CardTitle } from "@/components/ui/card";
+import { useQuizDetails } from "@/lib/hooks/api/useQuiz";
 
 import Add from "../Controls/Add";
 
@@ -15,6 +18,10 @@ const QuestionListCardHeader = ({
   essayCount,
   isLoading,
 }: Props) => {
+  const { itemId } = useParams<{ itemId: string }>();
+
+  const { data } = useQuizDetails(itemId);
+
   return (
     <div className="flex items-center justify-between">
       <div>
@@ -27,7 +34,7 @@ const QuestionListCardHeader = ({
           <span>•</span>
           <span>Essay: {isLoading ? "..." : essayCount}</span>
         </div>
-        <Add />
+        {data?.status === "draft" && <Add />}
       </div>
     </div>
   );

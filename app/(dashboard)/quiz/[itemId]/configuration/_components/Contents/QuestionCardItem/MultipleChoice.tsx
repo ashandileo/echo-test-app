@@ -1,28 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { CheckCircle2 } from "lucide-react";
 
-import { useParams } from "next/navigation";
-
-import { useQueryClient } from "@tanstack/react-query";
-import { CheckCircle2, Pencil, Trash2 } from "lucide-react";
-
-import { SharedDelete } from "@/components/dialogs";
-import QuestionEditDialog from "@/components/dialogs/quiz/QuestionEdit";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  QUIZ_QUESTION_COUNT,
-  QUIZ_QUESTION_MULTIPLE_CHOICE,
-} from "@/lib/queryKeys/quiz";
-import { createClient } from "@/lib/supabase/client";
 import { type MultipleChoiceOption } from "@/lib/utils/jsonb";
 import { Database } from "@/types/supabase";
+
+import ItemMoreMultipleChoice from "../../Controls/ItemMoreMultipleChoice";
 
 type MultipleChoiceQuestion =
   Database["public"]["Tables"]["quiz_question_multiple_choice"]["Row"];
 
-interface MultipleChoiceQuestionWithParsedOptions extends Omit<
+export interface MultipleChoiceQuestionWithParsedOptions extends Omit<
   MultipleChoiceQuestion,
   "options"
 > {
@@ -35,36 +24,8 @@ interface Props {
 }
 
 const MultipleChoice = ({ question, questionNumber }: Props) => {
-  const { itemId } = useParams<{ itemId: string }>();
-  const queryClient = useQueryClient();
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-
   const options = Array.isArray(question.options) ? question.options : [];
   const correctIndex = parseInt(question.correct_answer, 10);
-
-  const handleDelete = async () => {
-    try {
-      const supabase = createClient();
-
-      const { error } = await supabase
-        .from("quiz_question_multiple_choice")
-        .delete()
-        .eq("id", question.id);
-
-      if (error) throw error;
-
-      // Invalidate query cache
-      queryClient.invalidateQueries({
-        queryKey: QUIZ_QUESTION_MULTIPLE_CHOICE(itemId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: QUIZ_QUESTION_COUNT(itemId),
-      });
-    } catch (error) {
-      console.error("Failed to delete question:", error);
-    }
-  };
 
   return (
     <Card className="border">
@@ -115,43 +76,12 @@ const MultipleChoice = ({ question, questionNumber }: Props) => {
               </p>
             )}
           </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8"
-              onClick={() => setIsEditDialogOpen(true)}
-            >
-              <Pencil className="size-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setIsDeleteDialogOpen(true)}
-              className="shrink-0 text-red-500 hover:bg-red-100 hover:text-red-600"
-            >
-              <Trash2 className="size-4" />
-            </Button>
-          </div>
+          <ItemMoreMultipleChoice
+            question={question}
+            questionNumber={questionNumber}
+          />
         </div>
       </CardContent>
-
-      {/* Edit Dialog */}
-      <QuestionEditDialog
-        open={isEditDialogOpen}
-        onOpenChange={setIsEditDialogOpen}
-        question={question}
-        questionType="multiple_choice"
-        quizId={itemId}
-      />
-
-      {/* Delete Dialog */}
-      <SharedDelete
-        open={isDeleteDialogOpen}
-        onOpenChange={setIsDeleteDialogOpen}
-        onConfirm={handleDelete}
-        itemName={`Question ${questionNumber}`}
-      />
     </Card>
   );
 };

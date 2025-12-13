@@ -1,21 +1,12 @@
 "use client";
 
-import { useState } from "react";
-
-import { useParams } from "next/navigation";
-
-import { useQueryClient } from "@tanstack/react-query";
-import { Pencil, Trash2 } from "lucide-react";
-
-import { SharedDelete } from "@/components/dialogs";
-import QuestionEditDialog from "@/components/dialogs/quiz/QuestionEdit";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { QUIZ_QUESTION_COUNT, QUIZ_QUESTION_ESSAY } from "@/lib/queryKeys/quiz";
-import { createClient } from "@/lib/supabase/client";
 import { Database } from "@/types/supabase";
 
-type EssayQuestion = Database["public"]["Tables"]["quiz_question_essay"]["Row"];
+import ItemMoreEssay from "../../Controls/ItemMoreEssay";
+
+export type EssayQuestion =
+  Database["public"]["Tables"]["quiz_question_essay"]["Row"];
 
 interface Props {
   question: EssayQuestion;
@@ -23,34 +14,6 @@ interface Props {
 }
 
 const Essay = ({ question, questionNumber }: Props) => {
-  const { itemId } = useParams<{ itemId: string }>();
-  const queryClient = useQueryClient();
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-
-  const handleDelete = async () => {
-    try {
-      const supabase = createClient();
-
-      const { error } = await supabase
-        .from("quiz_question_essay")
-        .delete()
-        .eq("id", question.id);
-
-      if (error) throw error;
-
-      // Invalidate query cache
-      queryClient.invalidateQueries({
-        queryKey: QUIZ_QUESTION_ESSAY(itemId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: QUIZ_QUESTION_COUNT(itemId),
-      });
-    } catch (error) {
-      console.error("Failed to delete question:", error);
-    }
-  };
-
   return (
     <Card className="border">
       <CardContent className="p-4">
@@ -88,43 +51,9 @@ const Essay = ({ question, questionNumber }: Props) => {
               </div>
             )}
           </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8"
-              onClick={() => setIsEditDialogOpen(true)}
-            >
-              <Pencil className="size-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setIsDeleteDialogOpen(true)}
-              className="shrink-0 text-red-500 hover:bg-red-100 hover:text-red-600"
-            >
-              <Trash2 className="size-4" />
-            </Button>
-          </div>
+          <ItemMoreEssay question={question} questionNumber={questionNumber} />
         </div>
       </CardContent>
-
-      {/* Edit Dialog */}
-      <QuestionEditDialog
-        open={isEditDialogOpen}
-        onOpenChange={setIsEditDialogOpen}
-        question={question}
-        questionType="essay"
-        quizId={itemId}
-      />
-
-      {/* Delete Dialog */}
-      <SharedDelete
-        open={isDeleteDialogOpen}
-        onOpenChange={setIsDeleteDialogOpen}
-        onConfirm={handleDelete}
-        itemName={`Question ${questionNumber}`}
-      />
     </Card>
   );
 };
