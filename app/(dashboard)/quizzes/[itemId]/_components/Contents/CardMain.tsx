@@ -1,7 +1,15 @@
 'use client";';
 import { useParams, useRouter } from "next/navigation";
 
-import { Award, BookOpen, Clock, FileText, GraduationCap } from "lucide-react";
+import {
+  Award,
+  BookOpen,
+  CheckCircle2,
+  Clock,
+  FileText,
+  GraduationCap,
+  PlayCircle,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -15,6 +23,8 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { useQuizDetails } from "@/lib/hooks/api/useQuiz";
 import { useQuizQuestionCount } from "@/lib/hooks/api/useQuizQuestion";
+import { useQuizSubmissionStatus } from "@/lib/hooks/api/useQuizSubmissionStatus";
+import { useUser } from "@/lib/hooks/api/useUser";
 
 const CardMain = () => {
   const { itemId } = useParams<{ itemId: string }>();
@@ -25,7 +35,19 @@ const CardMain = () => {
   const { data: questionsData, isLoading: isLoadingQuizCount } =
     useQuizQuestionCount(itemId);
 
+  // Get current user and submission status
+  const { data: user } = useUser();
+  const { data: submissionStatus } = useQuizSubmissionStatus(
+    user?.id ?? "",
+    itemId
+  );
+
   const isLoading = isLoadingQuiz || isLoadingQuizCount;
+
+  // Determine quiz status
+  const isSubmitted = submissionStatus?.status === "submitted";
+  const isCompleted = submissionStatus?.status === "completed";
+  const isInProgress = submissionStatus?.status === "in_progress";
 
   const handleStartQuiz = () => {
     router.push(`/take-quiz/${itemId}`);
@@ -117,28 +139,88 @@ const CardMain = () => {
         </div>
       </CardContent>
       <CardFooter className="border-t pt-6">
-        <div className="w-full flex gap-3">
-          <Button
-            className="flex-1"
-            size="lg"
-            onClick={handleStartQuiz}
-            disabled={!questionsData?.total || questionsData.total === 0}
-          >
-            {questionsData?.total === 0
-              ? "No Questions Available"
-              : "Start Quiz"}
-          </Button>
-          {/* FIXME: Fix this with table submission status later */}
-          {/* {hasSubmissions && (
+        <div className="w-full flex flex-col gap-3">
+          {isCompleted ? (
+            <>
+              <Button variant="outline" className="w-full" size="lg" disabled>
+                <CheckCircle2 className="mr-2 h-4 w-4" />
+                Completed
+              </Button>
+              {submissionStatus?.completed_at && (
+                <p className="text-xs text-center text-muted-foreground">
+                  Completed on{" "}
+                  {new Date(submissionStatus.completed_at).toLocaleDateString(
+                    "en-US",
+                    {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric",
+                    }
+                  )}{" "}
+                  · Score: {submissionStatus.percentage?.toFixed(0)}%
+                </p>
+              )}
+            </>
+          ) : isSubmitted ? (
+            <>
+              <Button variant="outline" className="w-full" size="lg" disabled>
+                <CheckCircle2 className="mr-2 h-4 w-4" />
+                Submitted
+              </Button>
+              {submissionStatus?.submitted_at && (
+                <p className="text-xs text-center text-muted-foreground">
+                  Submitted on{" "}
+                  {new Date(submissionStatus.submitted_at).toLocaleDateString(
+                    "en-US",
+                    {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric",
+                    }
+                  )}
+                </p>
+              )}
+              <p className="text-xs text-center text-muted-foreground italic">
+                Waiting for grading to complete...
+              </p>
+            </>
+          ) : isInProgress ? (
+            <>
+              <Button
+                className="w-full"
+                size="lg"
+                onClick={handleStartQuiz}
+                disabled={!questionsData?.total || questionsData.total === 0}
+              >
+                <PlayCircle className="mr-2 h-4 w-4" />
+                Continue Quiz
+              </Button>
+              {submissionStatus?.started_at && (
+                <p className="text-xs text-center text-muted-foreground">
+                  Started on{" "}
+                  {new Date(submissionStatus.started_at).toLocaleDateString(
+                    "en-US",
+                    {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric",
+                    }
+                  )}
+                </p>
+              )}
+            </>
+          ) : (
             <Button
-              variant="outline"
-              className="flex-1"
+              className="w-full"
               size="lg"
-              onClick={handleViewResults}
+              onClick={handleStartQuiz}
+              disabled={!questionsData?.total || questionsData.total === 0}
             >
-              View Results
+              {questionsData?.total === 0
+                ? "No Questions Available"
+                : "Start Quiz"}
             </Button>
-          )} */}
+          )}
         </div>
       </CardFooter>
     </Card>
