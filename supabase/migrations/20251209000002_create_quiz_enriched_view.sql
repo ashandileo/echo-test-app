@@ -64,26 +64,18 @@ LEFT JOIN LATERAL (
   SELECT 
     TRUE AS is_completed,
     NULL::INTEGER AS score, -- TODO: Calculate actual score when scoring system is implemented
-    MAX(submitted_at) AS completed_at,
-    COUNT(DISTINCT question_id) AS total_answered_questions,
-    SUM(CASE WHEN is_correct THEN 1 ELSE 0 END) AS correct_answers
-  FROM public.quiz_submission_multiple_choice qsmc
-  WHERE qsmc.quiz_id = q.id 
-    AND qsmc.user_id = auth.uid()
-  GROUP BY qsmc.quiz_id
-  
-  UNION ALL
-  
-  SELECT 
-    TRUE AS is_completed,
-    NULL::INTEGER AS score, -- TODO: Calculate actual score when scoring system is implemented
-    MAX(submitted_at) AS completed_at,
-    COUNT(DISTINCT question_id) AS total_answered_questions,
-    0 AS correct_answers -- Essay questions don't have auto-correct
-  FROM public.quiz_submission_essay qse
-  WHERE qse.quiz_id = q.id 
-    AND qse.user_id = auth.uid()
-  GROUP BY qse.quiz_id
+    GREATEST(
+      MAX(mc.submitted_at),
+      MAX(essay.submitted_at)
+    ) AS completed_at,
+    COALESCE(COUNT(DISTINCT mc.question_id), 0) + COALESCE(COUNT(DISTINCT essay.question_id), 0) AS total_answered_questions,
+    COALESCE(SUM(CASE WHEN mc.is_correct THEN 1 ELSE 0 END), 0) AS correct_answers
+  FROM public.quiz_submission_multiple_choice mc
+  FULL OUTER JOIN public.quiz_submission_essay essay 
+    ON mc.quiz_id = essay.quiz_id 
+    AND mc.user_id = essay.user_id
+  WHERE (mc.quiz_id = q.id OR essay.quiz_id = q.id)
+    AND (mc.user_id = auth.uid() OR essay.user_id = auth.uid())
 ) user_completion ON TRUE;
 
 -- Add comments for documentation
