@@ -2,9 +2,15 @@
 
 import { useParams } from "next/navigation";
 
-import { useQuery } from "@tanstack/react-query";
-
-import { createClient } from "@/lib/supabase/client";
+import {
+  useQuizQuestionEssay,
+  useQuizQuestionMultipleChoice,
+} from "@/lib/hooks/api/useQuizQuestion";
+import {
+  useQuizSubmissionEssay,
+  useQuizSubmissionMultipleChoice,
+} from "@/lib/hooks/api/useQuizSubmission";
+import { useUser } from "@/lib/hooks/api/useUser";
 import { Database } from "@/types/supabase";
 
 import EssayResultItem, { EssayResultItemSkeleton } from "./EssayResultItem";
@@ -29,89 +35,27 @@ interface QuestionWithSubmission {
 
 const Contents = () => {
   const { itemId } = useParams<{ itemId: string }>();
-  const supabase = createClient();
 
   // Get current user
-  const { data: userData } = useQuery({
-    queryKey: ["current-user"],
-    queryFn: async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      return user;
-    },
-  });
+  const { data: userData } = useUser();
 
   const userId = userData?.id;
 
   // Fetch multiple choice questions
-  const { data: mcQuestions, isLoading: isLoadingMCQuestions } = useQuery({
-    queryKey: ["quiz-mc-questions", itemId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("quiz_question_multiple_choice")
-        .select("*")
-        .eq("quiz_id", itemId)
-        .is("deleted_at", null)
-        .order("created_at", { ascending: true });
-
-      if (error) throw error;
-      return data || [];
-    },
-  });
+  const { data: mcQuestions, isLoading: isLoadingMCQuestions } =
+    useQuizQuestionMultipleChoice(itemId);
 
   // Fetch essay questions
-  const { data: essayQuestions, isLoading: isLoadingEssayQuestions } = useQuery(
-    {
-      queryKey: ["quiz-essay-questions", itemId],
-      queryFn: async () => {
-        const { data, error } = await supabase
-          .from("quiz_question_essay")
-          .select("*")
-          .eq("quiz_id", itemId)
-          .is("deleted_at", null)
-          .order("created_at", { ascending: true });
-
-        if (error) throw error;
-        return data || [];
-      },
-    }
-  );
+  const { data: essayQuestions, isLoading: isLoadingEssayQuestions } =
+    useQuizQuestionEssay(itemId);
 
   // Fetch MC submissions
-  const { data: mcSubmissions, isLoading: isLoadingMCSubmissions } = useQuery({
-    queryKey: ["quiz-mc-submissions", itemId, userId],
-    queryFn: async () => {
-      if (!userId) return [];
-      const { data, error } = await supabase
-        .from("quiz_submission_multiple_choice")
-        .select("*")
-        .eq("quiz_id", itemId)
-        .eq("user_id", userId);
-
-      if (error) throw error;
-      return data || [];
-    },
-    enabled: !!userId,
-  });
+  const { data: mcSubmissions, isLoading: isLoadingMCSubmissions } =
+    useQuizSubmissionMultipleChoice(itemId, String(userId));
 
   // Fetch essay submissions
   const { data: essaySubmissions, isLoading: isLoadingEssaySubmissions } =
-    useQuery({
-      queryKey: ["quiz-essay-submissions", itemId, userId],
-      queryFn: async () => {
-        if (!userId) return [];
-        const { data, error } = await supabase
-          .from("quiz_submission_essay")
-          .select("*")
-          .eq("quiz_id", itemId)
-          .eq("user_id", userId);
-
-        if (error) throw error;
-        return data || [];
-      },
-      enabled: !!userId,
-    });
+    useQuizSubmissionEssay(itemId, String(userId));
 
   const isLoading =
     isLoadingMCQuestions ||

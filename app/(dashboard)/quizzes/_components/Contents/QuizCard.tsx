@@ -12,27 +12,30 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useQuizQuestionCount } from "@/lib/hooks/api/useQuizQuestion";
 import { Database } from "@/types/supabase";
 
 interface Props {
-  quiz: Database["public"]["Views"]["quiz_enriched_view"]["Row"];
+  quiz: Database["public"]["Tables"]["quiz"]["Row"] | null;
 }
 
 const QuizCard = ({ quiz }: Props) => {
   const router = useRouter();
 
+  const isCompleted = false;
+  const quizScore = 0;
+
   const {
-    title,
-    description,
-    is_completed: isCompleted,
     id: quizId,
+    name,
+    description,
     published_at: publishedAt,
-    completed_at: completedAt,
-    score,
-    total_questions: totalQuestions,
   } = quiz ?? {};
 
-  const quizScore = score ?? 0;
+  const { data: questionCountData, isLoading } = useQuizQuestionCount(
+    String(quizId)
+  );
 
   const getScoreColor = (score: number) => {
     if (score >= 90) return "text-green-600 dark:text-green-400";
@@ -56,9 +59,7 @@ const QuizCard = ({ quiz }: Props) => {
     >
       <CardHeader>
         <div className="flex items-start justify-between mb-3">
-          <CardTitle className="text-xl flex-1 leading-tight">
-            {title}
-          </CardTitle>
+          <CardTitle className="text-xl flex-1 leading-tight">{name}</CardTitle>
           {isCompleted && (
             <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400 shrink-0" />
           )}
@@ -85,7 +86,13 @@ const QuizCard = ({ quiz }: Props) => {
         <div className="space-y-3">
           <div className="flex items-center gap-2 text-sm">
             <FileText className="h-4 w-4 text-primary" />
-            <span className="font-medium">{totalQuestions} Questions</span>
+            {isLoading ? (
+              <Skeleton className="w-24 h-4" />
+            ) : (
+              <span className="font-medium">
+                {questionCountData?.total} Questions
+              </span>
+            )}
           </div>
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Award className="h-4 w-4" />
@@ -103,7 +110,8 @@ const QuizCard = ({ quiz }: Props) => {
                 <span
                   className={`text-2xl font-bold ${getScoreColor(quizScore)}`}
                 >
-                  {score}%
+                  {/* FIXME: Change with table submission status later */}
+                  {quizScore}%
                 </span>
               </div>
               <div className="w-full bg-secondary rounded-full h-2 mb-2">
@@ -139,7 +147,9 @@ const QuizCard = ({ quiz }: Props) => {
             >
               Retake Quiz
             </Button>
-            {completedAt && (
+
+            {/* FIXME: Change with table submission status later */}
+            {/* {completedAt && (
               <p className="text-xs text-center text-muted-foreground">
                 Completed:{" "}
                 {new Date(completedAt).toLocaleDateString("en-US", {
@@ -148,7 +158,7 @@ const QuizCard = ({ quiz }: Props) => {
                   year: "numeric",
                 })}
               </p>
-            )}
+            )} */}
           </>
         ) : (
           <>

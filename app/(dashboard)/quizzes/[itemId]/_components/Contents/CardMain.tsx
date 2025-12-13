@@ -1,7 +1,6 @@
 'use client";';
 import { useParams, useRouter } from "next/navigation";
 
-import { useQuery } from "@tanstack/react-query";
 import { Award, BookOpen, Clock, FileText, GraduationCap } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -14,100 +13,22 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { createClient } from "@/lib/supabase/client";
+import { useQuizDetails } from "@/lib/hooks/api/useQuiz";
+import { useQuizQuestionCount } from "@/lib/hooks/api/useQuizQuestion";
 
 const CardMain = () => {
   const { itemId } = useParams<{ itemId: string }>();
   const router = useRouter();
-  const supabase = createClient();
 
-  // Get current user
-  const { data: userData } = useQuery({
-    queryKey: ["current-user"],
-    queryFn: async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      return user;
-    },
-  });
+  const { data: quiz, isLoading: isLoadingQuiz } = useQuizDetails(itemId);
 
-  const userId = userData?.id;
-
-  const { data: quiz, isLoading: isLoadingQuiz } = useQuery({
-    queryKey: ["quiz-details", itemId],
-    queryFn: async () => {
-      const supabase = createClient();
-      const { data, error } = await supabase
-        .from("quiz")
-        .select("*")
-        .eq("id", itemId)
-        .single();
-
-      if (error) throw error;
-      return data;
-    },
-  });
-
-  const { data: questionsData, isLoading: isLoadingQuizCount } = useQuery({
-    queryKey: ["quiz-questions-count", itemId],
-    queryFn: async () => {
-      const supabase = createClient();
-
-      const [mcData, essayData] = await Promise.all([
-        supabase
-          .from("quiz_question_multiple_choice")
-          .select("id", { count: "exact" })
-          .eq("quiz_id", itemId),
-        supabase
-          .from("quiz_question_essay")
-          .select("id", { count: "exact" })
-          .eq("quiz_id", itemId),
-      ]);
-
-      return {
-        multipleChoice: mcData.count || 0,
-        essay: essayData.count || 0,
-        total: (mcData.count || 0) + (essayData.count || 0),
-      };
-    },
-  });
-
-  // Check if user has submissions
-  const { data: hasSubmissions } = useQuery({
-    queryKey: ["user-has-submissions", itemId, userId],
-    queryFn: async () => {
-      if (!userId) return false;
-      const supabase = createClient();
-
-      const [mcSubmissions, essaySubmissions] = await Promise.all([
-        supabase
-          .from("quiz_submission_multiple_choice")
-          .select("id", { count: "exact", head: true })
-          .eq("quiz_id", itemId)
-          .eq("user_id", userId),
-        supabase
-          .from("quiz_submission_essay")
-          .select("id", { count: "exact", head: true })
-          .eq("quiz_id", itemId)
-          .eq("user_id", userId),
-      ]);
-
-      return (
-        (mcSubmissions.count || 0) > 0 || (essaySubmissions.count || 0) > 0
-      );
-    },
-    enabled: !!userId,
-  });
+  const { data: questionsData, isLoading: isLoadingQuizCount } =
+    useQuizQuestionCount(itemId);
 
   const isLoading = isLoadingQuiz || isLoadingQuizCount;
 
   const handleStartQuiz = () => {
     router.push(`/take-quiz/${itemId}`);
-  };
-
-  const handleViewResults = () => {
-    router.push(`/quizzes/${itemId}/results`);
   };
 
   const estimatedTime = questionsData
@@ -207,7 +128,8 @@ const CardMain = () => {
               ? "No Questions Available"
               : "Start Quiz"}
           </Button>
-          {hasSubmissions && (
+          {/* FIXME: Fix this with table submission status later */}
+          {/* {hasSubmissions && (
             <Button
               variant="outline"
               className="flex-1"
@@ -216,7 +138,7 @@ const CardMain = () => {
             >
               View Results
             </Button>
-          )}
+          )} */}
         </div>
       </CardFooter>
     </Card>

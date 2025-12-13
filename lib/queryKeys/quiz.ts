@@ -19,3 +19,8 @@ export const QUIZ_QUESTION_ESSAY = (quizId: string) => [
   quizId,
   "questions-essay",
 ];
+
+export const QUIZ_SUBMISSION_MULTIPLE_CHOICE = (
+  quizId: string,
+  userId: string
+) => ["quiz", quizId, "submissions-multiple-choice", userId];

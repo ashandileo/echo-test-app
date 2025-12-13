@@ -2,7 +2,6 @@
 
 import { useParams } from "next/navigation";
 
-import { Button } from "@/components/ui/button";
 import { useQuizQuestionMultipleChoice } from "@/lib/hooks/api/useQuizQuestion";
 import { type MultipleChoiceOption } from "@/lib/utils/jsonb";
 import { Database } from "@/types/supabase";
@@ -22,7 +21,7 @@ export interface MultipleChoiceQuestionWithOptions extends Omit<
 const QuestionContentMultipleChoices = () => {
   const { itemId } = useParams<{ itemId: string }>();
 
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
+  const { data: allQuestions, isLoading } =
     useQuizQuestionMultipleChoice(itemId);
 
   if (isLoading) {
@@ -33,9 +32,7 @@ const QuestionContentMultipleChoices = () => {
     );
   }
 
-  const allQuestions = data?.pages.flatMap((page) => page.questions) || [];
-
-  if (allQuestions.length === 0) {
+  if (allQuestions?.length === 0) {
     return (
       <div className="flex items-center justify-center py-8">
         <p className="text-muted-foreground">
@@ -47,25 +44,13 @@ const QuestionContentMultipleChoices = () => {
 
   return (
     <div className="space-y-4">
-      {allQuestions.map((question, index) => (
+      {allQuestions?.map((question, index) => (
         <MultipleChoice
           key={question.id}
           question={question}
           questionNumber={index + 1}
         />
       ))}
-
-      {hasNextPage && (
-        <div className="flex justify-center pt-4">
-          <Button
-            variant="outline"
-            onClick={() => fetchNextPage()}
-            disabled={isFetchingNextPage}
-          >
-            {isFetchingNextPage ? "Loading..." : "Load More"}
-          </Button>
-        </div>
-      )}
     </div>
   );
 };

@@ -11,12 +11,12 @@ import { createClient } from "@/lib/supabase/client";
 const SUPABASE_QUIZ_TABLE = "quiz";
 
 // Fetch list of quizzes with question counts
-export const useQuizzes = () => {
+export const useQuizzes = (filters?: { status?: "draft" | "published" }) => {
   return useQuery({
     queryKey: QUIZZES,
     queryFn: async () => {
       const supabase = createClient();
-      const { data, error } = await supabase
+      const query = supabase
         .from(SUPABASE_QUIZ_TABLE)
         .select(
           `
@@ -28,6 +28,13 @@ export const useQuizzes = () => {
         .is("deleted_at", null) // Only fetch non-deleted quizzes
         .is("quiz_question_multiple_choice.deleted_at", null) // Only count non-deleted multiple choice questions
         .is("quiz_question_essay.deleted_at", null); // Only count non-deleted essay questions
+
+      // Filter query by status
+      if (filters?.status) {
+        query.eq("status", filters.status);
+      }
+
+      const { data, error } = await query;
 
       if (error) throw error;
 

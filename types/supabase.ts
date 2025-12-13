@@ -17,10 +17,10 @@ export type Database = {
     Functions: {
       graphql: {
         Args: {
-          query?: string
-          extensions?: Json
           variables?: Json
           operationName?: string
+          query?: string
+          extensions?: Json
         }
         Returns: Json
       }
@@ -120,6 +120,7 @@ export type Database = {
           description: string | null
           id: string
           name: string
+          published_at: string | null
           source_document_path: string | null
           status: string
           updated_at: string | null
@@ -131,6 +132,7 @@ export type Database = {
           description?: string | null
           id?: string
           name: string
+          published_at?: string | null
           source_document_path?: string | null
           status?: string
           updated_at?: string | null
@@ -142,6 +144,7 @@ export type Database = {
           description?: string | null
           id?: string
           name?: string
+          published_at?: string | null
           source_document_path?: string | null
           status?: string
           updated_at?: string | null
@@ -193,13 +196,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "quiz_enriched_view"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "quiz_question_essay_quiz_id_fkey"
-            columns: ["quiz_id"]
-            isOneToOne: false
-            referencedRelation: "quiz_results_view"
-            referencedColumns: ["quiz_id"]
           },
         ]
       }
@@ -254,13 +250,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "quiz_enriched_view"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "quiz_question_multiple_choice_quiz_id_fkey"
-            columns: ["quiz_id"]
-            isOneToOne: false
-            referencedRelation: "quiz_results_view"
-            referencedColumns: ["quiz_id"]
           },
         ]
       }
@@ -326,13 +315,6 @@ export type Database = {
             referencedRelation: "quiz_enriched_view"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "quiz_submission_essay_quiz_id_fkey"
-            columns: ["quiz_id"]
-            isOneToOne: false
-            referencedRelation: "quiz_results_view"
-            referencedColumns: ["quiz_id"]
-          },
         ]
       }
       quiz_submission_multiple_choice: {
@@ -388,13 +370,6 @@ export type Database = {
             referencedRelation: "quiz_enriched_view"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "quiz_submission_multiple_choice_quiz_id_fkey"
-            columns: ["quiz_id"]
-            isOneToOne: false
-            referencedRelation: "quiz_results_view"
-            referencedColumns: ["quiz_id"]
-          },
         ]
       }
     }
@@ -419,36 +394,6 @@ export type Database = {
           total_points: number | null
           total_questions: number | null
           updated_at: string | null
-        }
-        Relationships: []
-      }
-      quiz_results_view: {
-        Row: {
-          all_essays_graded: boolean | null
-          essay_answered_count: number | null
-          essay_graded_count: number | null
-          essay_last_submitted_at: string | null
-          essay_pending_count: number | null
-          essay_score: number | null
-          last_submitted_at: string | null
-          mc_answered_count: number | null
-          mc_correct_count: number | null
-          mc_last_submitted_at: string | null
-          mc_score: number | null
-          percentage_score: number | null
-          quiz_description: string | null
-          quiz_id: string | null
-          quiz_name: string | null
-          submission_status: string | null
-          total_answered: number | null
-          total_essay_points: number | null
-          total_essay_questions: number | null
-          total_mc_points: number | null
-          total_mc_questions: number | null
-          total_possible_points: number | null
-          total_questions: number | null
-          total_score: number | null
-          user_id: string | null
         }
         Relationships: []
       }
@@ -517,14 +462,14 @@ export type Database = {
           match_user_id: string
         }
         Returns: {
-          total_chunks: number
-          chunk_index: number
           chunk_text: string
           file_path: string
           similarity: number
           file_name: string
           user_id: string
           id: string
+          total_chunks: number
+          chunk_index: number
         }[]
       }
       sparsevec_out: {

@@ -1,4 +1,4 @@
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 
 import {
   QUIZ_QUESTION_COUNT,
@@ -33,6 +33,7 @@ export const useQuizQuestionCount = (itemId: string) => {
       return {
         multipleChoice: countMultipleChoice ?? 0,
         essay: countEssay ?? 0,
+        total: (countMultipleChoice ?? 0) + (countEssay ?? 0),
       };
     },
   });
@@ -40,70 +41,50 @@ export const useQuizQuestionCount = (itemId: string) => {
 
 // Fetch multiple choice questions for a specific quiz with infinite scrolling
 export const useQuizQuestionMultipleChoice = (itemId: string) => {
-  return useInfiniteQuery({
+  return useQuery({
     queryKey: QUIZ_QUESTION_MULTIPLE_CHOICE(itemId),
-    queryFn: async ({ pageParam = 0 }) => {
+    queryFn: async () => {
       const supabase = createClient();
-
-      const PAGE_SIZE = 10;
-
-      const from = pageParam * PAGE_SIZE;
-      const to = from + PAGE_SIZE - 1;
 
       const { data, error } = await supabase
         .from("quiz_question_multiple_choice")
         .select("*")
         .eq("quiz_id", itemId)
-        .order("created_at", { ascending: true })
-        .range(from, to);
+        .is("deleted_at", null)
+        .order("created_at", { ascending: true });
 
       if (error) throw error;
 
-      // Parse options menggunakan Zod validator
+      // Parse options from JSONB to array
       const parsedQuestions = (data || []).map((question) => ({
         ...question,
         options: parseMultipleChoiceOptions(question.options),
       }));
 
-      return {
-        questions: parsedQuestions,
-        nextPage: data && data.length === PAGE_SIZE ? pageParam + 1 : undefined,
-      };
+      return parsedQuestions;
     },
-    getNextPageParam: (lastPage) => lastPage.nextPage,
-    initialPageParam: 0,
     enabled: !!itemId,
   });
 };
 
 // Fetch essay questions for a specific quiz with infinite scrolling
 export const useQuizQuestionEssay = (itemId: string) => {
-  return useInfiniteQuery({
+  return useQuery({
     queryKey: QUIZ_QUESTION_ESSAY(itemId),
-    queryFn: async ({ pageParam = 0 }) => {
+    queryFn: async () => {
       const supabase = createClient();
-
-      const PAGE_SIZE = 10;
-
-      const from = pageParam * PAGE_SIZE;
-      const to = from + PAGE_SIZE - 1;
 
       const { data, error } = await supabase
         .from("quiz_question_essay")
         .select("*")
         .eq("quiz_id", itemId)
-        .order("created_at", { ascending: true })
-        .range(from, to);
+        .is("deleted_at", null)
+        .order("created_at", { ascending: true });
 
       if (error) throw error;
 
-      return {
-        questions: data || [],
-        nextPage: data && data.length === PAGE_SIZE ? pageParam + 1 : undefined,
-      };
+      return data;
     },
-    getNextPageParam: (lastPage) => lastPage.nextPage,
-    initialPageParam: 0,
     enabled: !!itemId,
   });
 };
