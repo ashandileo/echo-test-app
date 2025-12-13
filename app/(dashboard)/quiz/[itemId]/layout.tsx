@@ -20,6 +20,10 @@ const navigations = [
     id: "configuration",
     label: "Configuration",
   },
+  {
+    id: "submissions",
+    label: "Submissions",
+  },
 ];
 
 export default function QuizDetailLayout({

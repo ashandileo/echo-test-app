@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS public.quiz_submission_multiple_choice (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   quiz_id UUID NOT NULL REFERENCES public.quiz(id) ON DELETE CASCADE,
   question_id UUID NOT NULL REFERENCES public.quiz_question_multiple_choice(id) ON DELETE CASCADE,
-  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
   selected_answer TEXT NOT NULL, -- The index of the selected option as string: "0", "1", "2", or "3"
   is_correct BOOLEAN NOT NULL, -- Whether the answer is correct
   points_earned INTEGER NOT NULL DEFAULT 0, -- Points earned for this answer

@@ -3,7 +3,7 @@
 CREATE TABLE IF NOT EXISTS public.quiz_submission_status (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   quiz_id UUID NOT NULL REFERENCES public.quiz(id) ON DELETE CASCADE,
-  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
   
   -- Submission status: 'not_started', 'in_progress', 'submitted', 'completed'
   status TEXT NOT NULL DEFAULT 'not_started' CHECK (

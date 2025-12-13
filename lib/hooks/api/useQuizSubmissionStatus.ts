@@ -31,6 +31,65 @@ export const useQuizSubmissionStatus = (userId: string, quizId: string) => {
   });
 };
 
+// Fetch all submission statuses for a quiz (for teachers/admins)
+export const useQuizSubmissions = (quizId: string) => {
+  return useQuery({
+    queryKey: ["quiz", quizId, "submissions"],
+    queryFn: async () => {
+      const supabase = createClient();
+
+      // Fetch submission statuses with user profile data using explicit join
+      const { data: submissions, error: submissionsError } = await supabase
+        .from("quiz_submission_status")
+        .select(
+          `
+          *,
+          profiles!quiz_submission_status_user_id_fkey (
+            id,
+            email,
+            full_name,
+            avatar_url
+          )
+        `
+        )
+        .eq("quiz_id", quizId)
+        .order("created_at", { ascending: false });
+
+      if (submissionsError) {
+        throw submissionsError;
+      }
+
+      if (!submissions || submissions.length === 0) {
+        return [];
+      }
+
+      // Map to expected format
+      const result = submissions.map((submission) => ({
+        ...submission,
+        users: submission.profiles
+          ? {
+              id: submission.profiles.id,
+              email: submission.profiles.email || "",
+              raw_user_meta_data: {
+                full_name: submission.profiles.full_name,
+                avatar_url: submission.profiles.avatar_url,
+              },
+            }
+          : null,
+      })) as (QuizSubmissionStatus & {
+        users: {
+          id: string;
+          email: string;
+          raw_user_meta_data: Record<string, unknown>;
+        } | null;
+      })[];
+
+      return result;
+    },
+    enabled: !!quizId,
+  });
+};
+
 // Create or update submission status
 export const useUpsertQuizSubmissionStatus = () => {
   const queryClient = useQueryClient();

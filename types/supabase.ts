@@ -17,10 +17,10 @@ export type Database = {
     Functions: {
       graphql: {
         Args: {
-          operationName?: string
           query?: string
-          variables?: Json
+          operationName?: string
           extensions?: Json
+          variables?: Json
         }
         Returns: Json
       }
@@ -80,7 +80,15 @@ export type Database = {
           updated_at?: string | null
           user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "document_learnings_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -149,7 +157,15 @@ export type Database = {
           status?: string
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "quiz_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       quiz_question_essay: {
         Row: {
@@ -295,6 +311,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "quiz_submission_essay_graded_by_fkey"
+            columns: ["graded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "quiz_submission_essay_question_id_fkey"
             columns: ["question_id"]
             isOneToOne: false
@@ -313,6 +336,13 @@ export type Database = {
             columns: ["quiz_id"]
             isOneToOne: false
             referencedRelation: "quiz_enriched_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quiz_submission_essay_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -368,6 +398,13 @@ export type Database = {
             columns: ["quiz_id"]
             isOneToOne: false
             referencedRelation: "quiz_enriched_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quiz_submission_multiple_choice_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -442,6 +479,13 @@ export type Database = {
             referencedRelation: "quiz_enriched_view"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "quiz_submission_status_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
     }
@@ -467,7 +511,22 @@ export type Database = {
           total_questions: number | null
           updated_at: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "quiz_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quiz_created_by_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Functions: {
@@ -507,6 +566,10 @@ export type Database = {
         Args: { "": unknown }
         Returns: unknown
       }
+      is_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
       ivfflat_bit_support: {
         Args: { "": unknown }
         Returns: unknown
@@ -529,19 +592,19 @@ export type Database = {
       }
       search_document_chunks: {
         Args: {
-          query_embedding: string
-          match_user_id: string
           match_count?: number
+          match_user_id: string
+          query_embedding: string
         }
         Returns: {
-          id: string
-          user_id: string
-          file_name: string
-          similarity: number
+          chunk_text: string
           file_path: string
+          similarity: number
+          file_name: string
+          user_id: string
+          id: string
           total_chunks: number
           chunk_index: number
-          chunk_text: string
         }[]
       }
       sparsevec_out: {

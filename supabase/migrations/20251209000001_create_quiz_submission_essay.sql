@@ -3,11 +3,11 @@ CREATE TABLE IF NOT EXISTS public.quiz_submission_essay (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   quiz_id UUID NOT NULL REFERENCES public.quiz(id) ON DELETE CASCADE,
   question_id UUID NOT NULL REFERENCES public.quiz_question_essay(id) ON DELETE CASCADE,
-  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
   answer_text TEXT NOT NULL, -- The essay answer submitted by the user
   points_earned INTEGER DEFAULT NULL, -- Points earned (NULL until graded)
   feedback TEXT, -- Optional feedback from the grader
-  graded_by UUID REFERENCES auth.users(id) ON DELETE SET NULL, -- Who graded this submission
+  graded_by UUID REFERENCES public.profiles(id) ON DELETE SET NULL, -- Who graded this submission
   graded_at TIMESTAMP WITH TIME ZONE, -- When the submission was graded
   submitted_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()

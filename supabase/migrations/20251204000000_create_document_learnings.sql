@@ -9,7 +9,7 @@ ON CONFLICT (id) DO NOTHING;
 -- Create document_learnings table
 CREATE TABLE IF NOT EXISTS public.document_learnings (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE,
   file_name TEXT NOT NULL,
   file_path TEXT NOT NULL,
   file_size BIGINT NOT NULL,
