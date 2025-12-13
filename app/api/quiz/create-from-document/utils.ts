@@ -102,14 +102,14 @@ Do NOT use sentences, examples, or phrases from the material.
 English level: A2–B1 (SMA level, ages 15–18, SNMPTN style)
 - Use conversational, natural English
 - Create realistic dialogue or situations
-- Test practical grammar usage (tenses, verb forms, etc.)
+- Test practical understanding of concepts from the material
 - Questions should sound like real English conversations
 
 ⭐ QUESTION REQUIREMENTS
 - Question: 1–3 sentences with clear context (in English, like SNMPTN style)
-- Options: 4–5 options with varied lengths - can be 1–4 words each (in English)
+- Options: 4 options with varied lengths - can be 1–4 words each (in English)
 - Explanation: Detailed explanation in Bahasa Indonesia that:
-  * Explains the grammar/concept being tested
+  * Explains the key word/concept being tested
   * Explains why the correct answer is right
   * Shows the complete structure or pattern
   * Uses clear, educational language
@@ -130,12 +130,11 @@ Do NOT:
 ⭐ WHAT YOU MUST DO
 ✅ Create NEW original questions in SNMPTN/standardized test style
 ✅ Use conversational English with clear context (like examples: "Is one living with...", "You look so unhappy...")
-✅ Test grammar concepts: tenses, verb forms, sentence structure
-✅ Provide 4–5 options that test specific grammar points
+✅ Test practical understanding of concepts from the material
+✅ Provide 4 options that test specific grammar points
 ✅ Write DETAILED explanations in BAHASA INDONESIA following this structure:
-   - Start with "Pembahasan:"
    - Explain the key word/concept being tested
-   - Explain the grammar rule (e.g., "merupakan keterangan waktu Perfect Tense")
+   - Explain the concept being tested
    - Show the formula/structure if applicable
    - Explain why the correct answer fits
    - End with "Jawaban: [letter]"
@@ -149,8 +148,8 @@ Return ONLY this JSON structure with NO additional text:
   "questions": [
     {
       "question_text": "string (conversational English with context)",
-      "options": ["string", "string", "string", "string", "string"],
-      "correct_answer": "0" | "1" | "2" | "3" | "4",
+      "options": ["string", "string", "string", "string"],
+      "correct_answer": "0" | "1" | "2" | "3",
       "explanation": "string (detailed Bahasa Indonesia explanation following format: 'Pembahasan: [explain concept] ... Jawaban: X')",
       "points": 1
     }
@@ -159,16 +158,16 @@ Return ONLY this JSON structure with NO additional text:
 
 MANDATORY:
 - Generate EXACTLY ${count} questions
-- Each question MUST have exactly 4–5 options (preferably 5, like SNMPTN format with options A-E)
-- correct_answer MUST be "0", "1", "2", "3", or "4" (string format)
+- Each question MUST have exactly 4 options (preferably 4, like SNMPTN format with options A-D)
+- correct_answer MUST be "0", "1", "2", or "3" (string format)
 - Questions and options MUST be in English
 - Explanations MUST be in Bahasa Indonesia following this format:
-  "Pembahasan:\n[Explain key concept and grammar rule in detail]\nJawaban: [letter]"
+  "[Explain key concept and grammar rule in detail]\nJawaban: [letter]"
 - Make explanations educational like the examples provided
 - Return ONLY the JSON object
 
 EXAMPLE EXPLANATION FORMAT:
-"Pembahasan:\nKata kunci pada soal ini adalah 'for years' yang merupakan keterangan waktu Perfect Tense atau Continuous. Sementara kalimat 'Is one living with your grandmother in that house?' (Apakah seseorang sekarang ini tinggal bersama nenekmu di rumah itu) menunjukkan kejadian sekarang sehingga untuk melengkapi kalimat tersebut menggunakan Present Perfect Tense (have/has + V₃ atau have/has been). Jadi jawabannya pasti 'has never had'.\nJawaban: C"`,
+"Kata kunci pada soal ini adalah 'for years' yang merupakan keterangan waktu Perfect Tense atau Continuous. Sementara kalimat 'Is one living with your grandmother in that house?' (Apakah seseorang sekarang ini tinggal bersama nenekmu di rumah itu) menunjukkan kejadian sekarang sehingga untuk melengkapi kalimat tersebut menggunakan Present Perfect Tense (have/has + V₃ atau have/has been). Jadi jawabannya pasti 'has never had'.\nJawaban: C"`,
         },
         {
           role: "user",
@@ -196,10 +195,6 @@ ${context}`,
       points: q.points ?? 1, // Ensure points is always set
     }));
 
-    console.log(
-      "Generated MCQ questions:",
-      JSON.stringify(validatedQuestions, null, 2)
-    );
     return validatedQuestions;
   } catch (error) {
     console.error("Error generating multiple choice questions:", error);

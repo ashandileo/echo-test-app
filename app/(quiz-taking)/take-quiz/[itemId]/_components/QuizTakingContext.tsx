@@ -12,7 +12,13 @@ import {
 import { useParams, useRouter } from "next/navigation";
 
 import { useQuery } from "@tanstack/react-query";
+import { toast } from "sonner";
 
+import {
+  useQuizSubmissionStatus,
+  useStartQuiz,
+  useSubmitQuiz,
+} from "@/lib/hooks/api/useQuizSubmissionStatus";
 import { createClient } from "@/lib/supabase/client";
 import { Database } from "@/types/supabase";
 
@@ -60,6 +66,10 @@ interface QuizTakingContextValue {
   answeredCount: number;
   totalQuestions: number;
 
+  // Submission dialog state
+  isSubmitDialogOpen: boolean;
+  setIsSubmitDialogOpen: (open: boolean) => void;
+
   // Actions
   setCurrentQuestionIndex: (index: number) => void;
   handleAnswerSelect: (questionId: string, answer: string) => void;
@@ -67,6 +77,7 @@ interface QuizTakingContextValue {
   handlePrevious: () => void;
   handleTabSwitch: (tab: "multiple_choice" | "essay") => void;
   handleSubmitQuiz: () => void;
+  handleConfirmSubmit: () => Promise<void>;
   handleExit: () => void;
 }
 
@@ -97,6 +108,17 @@ export const QuizTakingProvider = ({ children }: QuizTakingProviderProps) => {
   );
   const [userAnswers, setUserAnswers] = useState<Record<string, string>>({});
   const [userId, setUserId] = useState<string | null>(null);
+  const [isSubmitDialogOpen, setIsSubmitDialogOpen] = useState(false);
+
+  // React Query mutations
+  const startQuizMutation = useStartQuiz();
+  const submitQuizMutation = useSubmitQuiz();
+
+  // Fetch submission status
+  const { data: submissionStatus } = useQuizSubmissionStatus(
+    userId || "",
+    itemId
+  );
 
   // Fetch user ID on mount
   useEffect(() => {
@@ -233,6 +255,35 @@ export const QuizTakingProvider = ({ children }: QuizTakingProviderProps) => {
   const answeredCount = Object.keys(answers).length;
   const totalQuestions =
     (mcQuestions?.length || 0) + (essayQuestions?.length || 0);
+
+  // Initialize quiz submission status when user and quiz are loaded
+  useEffect(() => {
+    const initializeQuizStatus = async () => {
+      if (!userId || !itemId || !quiz) return;
+
+      // If no submission status exists, create one with status 'in_progress'
+      if (!submissionStatus) {
+        // Calculate max possible score
+        const mcCount = mcQuestions?.length || 0;
+        const essayCount = essayQuestions?.length || 0;
+        // Assuming 1 point per question (adjust based on your scoring logic)
+        const maxScore = mcCount + essayCount;
+
+        try {
+          await startQuizMutation.mutateAsync({
+            userId,
+            quizId: itemId,
+            maxPossibleScore: maxScore,
+          });
+        } catch (error) {
+          console.error("Error initializing quiz status:", error);
+        }
+      }
+    };
+
+    initializeQuizStatus();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId, itemId, quiz, mcQuestions, essayQuestions]);
 
   // Save answer to database
   const saveAnswer = async (questionId: string, answer: string) => {
@@ -372,8 +423,39 @@ export const QuizTakingProvider = ({ children }: QuizTakingProviderProps) => {
   };
 
   const handleSubmitQuiz = () => {
-    // TODO: Implement quiz submission
-    console.log("Submitting quiz with answers:", answers);
+    // Open confirmation dialog
+    setIsSubmitDialogOpen(true);
+  };
+
+  const handleConfirmSubmit = async () => {
+    if (!userId || !itemId) {
+      toast.error("Cannot submit quiz: User not authenticated");
+      return;
+    }
+
+    try {
+      // Save current answer if any
+      if (currentQuestion && answers[currentQuestion.id]) {
+        await saveAnswer(currentQuestion.id, answers[currentQuestion.id]);
+      }
+
+      // Submit the quiz (update status to 'submitted')
+      await submitQuizMutation.mutateAsync({
+        userId,
+        quizId: itemId,
+      });
+
+      toast.success("Quiz submitted successfully!");
+
+      // Close dialog
+      setIsSubmitDialogOpen(false);
+
+      // Redirect to quiz results or dashboard
+      router.push(`/quizzes/${itemId}`);
+    } catch (error) {
+      console.error("Error submitting quiz:", error);
+      toast.error("Failed to submit quiz. Please try again.");
+    }
   };
 
   const handleExit = () => {
@@ -398,6 +480,10 @@ export const QuizTakingProvider = ({ children }: QuizTakingProviderProps) => {
     answeredCount,
     totalQuestions,
 
+    // Submission dialog state
+    isSubmitDialogOpen,
+    setIsSubmitDialogOpen,
+
     // Actions
     setCurrentQuestionIndex,
     handleAnswerSelect,
@@ -405,6 +491,7 @@ export const QuizTakingProvider = ({ children }: QuizTakingProviderProps) => {
     handlePrevious,
     handleTabSwitch,
     handleSubmitQuiz,
+    handleConfirmSubmit,
     handleExit,
   };
 

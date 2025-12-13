@@ -1,5 +1,7 @@
 import OpenAI from "openai";
+
 import { createClient } from "@/lib/supabase/server";
+
 import { ERROR_MESSAGES, MAX_CONTEXT_LENGTH } from "./consts";
 
 const openai = new OpenAI({

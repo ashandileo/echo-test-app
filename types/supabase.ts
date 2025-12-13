@@ -17,9 +17,9 @@ export type Database = {
     Functions: {
       graphql: {
         Args: {
-          variables?: Json
           operationName?: string
           query?: string
+          variables?: Json
           extensions?: Json
         }
         Returns: Json
@@ -372,6 +372,78 @@ export type Database = {
           },
         ]
       }
+      quiz_submission_status: {
+        Row: {
+          completed_at: string | null
+          created_at: string | null
+          essay_percentage: number | null
+          essay_score: number | null
+          id: string
+          max_possible_score: number | null
+          multiple_choice_percentage: number | null
+          multiple_choice_score: number | null
+          percentage: number | null
+          quiz_id: string
+          started_at: string | null
+          status: string
+          submitted_at: string | null
+          total_score: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string | null
+          essay_percentage?: number | null
+          essay_score?: number | null
+          id?: string
+          max_possible_score?: number | null
+          multiple_choice_percentage?: number | null
+          multiple_choice_score?: number | null
+          percentage?: number | null
+          quiz_id: string
+          started_at?: string | null
+          status?: string
+          submitted_at?: string | null
+          total_score?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string | null
+          essay_percentage?: number | null
+          essay_score?: number | null
+          id?: string
+          max_possible_score?: number | null
+          multiple_choice_percentage?: number | null
+          multiple_choice_score?: number | null
+          percentage?: number | null
+          quiz_id?: string
+          started_at?: string | null
+          status?: string
+          submitted_at?: string | null
+          total_score?: number | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quiz_submission_status_quiz_id_fkey"
+            columns: ["quiz_id"]
+            isOneToOne: false
+            referencedRelation: "quiz"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quiz_submission_status_quiz_id_fkey"
+            columns: ["quiz_id"]
+            isOneToOne: false
+            referencedRelation: "quiz_enriched_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       quiz_enriched_view: {
@@ -458,18 +530,18 @@ export type Database = {
       search_document_chunks: {
         Args: {
           query_embedding: string
-          match_count?: number
           match_user_id: string
+          match_count?: number
         }
         Returns: {
-          chunk_text: string
-          file_path: string
-          similarity: number
-          file_name: string
-          user_id: string
           id: string
+          user_id: string
+          file_name: string
+          similarity: number
+          file_path: string
           total_chunks: number
           chunk_index: number
+          chunk_text: string
         }[]
       }
       sparsevec_out: {

@@ -24,3 +24,16 @@ export const QUIZ_SUBMISSION_MULTIPLE_CHOICE = (
   quizId: string,
   userId: string
 ) => ["quiz", quizId, "submissions-multiple-choice", userId];
+
+export const QUIZ_SUBMISSION_ESSAY = (quizId: string, userId: string) => [
+  "quiz",
+  quizId,
+  "submissions-essay",
+  userId,
+];
+
+export const QUIZ_SUBMISSION_STATUS = (userId: string, quizId: string) => [
+  "quiz-submission-status",
+  userId,
+  quizId,
+];

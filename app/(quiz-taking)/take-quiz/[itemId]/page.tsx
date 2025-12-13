@@ -1,5 +1,6 @@
 "use client";
 
+import { QuizSubmitConfirmDialog } from "@/components/dialogs/quiz/QuizSubmitConfirmDialog";
 import { Card, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -15,7 +16,14 @@ import {
 } from "./_components/QuizTakingContext";
 
 const QuizTakingContent = () => {
-  const { isLoading } = useQuizTaking();
+  const {
+    isLoading,
+    isSubmitDialogOpen,
+    setIsSubmitDialogOpen,
+    handleConfirmSubmit,
+    answeredCount,
+    totalQuestions,
+  } = useQuizTaking();
 
   if (isLoading) {
     return (
@@ -86,6 +94,15 @@ const QuizTakingContent = () => {
         {/* Right: Question Navigation */}
         <QuestionNavigation />
       </div>
+
+      {/* Submit Confirmation Dialog */}
+      <QuizSubmitConfirmDialog
+        open={isSubmitDialogOpen}
+        onOpenChange={setIsSubmitDialogOpen}
+        onConfirm={handleConfirmSubmit}
+        answeredCount={answeredCount}
+        totalQuestions={totalQuestions}
+      />
     </div>
   );
 };
