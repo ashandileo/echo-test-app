@@ -17,10 +17,10 @@ export type Database = {
     Functions: {
       graphql: {
         Args: {
-          operationName?: string
           query?: string
-          variables?: Json
+          operationName?: string
           extensions?: Json
+          variables?: Json
         }
         Returns: Json
       }
@@ -206,13 +206,6 @@ export type Database = {
             referencedRelation: "quiz"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "quiz_question_essay_quiz_id_fkey"
-            columns: ["quiz_id"]
-            isOneToOne: false
-            referencedRelation: "quiz_enriched_view"
-            referencedColumns: ["id"]
-          },
         ]
       }
       quiz_question_multiple_choice: {
@@ -258,13 +251,6 @@ export type Database = {
             columns: ["quiz_id"]
             isOneToOne: false
             referencedRelation: "quiz"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "quiz_question_multiple_choice_quiz_id_fkey"
-            columns: ["quiz_id"]
-            isOneToOne: false
-            referencedRelation: "quiz_enriched_view"
             referencedColumns: ["id"]
           },
         ]
@@ -332,13 +318,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "quiz_submission_essay_quiz_id_fkey"
-            columns: ["quiz_id"]
-            isOneToOne: false
-            referencedRelation: "quiz_enriched_view"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "quiz_submission_essay_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
@@ -391,13 +370,6 @@ export type Database = {
             columns: ["quiz_id"]
             isOneToOne: false
             referencedRelation: "quiz"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "quiz_submission_multiple_choice_quiz_id_fkey"
-            columns: ["quiz_id"]
-            isOneToOne: false
-            referencedRelation: "quiz_enriched_view"
             referencedColumns: ["id"]
           },
           {
@@ -473,13 +445,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "quiz_submission_status_quiz_id_fkey"
-            columns: ["quiz_id"]
-            isOneToOne: false
-            referencedRelation: "quiz_enriched_view"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "quiz_submission_status_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
@@ -490,44 +455,7 @@ export type Database = {
       }
     }
     Views: {
-      quiz_enriched_view: {
-        Row: {
-          completed_at: string | null
-          correct_answers: number | null
-          created_at: string | null
-          created_by: string | null
-          creator_id: string | null
-          description: string | null
-          id: string | null
-          is_completed: boolean | null
-          published_at: string | null
-          score: number | null
-          status: string | null
-          title: string | null
-          total_answered_questions: number | null
-          total_essay_questions: number | null
-          total_multiple_choice_questions: number | null
-          total_points: number | null
-          total_questions: number | null
-          updated_at: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "quiz_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "quiz_created_by_fkey"
-            columns: ["creator_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
+      [_ in never]: never
     }
     Functions: {
       binary_quantize: {
@@ -597,14 +525,14 @@ export type Database = {
           match_count?: number
         }
         Returns: {
+          total_chunks: number
+          chunk_index: number
+          chunk_text: string
           id: string
           user_id: string
           file_name: string
           similarity: number
           file_path: string
-          chunk_text: string
-          chunk_index: number
-          total_chunks: number
         }[]
       }
       sparsevec_out: {

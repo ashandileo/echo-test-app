@@ -187,6 +187,7 @@ const Contents = () => {
               submissionId={submission.id}
               quizId={itemId}
               userId={userId}
+              studentName={studentName}
             />
           );
         })}

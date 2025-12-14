@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { CheckCircle2, FileText, Loader2, Save } from "lucide-react";
+import { CheckCircle2, FileText, Loader2, Save, Sparkles } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -33,6 +33,7 @@ interface EssayGradingProps {
   submissionId: string;
   quizId: string;
   userId: string;
+  studentName?: string;
 }
 
 const EssayGrading = ({
@@ -48,6 +49,7 @@ const EssayGrading = ({
   submissionId,
   quizId,
   userId,
+  studentName,
 }: EssayGradingProps) => {
   const [points, setPoints] = useState<string>(pointsEarned?.toString() || "");
   const [teacherFeedback, setTeacherFeedback] = useState<string>(
@@ -55,6 +57,40 @@ const EssayGrading = ({
   );
 
   const queryClient = useQueryClient();
+
+  // AI Generate mutation
+  const aiGenerateMutation = useMutation({
+    mutationFn: async () => {
+      const response = await fetch("/api/quiz/grade-essay-ai", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          questionText,
+          rubric,
+          studentAnswer: answerText,
+          maxPoints,
+          studentName: studentName ? studentName.split(" ")[0] : "Student",
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to generate AI suggestions");
+      }
+
+      return response.json() as Promise<{
+        suggestedScore: number;
+        feedback: string;
+      }>;
+    },
+    onSuccess: (data) => {
+      // Auto-fill the form with AI suggestions
+      setPoints(data.suggestedScore.toString());
+      setTeacherFeedback(data.feedback);
+    },
+  });
 
   const gradeMutation = useMutation({
     mutationFn: async () => {
@@ -89,6 +125,10 @@ const EssayGrading = ({
 
   const handleSave = () => {
     gradeMutation.mutate();
+  };
+
+  const handleAIGenerate = () => {
+    aiGenerateMutation.mutate();
   };
 
   const hasChanges =
@@ -148,7 +188,49 @@ const EssayGrading = ({
 
         {/* Grading Section */}
         <div className="space-y-4 p-4 border rounded-lg bg-card">
-          <h3 className="font-semibold text-lg">Grading</h3>
+          <div className="flex items-center justify-between">
+            <h3 className="font-semibold text-lg">Grading</h3>
+
+            {/* AI Generate Button */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleAIGenerate}
+              disabled={aiGenerateMutation.isPending || !answerText}
+              className="gap-2"
+            >
+              {aiGenerateMutation.isPending ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="h-4 w-4" />
+                  AI Suggestions
+                </>
+              )}
+            </Button>
+          </div>
+
+          {/* AI Error Message */}
+          {aiGenerateMutation.isError && (
+            <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20">
+              <p className="text-sm text-destructive">
+                AI Error: {(aiGenerateMutation.error as Error).message}
+              </p>
+            </div>
+          )}
+
+          {/* AI Success Message */}
+          {aiGenerateMutation.isSuccess && (
+            <div className="p-3 rounded-lg bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900">
+              <p className="text-sm text-green-700 dark:text-green-400">
+                ✨ AI suggestions applied! Review and adjust as needed before
+                saving.
+              </p>
+            </div>
+          )}
 
           {/* Points Input */}
           <div className="space-y-2">
