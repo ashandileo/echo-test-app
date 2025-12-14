@@ -17,10 +17,10 @@ export type Database = {
     Functions: {
       graphql: {
         Args: {
-          query?: string
           operationName?: string
-          extensions?: Json
+          query?: string
           variables?: Json
+          extensions?: Json
         }
         Returns: Json
       }
@@ -592,19 +592,19 @@ export type Database = {
       }
       search_document_chunks: {
         Args: {
-          match_count?: number
-          match_user_id: string
           query_embedding: string
+          match_user_id: string
+          match_count?: number
         }
         Returns: {
-          chunk_text: string
-          file_path: string
-          similarity: number
-          file_name: string
-          user_id: string
           id: string
-          total_chunks: number
+          user_id: string
+          file_name: string
+          similarity: number
+          file_path: string
+          chunk_text: string
           chunk_index: number
+          total_chunks: number
         }[]
       }
       sparsevec_out: {

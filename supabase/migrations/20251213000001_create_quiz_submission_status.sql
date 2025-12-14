@@ -138,10 +138,8 @@ BEGIN
   FROM public.quiz_question_essay
   WHERE quiz_id = NEW.quiz_id;
 
-  -- Get total max possible score
-  SELECT max_possible_score INTO max_score
-  FROM public.quiz_submission_status
-  WHERE quiz_id = NEW.quiz_id AND user_id = NEW.user_id;
+  -- Calculate total max possible score (THIS IS THE FIX!)
+  max_score := mc_max_score + essay_max_score;
 
   -- Calculate overall percentage
   IF max_score > 0 THEN
@@ -181,6 +179,7 @@ BEGIN
     multiple_choice_score = mc_score,
     essay_score = essay_score_total,
     total_score = new_total_score,
+    max_possible_score = max_score, -- Update max_possible_score with correct calculation
     percentage = new_percentage,
     multiple_choice_percentage = new_mc_percentage,
     essay_percentage = new_essay_percentage,
@@ -199,6 +198,7 @@ BEGIN
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
+
 
 -- Create trigger on multiple choice submissions to update scores
 -- Trigger when points_earned changes OR when selected_answer changes

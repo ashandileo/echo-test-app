@@ -14,3 +14,21 @@ export const useUser = () => {
     },
   });
 };
+
+export const useUserById = (userId: string) => {
+  return useQuery({
+    queryKey: ["user", userId],
+    queryFn: async () => {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", userId)
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!userId,
+  });
+};
