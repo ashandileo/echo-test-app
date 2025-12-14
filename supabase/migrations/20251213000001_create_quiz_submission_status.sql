@@ -212,13 +212,3 @@ CREATE TRIGGER trigger_update_scores_on_essay_submission
   AFTER INSERT OR UPDATE OF points_earned ON public.quiz_submission_essay
   FOR EACH ROW
   EXECUTE FUNCTION update_quiz_submission_scores();
-
--- Add comment to table
-COMMENT ON TABLE public.quiz_submission_status IS 'Tracks overall submission status and scores for each user quiz attempt';
-COMMENT ON COLUMN public.quiz_submission_status.status IS 'Submission status: not_started, in_progress, submitted, completed';
-COMMENT ON COLUMN public.quiz_submission_status.multiple_choice_score IS 'Total points earned from multiple choice questions';
-COMMENT ON COLUMN public.quiz_submission_status.essay_score IS 'Total points earned from essay questions';
-COMMENT ON COLUMN public.quiz_submission_status.total_score IS 'Combined score from all question types';
-COMMENT ON COLUMN public.quiz_submission_status.percentage IS 'Score percentage (automatically calculated)';
-COMMENT ON COLUMN public.quiz_submission_status.multiple_choice_percentage IS 'Multiple choice score percentage (automatically calculated)';
-COMMENT ON COLUMN public.quiz_submission_status.essay_percentage IS 'Essay score percentage (automatically calculated)';
