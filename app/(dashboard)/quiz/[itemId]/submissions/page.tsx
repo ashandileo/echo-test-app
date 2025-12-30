@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 
 import { useParams } from "next/navigation";
 
-import { BookOpen, Filter } from "lucide-react";
+import { Filter } from "lucide-react";
 
 import {
   Card,
@@ -69,16 +69,11 @@ const SubmissionsPage = () => {
 
   if (isLoading) {
     return (
-      <div className="flex flex-1 flex-col gap-6 p-4 md:p-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <Skeleton className="h-8 w-64 mb-2" />
-            <Skeleton className="h-4 w-96" />
-          </div>
-        </div>
+      <div className="flex flex-1 flex-col gap-6 p-4 md:p-8">
         <Card>
           <CardHeader>
             <Skeleton className="h-6 w-48" />
+            <Skeleton className="h-4 w-64 mt-2" />
           </CardHeader>
           <CardContent>
             <Skeleton className="h-64 w-full" />
@@ -89,28 +84,14 @@ const SubmissionsPage = () => {
   }
 
   return (
-    <div className="flex flex-1 flex-col gap-6 p-4 md:p-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <div className="flex items-center gap-2 mb-2">
-            <BookOpen className="h-6 w-6 text-primary" />
-            <h1 className="text-2xl font-bold tracking-tight">
-              Quiz Submissions
-            </h1>
-          </div>
-          <p className="text-muted-foreground">
-            Monitor and grade student submissions
-          </p>
-        </div>
-      </div>
-
-      <Card>
+    <div className="flex flex-1 flex-col gap-6 p-4 md:p-8">
+      <Card className="shadow-sm">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-lg">
             <Filter className="h-5 w-5" />
             Filters
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-sm">
             Filter submissions by status or student name
           </CardDescription>
         </CardHeader>

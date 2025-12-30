@@ -80,8 +80,8 @@ const QuizPublish = ({
             disabled={isProcessing}
             className={
               isPublishing
-                ? "bg-green-600 hover:bg-green-700"
-                : "bg-yellow-600 hover:bg-yellow-700"
+                ? "" // Use default primary blue for publish
+                : "bg-amber-600 hover:bg-amber-700 dark:bg-amber-700 dark:hover:bg-amber-800"
             }
           >
             {isProcessing ? (

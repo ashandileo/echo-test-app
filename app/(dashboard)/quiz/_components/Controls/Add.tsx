@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 
-import { Plus } from "lucide-react";
+import { Sparkles } from "lucide-react";
 
 import { QuizUploadDocument } from "@/components/dialogs/quiz/QuizUploadDocument";
 import { Button } from "@/components/ui/button";
@@ -13,8 +13,8 @@ const Add = () => {
 
   return (
     <>
-      <Button onClick={toggleOpen}>
-        <Plus className="mr-2 size-4" />
+      <Button onClick={toggleOpen} size="lg" className="gap-2 shadow-md">
+        <Sparkles className="size-4" />
         Create New Quiz
       </Button>
       <QuizUploadDocument open={isDialogOpen} onOpenChange={toggleOpen} />

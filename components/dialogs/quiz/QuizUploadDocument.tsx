@@ -1,10 +1,19 @@
 "use client";
 
 import { useState } from "react";
+import { useDropzone } from "react-dropzone";
 
 import { useRouter } from "next/navigation";
 
-import { BookOpen, FileText, Upload, X } from "lucide-react";
+import {
+  BookOpen,
+  CheckCircle2,
+  CloudUpload,
+  FileText,
+  Upload,
+  X,
+} from "lucide-react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -16,8 +25,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 
 interface QuizUploadDocumentProps {
   open: boolean;
@@ -31,28 +38,91 @@ export function QuizUploadDocument({
   const router = useRouter();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState("");
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  const onDrop = (acceptedFiles: File[]) => {
+    const file = acceptedFiles[0];
     if (file && file.type === "application/pdf") {
       setSelectedFile(file);
-    } else {
-      setSelectedFile(null);
+      toast.success("File selected successfully!", {
+        description: `${file.name} is ready to upload`,
+      });
+    } else if (file) {
+      toast.error("Invalid file type", {
+        description: "Please select a PDF file",
+      });
     }
   };
+
+  const { getRootProps, getInputProps, isDragActive, isDragReject } =
+    useDropzone({
+      onDrop,
+      accept: {
+        "application/pdf": [".pdf"],
+      },
+      maxFiles: 1,
+      multiple: false,
+    });
 
   const handleCancel = () => {
     onOpenChange(false);
     setSelectedFile(null);
-    setUploadProgress("");
+  };
+
+  // Progress toast component that updates based on state
+  const ProgressToast = ({
+    step,
+    message,
+    description,
+  }: {
+    step: number;
+    message: string;
+    description: string;
+  }) => {
+    const progress = step === 1 ? 33 : step === 2 ? 66 : 100;
+    const widthClass = step === 1 ? "w-1/3" : step === 2 ? "w-2/3" : "w-full";
+
+    return (
+      <div className="flex flex-col gap-2 w-full min-w-[320px]">
+        <div className="flex items-start gap-3">
+          <div className="shrink-0 mt-0.5">
+            <div className="size-4 rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="font-semibold text-sm">{message}</p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {description}
+            </p>
+          </div>
+        </div>
+        <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden">
+          <div
+            className={`h-full bg-primary rounded-full transition-all duration-700 ease-out ${widthClass} ${
+              step === 3 ? "animate-pulse" : ""
+            }`}
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+      </div>
+    );
   };
 
   const handleUpload = async () => {
     if (!selectedFile) return;
 
     setIsUploading(true);
-    setUploadProgress("Extracting text from PDF...");
+    let toastId: string | number = "";
+
+    // Step 1: Extract text from PDF
+    toastId = toast(
+      <ProgressToast
+        step={1}
+        message="Extracting text from PDF..."
+        description="Step 1 of 3 • Processing your document"
+      />,
+      {
+        duration: Infinity,
+      }
+    );
 
     try {
       // Step 1: Extract text using OCR
@@ -71,8 +141,18 @@ export function QuizUploadDocument({
 
       const ocrData = await ocrResponse.json();
 
-      // Step 2: Convert file to base64 for storage
-      setUploadProgress("Processing document and generating embeddings...");
+      // Step 2: Process document and generate embeddings
+      toast(
+        <ProgressToast
+          step={2}
+          message="Processing document and generating embeddings..."
+          description="Step 2 of 3 • Analyzing your content"
+        />,
+        {
+          id: toastId,
+          duration: Infinity,
+        }
+      );
       const base64File = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
         reader.onloadend = () => resolve(reader.result as string);
@@ -105,8 +185,18 @@ export function QuizUploadDocument({
 
       const processData = await processResponse.json();
 
-      // Step 4: Create quiz with AI-generated name and description
-      setUploadProgress("Creating quiz...");
+      // Step 3: Create quiz with AI-generated name and description
+      toast(
+        <ProgressToast
+          step={3}
+          message="Creating quiz..."
+          description="Step 3 of 3 • Almost done!"
+        />,
+        {
+          id: toastId,
+          duration: Infinity,
+        }
+      );
       const createQuizResponse = await fetch("/api/quiz/create-from-document", {
         method: "POST",
         headers: {
@@ -124,19 +214,23 @@ export function QuizUploadDocument({
 
       const quizData = await createQuizResponse.json();
 
-      setUploadProgress("Quiz created successfully!");
+      // Success toast
+      toast.success("Quiz created successfully!", {
+        id: toastId,
+        description: "Redirecting to quiz configuration...",
+      });
 
       onOpenChange(false);
       setSelectedFile(null);
-      setUploadProgress("");
 
       // Redirect to quiz configuration page
       router.push(`/quiz/${quizData.data.id}/configuration`);
     } catch (error) {
-      setUploadProgress(
-        error instanceof Error ? error.message : "Failed to upload document"
-      );
-      setTimeout(() => setUploadProgress(""), 3000);
+      toast.error("Upload failed", {
+        id: toastId,
+        description:
+          error instanceof Error ? error.message : "Failed to upload document",
+      });
     } finally {
       setIsUploading(false);
     }
@@ -159,54 +253,129 @@ export function QuizUploadDocument({
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
-          <div className="grid gap-2">
-            <Label htmlFor="document">Select PDF Document</Label>
-            <div className="flex items-center gap-2">
-              <Input
-                id="document"
-                type="file"
-                accept="application/pdf"
-                onChange={handleFileChange}
-                className="cursor-pointer"
-              />
-            </div>
-          </div>
-          {selectedFile && (
-            <Card className="border bg-muted/50">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <div className="shrink-0 p-2 rounded-lg bg-muted">
-                      <FileText className="size-5 text-foreground" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm truncate">
-                        {selectedFile.name}
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-0.5">
-                        {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
-                      </p>
-                    </div>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 shrink-0"
-                    onClick={() => setSelectedFile(null)}
-                  >
-                    <X className="size-4" />
-                    <span className="sr-only">Remove file</span>
-                  </Button>
+          {!selectedFile ? (
+            <div
+              {...getRootProps()}
+              className={`
+                border-2 border-dashed rounded-lg p-8 cursor-pointer
+                transition-all duration-200 ease-in-out
+                ${
+                  isDragActive && !isDragReject
+                    ? "border-primary bg-primary/5 scale-[1.02]"
+                    : isDragReject
+                      ? "border-destructive bg-destructive/5"
+                      : "border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/50"
+                }
+              `}
+            >
+              <input {...getInputProps()} />
+              <div className="flex flex-col items-center justify-center gap-4 text-center">
+                <div
+                  className={`
+                  p-4 rounded-full transition-colors
+                  ${
+                    isDragActive && !isDragReject
+                      ? "bg-primary/10"
+                      : isDragReject
+                        ? "bg-destructive/10"
+                        : "bg-muted"
+                  }
+                `}
+                >
+                  <CloudUpload
+                    className={`
+                    size-10 transition-colors
+                    ${
+                      isDragActive && !isDragReject
+                        ? "text-primary"
+                        : isDragReject
+                          ? "text-destructive"
+                          : "text-muted-foreground"
+                    }
+                  `}
+                  />
                 </div>
-              </CardContent>
-            </Card>
+                <div className="space-y-2">
+                  <p className="text-base font-semibold">
+                    {isDragActive && !isDragReject
+                      ? "Drop your PDF here"
+                      : isDragReject
+                        ? "Only PDF files are accepted"
+                        : "Drag & drop your PDF here"}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    or click to browse files
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <FileText className="size-4" />
+                  <span>Supported format: PDF only</span>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
+              <Card className="border-2 border-primary/20 bg-gradient-to-br from-primary/5 via-primary/3 to-transparent shadow-sm hover:shadow-md transition-shadow">
+                <CardContent className="p-5">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex items-start gap-4 flex-1 min-w-0">
+                      <div className="shrink-0 relative">
+                        <div className="p-3 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 border border-primary/20">
+                          <FileText className="size-6 text-primary" />
+                        </div>
+                        <div className="absolute -top-1 -right-1 p-0.5 rounded-full bg-green-500 border-2 border-background">
+                          <CheckCircle2 className="size-3 text-white" />
+                        </div>
+                      </div>
+                      <div className="flex-1 min-w-0 pt-1">
+                        <p className="font-semibold text-base truncate mb-1">
+                          {selectedFile.name}
+                        </p>
+                        <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+                          <div className="flex items-center gap-1.5">
+                            <div className="size-1.5 rounded-full bg-primary/60" />
+                            <span className="font-medium">
+                              {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <div className="size-1.5 rounded-full bg-primary/60" />
+                            <span>PDF Document</span>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <div className="size-1.5 rounded-full bg-green-500" />
+                            <span className="text-green-600 dark:text-green-400 font-medium">
+                              Ready to upload
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-9 w-9 shrink-0 rounded-lg hover:bg-destructive/10 hover:text-destructive transition-colors"
+                      onClick={() => setSelectedFile(null)}
+                      disabled={isUploading}
+                    >
+                      <X className="size-4" />
+                      <span className="sr-only">Remove file</span>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+              <div className="px-1">
+                <p className="text-xs text-muted-foreground flex items-center gap-2">
+                  <CheckCircle2 className="size-3.5 text-green-500" />
+                  <span>
+                    File validated successfully. Click &quot;Upload &
+                    Continue&quot; to proceed.
+                  </span>
+                </p>
+              </div>
+            </div>
           )}
         </div>
-        {uploadProgress && (
-          <div className="px-1 py-2">
-            <p className="text-sm text-muted-foreground">{uploadProgress}</p>
-          </div>
-        )}
         <DialogFooter>
           <Button
             variant="outline"

@@ -22,14 +22,9 @@ const QuestionListCard = () => {
   const totalCount = multipleChoice + essay;
 
   return (
-    <Card>
+    <Card className="shadow-sm">
       <CardHeader>
-        <QuestionListCardHeader
-          totalCount={totalCount}
-          multipleChoiceCount={multipleChoice}
-          essayCount={essay}
-          isLoading={isLoading}
-        />
+        <QuestionListCardHeader totalCount={totalCount} isLoading={isLoading} />
       </CardHeader>
       <QuestionListCardTabs
         activeTab={activeTab}

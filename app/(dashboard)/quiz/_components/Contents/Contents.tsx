@@ -2,9 +2,10 @@
 import Link from "next/link";
 
 import startCase from "lodash/startCase";
-import { Eye, FileText, Trash2 } from "lucide-react";
+import { Calendar, Eye, FileText, Trash2 } from "lucide-react";
 
 import { SharedDelete } from "@/components/dialogs";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -49,51 +50,80 @@ const Contents = () => {
   };
 
   return (
-    <div className="rounded-md border">
+    <div className="rounded-lg border bg-card shadow-sm">
       {quizzes && quizzes?.length > 0 ? (
         <Table>
           <TableHeader>
-            <TableRow>
-              <TableHead className="w-[300px]">Quiz Name</TableHead>
-              <TableHead>
-                <div className="flex items-center gap-1">
+            <TableRow className="hover:bg-transparent">
+              <TableHead className="w-[300px] font-semibold">
+                Quiz Name
+              </TableHead>
+              <TableHead className="font-semibold">
+                <div className="flex items-center gap-1.5">
                   <FileText className="size-4" />
                   Questions
                 </div>
               </TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Created Date</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead className="font-semibold">Status</TableHead>
+              <TableHead className="font-semibold">
+                <div className="flex items-center gap-1.5">
+                  <Calendar className="size-4" />
+                  Created
+                </div>
+              </TableHead>
+              <TableHead className="text-right font-semibold">
+                Actions
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {quizzes.map((quiz) => (
-              <TableRow key={quiz.id}>
-                <TableCell className="font-medium">{quiz?.name}</TableCell>
-                <TableCell>{quiz?.totalQuestions || 0} questions</TableCell>
+              <TableRow key={quiz.id} className="group">
+                <TableCell className="font-medium">
+                  <Link
+                    href={`/quiz/${quiz?.id}`}
+                    className="hover:text-primary transition-colors"
+                  >
+                    {quiz?.name}
+                  </Link>
+                </TableCell>
                 <TableCell>
-                  <span
-                    className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                  <div className="flex items-center gap-1.5 text-muted-foreground">
+                    <span className="font-medium text-foreground">
+                      {quiz?.totalQuestions || 0}
+                    </span>
+                    <span className="text-sm">questions</span>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <Badge
+                    variant={
+                      quiz?.status === "published" ? "default" : "secondary"
+                    }
+                    className={
                       quiz?.status === "published"
-                        ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
-                        : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
-                    }`}
+                        ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-950 dark:text-emerald-400"
+                        : "bg-amber-100 text-amber-700 hover:bg-amber-100 dark:bg-amber-950 dark:text-amber-400"
+                    }
                   >
                     {startCase(quiz?.status)}
-                  </span>
+                  </Badge>
                 </TableCell>
-                <TableCell className="text-muted-foreground">
+                <TableCell className="text-sm text-muted-foreground">
                   {new Date(quiz.created_at).toLocaleDateString("en-US", {
                     year: "numeric",
-                    month: "long",
+                    month: "short",
                     day: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
                   })}
                 </TableCell>
                 <TableCell className="text-right">
-                  <div className="flex items-center justify-end gap-2">
-                    <Button variant="ghost" size="icon" asChild>
+                  <div className="flex items-center justify-end gap-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                      asChild
+                    >
                       <Link href={`/quiz/${quiz?.id}`}>
                         <Eye className="size-4" />
                         <span className="sr-only">View</span>
@@ -102,11 +132,12 @@ const Contents = () => {
                     <Button
                       variant="ghost"
                       size="icon"
+                      className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity hover:text-destructive"
                       onClick={() =>
                         handleDeleteClick({ id: quiz.id, name: quiz.name })
                       }
                     >
-                      <Trash2 className="size-4 text-destructive" />
+                      <Trash2 className="size-4" />
                       <span className="sr-only">Delete</span>
                     </Button>
                   </div>
@@ -116,11 +147,14 @@ const Contents = () => {
           </TableBody>
         </Table>
       ) : (
-        <div className="flex flex-col items-center justify-center rounded-md border border-dashed p-8 text-center">
-          <FileText className="mb-4 size-12 text-muted-foreground" />
-          <h3 className="text-lg font-semibold">No quizzes yet</h3>
-          <p className="text-muted-foreground mb-4">
-            Get started by creating your first quiz
+        <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed p-12 text-center animate-in fade-in-50">
+          <div className="rounded-full bg-primary/10 p-4 mb-4">
+            <FileText className="size-8 text-primary" />
+          </div>
+          <h3 className="text-xl font-semibold mb-2">No quizzes yet</h3>
+          <p className="text-muted-foreground mb-6 max-w-sm">
+            Get started by creating your first quiz. Upload a document or create
+            questions manually.
           </p>
           <Add />
         </div>

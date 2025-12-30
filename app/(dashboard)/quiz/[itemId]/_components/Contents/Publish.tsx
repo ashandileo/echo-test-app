@@ -77,8 +77,8 @@ const Publish = () => {
           variant={isPublished ? "outline" : "default"}
           className={
             isPublished
-              ? "border-yellow-600 text-yellow-600 hover:bg-yellow-50"
-              : "bg-green-600 hover:bg-green-700"
+              ? "border-amber-600 text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950/20"
+              : ""
           }
         >
           {isPublished ? (

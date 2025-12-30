@@ -144,10 +144,10 @@ const Details = () => {
                 <span
                   className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
                     quiz?.status === "published"
-                      ? "bg-green-100 text-green-800"
+                      ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400"
                       : quiz?.status === "draft"
-                        ? "bg-yellow-100 text-yellow-800"
-                        : "bg-gray-100 text-gray-800"
+                        ? "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-400"
+                        : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300"
                   }`}
                 >
                   {quiz?.status?.charAt(0).toUpperCase() +

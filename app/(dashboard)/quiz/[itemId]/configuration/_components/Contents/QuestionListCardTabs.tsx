@@ -42,12 +42,12 @@ const QuestionListCardTabs = ({
             variant="ghost"
             className={`h-10 rounded-none border-b-2 border-transparent px-4 ${
               activeTab === tab.id
-                ? "border-primary text-primary"
+                ? "border-primary text-primary font-semibold"
                 : "text-muted-foreground hover:text-foreground"
             }`}
             onClick={() => setActiveTab(tab.id)}
           >
-            {tab.label} ({isLoading ? "..." : tab.count})
+            {tab.label} {!isLoading && `(${tab.count})`}
           </Button>
         ))}
       </div>

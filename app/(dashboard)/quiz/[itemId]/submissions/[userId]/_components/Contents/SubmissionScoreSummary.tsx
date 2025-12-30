@@ -166,7 +166,10 @@ const SubmissionScoreSummary = ({
                   Pending
                 </Badge>
               ) : (
-                <Badge variant="default" className="bg-green-600">
+                <Badge
+                  variant="default"
+                  className="bg-emerald-600 hover:bg-emerald-600 dark:bg-emerald-700"
+                >
                   Complete
                 </Badge>
               )}

@@ -85,7 +85,7 @@ const SubmissionsTable = ({ submissions }: SubmissionsTableProps) => {
         return (
           <Badge
             variant="default"
-            className="flex items-center gap-1 bg-orange-600"
+            className="flex items-center gap-1 bg-orange-600 hover:bg-orange-600"
           >
             <AlertCircle className="h-3 w-3" />
             Needs Grading
@@ -95,7 +95,7 @@ const SubmissionsTable = ({ submissions }: SubmissionsTableProps) => {
         return (
           <Badge
             variant="default"
-            className="flex items-center gap-1 bg-green-600"
+            className="flex items-center gap-1 bg-emerald-600 hover:bg-emerald-600 dark:bg-emerald-700"
           >
             <CheckCircle className="h-3 w-3" />
             Completed

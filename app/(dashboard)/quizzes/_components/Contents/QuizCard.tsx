@@ -92,7 +92,7 @@ const QuizCard = ({ quiz }: Props) => {
         </div>
         <div className="flex gap-2 flex-wrap mb-3">
           {isCompleted ? (
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
               <Trophy className="h-3 w-3" />
               Completed
             </span>
@@ -153,11 +153,11 @@ const QuizCard = ({ quiz }: Props) => {
                 <div
                   className={`h-2 rounded-full ${
                     quizScore >= 90
-                      ? "bg-green-600 dark:bg-green-400"
+                      ? "bg-emerald-600 dark:bg-emerald-400"
                       : quizScore >= 75
                         ? "bg-blue-600 dark:bg-blue-400"
                         : quizScore >= 60
-                          ? "bg-yellow-600 dark:bg-yellow-400"
+                          ? "bg-amber-600 dark:bg-amber-400"
                           : "bg-orange-600 dark:bg-orange-400"
                   }`}
                   style={{ width: `${quizScore}%` }}

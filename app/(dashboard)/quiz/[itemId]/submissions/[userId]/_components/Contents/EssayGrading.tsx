@@ -150,7 +150,10 @@ const EssayGrading = ({
           </div>
           <div className="flex flex-col items-end gap-2">
             {isGraded ? (
-              <Badge variant="default" className="bg-green-600">
+              <Badge
+                variant="default"
+                className="bg-emerald-600 hover:bg-emerald-600 dark:bg-emerald-700"
+              >
                 <CheckCircle2 className="h-3 w-3 mr-1" />
                 Graded
               </Badge>
