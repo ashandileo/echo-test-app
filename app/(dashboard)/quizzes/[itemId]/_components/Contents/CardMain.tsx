@@ -3,7 +3,6 @@ import { useParams, useRouter } from "next/navigation";
 
 import {
   Award,
-  BookOpen,
   CheckCircle2,
   Clock,
   FileText,
@@ -31,7 +30,6 @@ const CardMain = () => {
   const router = useRouter();
 
   const { data: quiz, isLoading: isLoadingQuiz } = useQuizDetails(itemId);
-
   const { data: questionsData, isLoading: isLoadingQuizCount } =
     useQuizQuestionCount(itemId);
 
@@ -89,19 +87,10 @@ const CardMain = () => {
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-start gap-3">
-          <div className="rounded-lg bg-primary/10 p-3">
-            <BookOpen className="h-6 w-6 text-primary" />
-          </div>
-          <div className="flex-1">
-            <CardTitle className="text-2xl mb-2">
-              {quiz?.name || "Untitled Quiz"}
-            </CardTitle>
-            <CardDescription className="text-base">
-              {quiz?.description || "No description provided"}
-            </CardDescription>
-          </div>
-        </div>
+        <CardTitle className="text-lg">Quiz Information</CardTitle>
+        <CardDescription className="text-sm">
+          {quiz?.description || "No description provided"}
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

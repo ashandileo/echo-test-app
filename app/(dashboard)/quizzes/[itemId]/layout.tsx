@@ -8,15 +8,19 @@ import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useQuizDetails } from "@/lib/hooks/api/useQuiz";
 
 const navigations = [
   {
     id: "information",
-    label: "Information",
+    label: "Overview",
+    description: "Quiz details and instructions",
   },
   {
     id: "results",
     label: "Results",
+    description: "View your quiz results",
   },
 ];
 
@@ -28,6 +32,9 @@ export default function QuizDetailLayout({
   const pathname = usePathname();
   const { itemId } = useParams<{ itemId: string }>();
 
+  // Fetch quiz details to get the quiz name
+  const { data: quiz, isLoading } = useQuizDetails(itemId);
+
   const isActive = (path: string) => {
     if (path === "information") {
       return pathname === `/quizzes/${itemId}`;
@@ -36,39 +43,59 @@ export default function QuizDetailLayout({
   };
 
   return (
-    <>
-      <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
-        <div className="flex items-center gap-2 px-4 w-full">
-          <SidebarTrigger className="-ml-1" />
-          <Separator
-            orientation="vertical"
-            className="mr-2 data-[orientation=vertical]:h-4"
-          />
-          <Button variant="ghost" size="icon" asChild>
-            <Link href="/quizzes">
-              <ArrowLeft className="size-4" />
-              <span className="sr-only">Back</span>
-            </Link>
-          </Button>
-          <Separator
-            orientation="vertical"
-            className="mr-2 data-[orientation=vertical]:h-4"
-          />
-          <div className="w-full flex items-center justify-between">
-            <h1 className="text-lg font-semibold">Quiz Details</h1>
+    <div className="flex flex-1 flex-col">
+      <header className="sticky top-0 z-10 flex shrink-0 flex-col border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:py-4">
+        <div className="flex items-center justify-between gap-4 px-4 py-6 md:px-8">
+          <div className="flex items-center gap-2 min-w-0 flex-1">
+            <SidebarTrigger className="-ml-1" />
+            <Separator
+              orientation="vertical"
+              className="mr-2 data-[orientation=vertical]:h-4"
+            />
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 shrink-0"
+              asChild
+            >
+              <Link href="/quizzes">
+                <ArrowLeft className="size-4" />
+                <span className="sr-only">Back</span>
+              </Link>
+            </Button>
+            <Separator
+              orientation="vertical"
+              className="mr-2 data-[orientation=vertical]:h-4"
+            />
+            <div className="space-y-0.5 min-w-0">
+              {isLoading ? (
+                <>
+                  <Skeleton className="h-7 w-48" />
+                  <Skeleton className="h-3 w-64" />
+                </>
+              ) : (
+                <>
+                  <h1 className="text-2xl font-bold tracking-tight bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent truncate">
+                    {quiz?.name || "Quiz Details"}
+                  </h1>
+                  <p className="text-xs text-muted-foreground">
+                    View quiz information and track your progress
+                  </p>
+                </>
+              )}
+            </div>
           </div>
         </div>
-      </header>
-      {/* Navigation Tabs */}
-      <div className="border-b">
-        <div className="flex items-center gap-1 px-4">
+
+        {/* Navigation Tabs */}
+        <div className="flex items-center gap-1 px-4 md:px-8">
           {navigations.map((navigation) => (
             <Button
               key={navigation.id}
               variant="ghost"
               className={`h-10 rounded-none border-b-2 border-transparent px-4 ${
                 isActive(navigation.id)
-                  ? "border-primary text-primary"
+                  ? "border-primary text-primary font-semibold"
                   : "text-muted-foreground hover:text-foreground"
               }`}
               asChild
@@ -85,8 +112,8 @@ export default function QuizDetailLayout({
             </Button>
           ))}
         </div>
-      </div>
+      </header>
       {children}
-    </>
+    </div>
   );
 }

@@ -36,13 +36,8 @@ const ScoreSummary = ({
     return (
       <Card>
         <CardHeader>
-          <div className="flex items-start gap-3">
-            <Skeleton className="h-12 w-12 rounded-lg" />
-            <div className="flex-1 space-y-2">
-              <Skeleton className="h-8 w-3/4" />
-              <Skeleton className="h-4 w-full" />
-            </div>
-          </div>
+          <Skeleton className="h-6 w-48" />
+          <Skeleton className="h-4 w-64 mt-2" />
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -66,17 +61,10 @@ const ScoreSummary = ({
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-start gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-            <Award className="h-6 w-6 text-primary" />
-          </div>
-          <div className="flex-1">
-            <CardTitle className="text-2xl">Quiz Results</CardTitle>
-            <CardDescription>
-              Your performance summary and detailed answers
-            </CardDescription>
-          </div>
-        </div>
+        <CardTitle className="text-lg">Performance Summary</CardTitle>
+        <CardDescription>
+          Review your score and detailed answers below
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

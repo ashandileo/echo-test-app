@@ -1,7 +1,11 @@
 "use client";
 
+import Link from "next/link";
 import { useParams } from "next/navigation";
 
+import { ClipboardList } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
 import {
   useQuizQuestionEssay,
   useQuizQuestionMultipleChoice,
@@ -131,6 +135,28 @@ const Contents = () => {
     );
   }
 
+  // Check if user has any submissions
+  const hasSubmissions = answeredQuestions > 0;
+
+  // If no submissions, show empty state
+  if (!hasSubmissions) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 px-4">
+        <div className="rounded-full bg-muted p-6 mb-4">
+          <ClipboardList className="h-12 w-12 text-muted-foreground" />
+        </div>
+        <h3 className="text-xl font-semibold mb-2">No Results Yet</h3>
+        <p className="text-muted-foreground text-center mb-6 max-w-md">
+          You haven&apos;t taken this quiz yet. Start the quiz to see your
+          results here.
+        </p>
+        <Button asChild>
+          <Link href={`/take-quiz/${itemId}`}>Start Quiz</Link>
+        </Button>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <ScoreSummary
@@ -191,14 +217,6 @@ const Contents = () => {
           }
         })}
       </div>
-
-      {questionsWithSubmissions.length === 0 && (
-        <div className="text-center py-12">
-          <p className="text-muted-foreground">
-            No quiz results found. Please take the quiz first.
-          </p>
-        </div>
-      )}
     </div>
   );
 };

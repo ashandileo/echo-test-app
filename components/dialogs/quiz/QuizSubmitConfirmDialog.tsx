@@ -10,6 +10,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { confettiSideCannons } from "@/lib/utils/confetti";
 
 interface QuizSubmitConfirmDialogProps {
   open: boolean;
@@ -30,6 +31,16 @@ export function QuizSubmitConfirmDialog({
 }: QuizSubmitConfirmDialogProps) {
   const unansweredCount = totalQuestions - answeredCount;
   const hasUnanswered = unansweredCount > 0;
+
+  const handleConfirm = async () => {
+    // Trigger side cannons confetti
+    confettiSideCannons();
+
+    // Wait a bit before actually submitting
+    setTimeout(() => {
+      onConfirm();
+    }, 500);
+  };
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
@@ -80,7 +91,7 @@ export function QuizSubmitConfirmDialog({
           <AlertDialogAction
             onClick={(e) => {
               e.preventDefault();
-              onConfirm();
+              handleConfirm();
             }}
             disabled={isSubmitting}
             className="bg-primary"
