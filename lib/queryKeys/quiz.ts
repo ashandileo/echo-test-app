@@ -20,6 +20,18 @@ export const QUIZ_QUESTION_ESSAY = (quizId: string) => [
   "questions-essay",
 ];
 
+export const QUIZ_LISTENING_TEST_COUNT = (quizId: string) => [
+  "quiz",
+  quizId,
+  "listening-test-count",
+];
+
+export const QUIZ_SPEAKING_TEST_COUNT = (quizId: string) => [
+  "quiz",
+  quizId,
+  "speaking-test-count",
+];
+
 export const QUIZ_SUBMISSION_MULTIPLE_CHOICE = (
   quizId: string,
   userId: string

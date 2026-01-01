@@ -43,6 +43,8 @@ const QuestionAddDialog = ({
       correctAnswer: 0,
       sampleAnswer: "",
       explanation: "",
+      questionMode: "text",
+      answerMode: "text",
     },
   });
 

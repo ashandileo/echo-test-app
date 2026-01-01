@@ -11,7 +11,7 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useQuizDetails } from "@/lib/hooks/api/useQuiz";
 
-import Publish from "./_components/Contents/Publish";
+import PublishQuizButton from "./configuration/_components/PublishQuizButton";
 
 const navigations = [
   {
@@ -94,7 +94,7 @@ export default function QuizDetailLayout({
               )}
             </div>
           </div>
-          <Publish />
+          <PublishQuizButton />
         </div>
 
         {/* Navigation Tabs */}

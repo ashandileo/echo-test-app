@@ -1,9 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 
 import {
+  QUIZ_LISTENING_TEST_COUNT,
   QUIZ_QUESTION_COUNT,
   QUIZ_QUESTION_ESSAY,
   QUIZ_QUESTION_MULTIPLE_CHOICE,
+  QUIZ_SPEAKING_TEST_COUNT,
 } from "@/lib/queryKeys/quiz";
 import { createClient } from "@/lib/supabase/client";
 import { parseMultipleChoiceOptions } from "@/lib/utils/jsonb";
@@ -84,6 +86,50 @@ export const useQuizQuestionEssay = (itemId: string) => {
       if (error) throw error;
 
       return data;
+    },
+    enabled: !!itemId,
+  });
+};
+
+// Count listening test questions (question_mode = 'audio')
+export const useListeningTestCount = (itemId: string) => {
+  return useQuery({
+    queryKey: QUIZ_LISTENING_TEST_COUNT(itemId),
+    queryFn: async () => {
+      const supabase = createClient();
+      const { count } = await supabase
+        .from("quiz_question_multiple_choice")
+        .select("id", {
+          count: "exact",
+          head: true,
+        })
+        .eq("quiz_id", itemId)
+        .eq("question_mode", "audio")
+        .is("deleted_at", null);
+
+      return count ?? 0;
+    },
+    enabled: !!itemId,
+  });
+};
+
+// Count speaking test questions (answer_mode = 'voice')
+export const useSpeakingTestCount = (itemId: string) => {
+  return useQuery({
+    queryKey: QUIZ_SPEAKING_TEST_COUNT(itemId),
+    queryFn: async () => {
+      const supabase = createClient();
+      const { count } = await supabase
+        .from("quiz_question_essay")
+        .select("id", {
+          count: "exact",
+          head: true,
+        })
+        .eq("quiz_id", itemId)
+        .eq("answer_mode", "voice")
+        .is("deleted_at", null);
+
+      return count ?? 0;
     },
     enabled: !!itemId,
   });

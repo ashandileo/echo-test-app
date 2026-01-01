@@ -39,9 +39,13 @@ const QuestionAddForm = ({
       form.setValue("options", ["", "", "", ""]);
       form.setValue("correctAnswer", 0);
       form.setValue("sampleAnswer", "");
+      form.setValue("questionMode", "text"); // Reset to default
+      form.setValue("answerMode", undefined); // Clear essay mode
     } else {
       form.setValue("options", undefined);
       form.setValue("correctAnswer", undefined);
+      form.setValue("answerMode", "text"); // Reset to default
+      form.setValue("questionMode", undefined); // Clear multiple choice mode
     }
     form.setValue("explanation", "");
   };

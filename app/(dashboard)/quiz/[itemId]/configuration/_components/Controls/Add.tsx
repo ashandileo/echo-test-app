@@ -11,9 +11,11 @@ import QuestionAddDialog from "@/components/dialogs/quiz/QuestionAdd";
 import { QuestionFormValues } from "@/components/forms/quiz/QuestionAddForm/schema";
 import { Button } from "@/components/ui/button";
 import {
+  QUIZ_LISTENING_TEST_COUNT,
   QUIZ_QUESTION_COUNT,
   QUIZ_QUESTION_ESSAY,
   QUIZ_QUESTION_MULTIPLE_CHOICE,
+  QUIZ_SPEAKING_TEST_COUNT,
 } from "@/lib/queryKeys/quiz";
 import { createClient } from "@/lib/supabase/client";
 
@@ -35,6 +37,8 @@ const Add = () => {
           options: question.options,
           correct_answer: question.correctAnswer?.toString() || "",
           explanation: question.explanation || null,
+          question_mode: question.questionMode || "text", // Save question mode
+          audio_script: question.audioScript || null, // Save audio script
         })
         .select()
         .single();
@@ -56,6 +60,10 @@ const Add = () => {
       queryClient.invalidateQueries({
         queryKey: QUIZ_QUESTION_COUNT(itemId),
       });
+      // Invalidate listening test count for real-time update
+      queryClient.invalidateQueries({
+        queryKey: QUIZ_LISTENING_TEST_COUNT(itemId),
+      });
     },
     onError: (error: Error) => {
       toast.error(`Failed to add multiple choice question: ${error.message}`);
@@ -72,6 +80,7 @@ const Add = () => {
           quiz_id: itemId,
           question_text: question.question,
           rubric: question.sampleAnswer || null,
+          answer_mode: question.answerMode || "text", // Save answer mode
         })
         .select()
         .single();
@@ -92,6 +101,10 @@ const Add = () => {
       });
       queryClient.invalidateQueries({
         queryKey: QUIZ_QUESTION_COUNT(itemId),
+      });
+      // Invalidate speaking test count for real-time update
+      queryClient.invalidateQueries({
+        queryKey: QUIZ_SPEAKING_TEST_COUNT(itemId),
       });
     },
     onError: (error: Error) => {

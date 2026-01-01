@@ -8,7 +8,11 @@ import QuestionEditDialog from "@/components/dialogs/quiz/QuestionEdit";
 import { Button } from "@/components/ui/button";
 import { useQuizDetails } from "@/lib/hooks/api/useQuiz";
 import useActions from "@/lib/hooks/useAction";
-import { QUIZ_QUESTION_COUNT, QUIZ_QUESTION_ESSAY } from "@/lib/queryKeys/quiz";
+import {
+  QUIZ_QUESTION_COUNT,
+  QUIZ_QUESTION_ESSAY,
+  QUIZ_SPEAKING_TEST_COUNT,
+} from "@/lib/queryKeys/quiz";
 import { createClient } from "@/lib/supabase/client";
 
 import { EssayQuestion } from "../Contents/QuestionCardItem/Essay";
@@ -48,6 +52,10 @@ const ItemMoreEssay = ({ question, questionNumber }: Props) => {
       });
       queryClient.invalidateQueries({
         queryKey: QUIZ_QUESTION_COUNT(itemId),
+      });
+      // Invalidate speaking test count in case deleted question was voice mode
+      queryClient.invalidateQueries({
+        queryKey: QUIZ_SPEAKING_TEST_COUNT(itemId),
       });
     } catch (error) {
       console.error("Failed to delete question:", error);

@@ -2,6 +2,7 @@
 
 import ReactMarkdown from "react-markdown";
 
+import { FileText, Mic } from "lucide-react";
 import remarkGfm from "remark-gfm";
 
 import { Card, CardContent } from "@/components/ui/card";
@@ -18,6 +19,8 @@ interface Props {
 }
 
 const Essay = ({ question, questionNumber }: Props) => {
+  const answerMode = question.answer_mode || "text";
+
   return (
     <Card className="border">
       <CardContent className="p-4">
@@ -30,18 +33,23 @@ const Essay = ({ question, questionNumber }: Props) => {
               <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
                 Essay
               </span>
+
+              {/* Answer Mode Badge */}
+              {answerMode === "voice" ? (
+                <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 flex items-center gap-1">
+                  <Mic className="size-3" />
+                  Speaking Test
+                </span>
+              ) : (
+                <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400 flex items-center gap-1">
+                  <FileText className="size-3" />
+                  Text Answer
+                </span>
+              )}
             </div>
 
             {/* Question */}
             <p className="font-medium mb-3">{question.question_text}</p>
-
-            {/* Type Info */}
-            <div className="bg-muted/50 rounded-lg p-3 mt-2">
-              <p className="text-xs font-medium text-muted-foreground mb-1">
-                Type: Essay
-              </p>
-              <p className="text-sm">Students will answer in essay format</p>
-            </div>
 
             {/* Rubric */}
             {question.rubric && (

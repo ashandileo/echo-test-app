@@ -1,7 +1,8 @@
 "use client";
 
-import { CheckCircle2, XCircle } from "lucide-react";
+import { CheckCircle2, Headphones, XCircle } from "lucide-react";
 
+import { AudioPlayer } from "@/components/ui/audio-player";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -21,6 +22,8 @@ interface MultipleChoiceResultItemProps {
   explanation: string | null;
   points: number;
   isCorrect: boolean;
+  questionMode?: string;
+  audioUrl?: string | null;
 }
 
 const MultipleChoiceResultItem = ({
@@ -32,16 +35,40 @@ const MultipleChoiceResultItem = ({
   explanation,
   points,
   isCorrect,
+  questionMode,
+  audioUrl,
 }: MultipleChoiceResultItemProps) => {
+  const isListeningTest = questionMode === "audio";
+
   return (
     <Card>
       <CardHeader>
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1">
-            <CardTitle className="text-lg">Question {questionNumber}</CardTitle>
+            <div className="flex items-center gap-2">
+              <CardTitle className="text-lg">
+                Question {questionNumber}
+              </CardTitle>
+              {isListeningTest && (
+                <Badge
+                  variant="secondary"
+                  className="bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400"
+                >
+                  <Headphones className="h-3 w-3 mr-1" />
+                  Listening Test
+                </Badge>
+              )}
+            </div>
             <CardDescription className="mt-2 text-base text-foreground">
               {questionText}
             </CardDescription>
+
+            {/* Audio Player for Listening Test */}
+            {isListeningTest && audioUrl && (
+              <div className="mt-3">
+                <AudioPlayer audioUrl={audioUrl} />
+              </div>
+            )}
           </div>
           <div className="flex flex-col items-end gap-2">
             <Badge variant={isCorrect ? "default" : "destructive"}>

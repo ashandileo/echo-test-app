@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { useQuizDetails } from "@/lib/hooks/api/useQuiz";
 import useActions from "@/lib/hooks/useAction";
 import {
+  QUIZ_LISTENING_TEST_COUNT,
   QUIZ_QUESTION_COUNT,
   QUIZ_QUESTION_MULTIPLE_CHOICE,
 } from "@/lib/queryKeys/quiz";
@@ -51,6 +52,10 @@ const ItemMoreMultipleChoice = ({ question, questionNumber }: Props) => {
       });
       queryClient.invalidateQueries({
         queryKey: QUIZ_QUESTION_COUNT(itemId),
+      });
+      // Invalidate listening test count in case deleted question was audio mode
+      queryClient.invalidateQueries({
+        queryKey: QUIZ_LISTENING_TEST_COUNT(itemId),
       });
     } catch (error) {
       console.error("Failed to delete question:", error);

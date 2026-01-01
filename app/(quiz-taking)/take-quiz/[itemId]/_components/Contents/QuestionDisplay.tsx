@@ -1,7 +1,8 @@
 "use client";
 
-import { CheckCircle2, FileText } from "lucide-react";
+import { CheckCircle2, FileText, Headphones } from "lucide-react";
 
+import { AudioPlayer } from "@/components/ui/audio-player";
 import { Badge } from "@/components/ui/badge";
 import { CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -37,6 +38,18 @@ const QuestionDisplay = () => {
 
   const isAnswered = currentQuestion ? !!answers[currentQuestion.id] : false;
 
+  // Check if current question is a listening test (audio mode)
+  const isListeningTest =
+    selectedTab === "multiple_choice" &&
+    currentQuestion &&
+    "question_mode" in currentQuestion &&
+    currentQuestion.question_mode === "audio";
+
+  const audioUrl =
+    isListeningTest && currentQuestion && "audio_url" in currentQuestion
+      ? currentQuestion.audio_url
+      : null;
+
   return (
     <CardContent className="flex-1 overflow-y-auto min-h-0 p-4 md:p-6">
       <div
@@ -56,9 +69,20 @@ const QuestionDisplay = () => {
               {currentQuestionIndex + 1}
             </Badge>
             <div className="flex-1 min-w-0">
-              <h3 className="text-base md:text-lg font-semibold leading-relaxed">
-                {currentQuestion?.question_text}
-              </h3>
+              <div className="flex items-center gap-2 mb-2">
+                <h3 className="text-base md:text-lg font-semibold leading-relaxed">
+                  {currentQuestion?.question_text}
+                </h3>
+                {isListeningTest && (
+                  <Badge
+                    variant="secondary"
+                    className="shrink-0 bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400"
+                  >
+                    <Headphones className="h-3 w-3 mr-1" />
+                    Listening Test
+                  </Badge>
+                )}
+              </div>
               {currentQuestion && "points" in currentQuestion && (
                 <p className="text-xs md:text-sm text-muted-foreground mt-1">
                   Worth {currentQuestion.points}{" "}
@@ -77,6 +101,11 @@ const QuestionDisplay = () => {
             </Badge>
           )}
         </div>
+
+        {/* Audio Player for Listening Test */}
+        {isListeningTest && audioUrl && (
+          <AudioPlayer audioUrl={audioUrl} className="mb-2" />
+        )}
 
         {/* Answer Options */}
         {selectedTab === "multiple_choice" ? (

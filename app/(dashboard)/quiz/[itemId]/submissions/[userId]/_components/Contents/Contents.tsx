@@ -163,6 +163,8 @@ const Contents = () => {
                 explanation={question.explanation}
                 points={question.points}
                 isCorrect={submission.is_correct}
+                questionMode={question.question_mode}
+                audioUrl={question.audio_url}
               />
             );
           }

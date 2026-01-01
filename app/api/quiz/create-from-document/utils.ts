@@ -244,6 +244,7 @@ export async function saveMultipleChoiceQuestions(
     correct_answer: q.correct_answer,
     explanation: q.explanation,
     points: q.points ?? 1, // Default to 1 if not provided
+    question_mode: "text", // Default to text mode for AI-generated questions
   }));
 
   const { error } = await supabase
@@ -270,6 +271,7 @@ export async function saveEssayQuestions(
     question_text: q.question_text,
     rubric: q.rubric,
     points: q.points ?? 5, // Default to 5 if not provided
+    answer_mode: "text", // Default to text mode for AI-generated questions
   }));
 
   const { error } = await supabase

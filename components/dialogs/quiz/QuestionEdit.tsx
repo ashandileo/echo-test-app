@@ -25,9 +25,11 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
+  QUIZ_LISTENING_TEST_COUNT,
   QUIZ_QUESTION_COUNT,
   QUIZ_QUESTION_ESSAY,
   QUIZ_QUESTION_MULTIPLE_CHOICE,
+  QUIZ_SPEAKING_TEST_COUNT,
 } from "@/lib/queryKeys/quiz";
 import { createClient } from "@/lib/supabase/client";
 import { parseMultipleChoiceOptions } from "@/lib/utils/jsonb";
@@ -63,6 +65,9 @@ const QuestionEditDialog = ({
       correctAnswer: 0,
       sampleAnswer: "",
       explanation: "",
+      questionMode: "text",
+      answerMode: "text",
+      audioScript: "",
     },
   });
 
@@ -84,9 +89,19 @@ const QuestionEditDialog = ({
           parseInt(mcQuestion.correct_answer || "0", 10)
         );
         form.setValue("explanation", mcQuestion.explanation || "");
+        form.setValue(
+          "questionMode",
+          (mcQuestion.question_mode as "text" | "audio") || "text"
+        );
+        // Set audio script value
+        form.setValue("audioScript", mcQuestion.audio_script || "");
       } else {
         const essayQuestion = question as EssayQuestion;
         form.setValue("sampleAnswer", essayQuestion.rubric || "");
+        form.setValue(
+          "answerMode",
+          (essayQuestion.answer_mode as "text" | "voice") || "text"
+        );
       }
     }
   }, [question, questionType, open, form]);
@@ -108,6 +123,8 @@ const QuestionEditDialog = ({
             options: filteredOptions,
             correct_answer: values.correctAnswer?.toString() || "0",
             explanation: values.explanation || null,
+            question_mode: values.questionMode || "text", // Save question mode
+            audio_script: values.audioScript || null, // Save audio script
           })
           .eq("id", question.id);
 
@@ -116,12 +133,17 @@ const QuestionEditDialog = ({
         queryClient.invalidateQueries({
           queryKey: QUIZ_QUESTION_MULTIPLE_CHOICE(itemId),
         });
+        // Invalidate listening test count in case mode changed
+        queryClient.invalidateQueries({
+          queryKey: QUIZ_LISTENING_TEST_COUNT(itemId),
+        });
       } else {
         const { error } = await supabase
           .from("quiz_question_essay")
           .update({
             question_text: values.question,
             rubric: values.sampleAnswer || null,
+            answer_mode: values.answerMode || "text", // Save answer mode
           })
           .eq("id", question.id);
 
@@ -129,6 +151,10 @@ const QuestionEditDialog = ({
 
         queryClient.invalidateQueries({
           queryKey: QUIZ_QUESTION_ESSAY(itemId),
+        });
+        // Invalidate speaking test count in case mode changed
+        queryClient.invalidateQueries({
+          queryKey: QUIZ_SPEAKING_TEST_COUNT(itemId),
         });
       }
 

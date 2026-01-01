@@ -218,6 +218,7 @@ export function QuizUploadDocument({
       toast.success("Quiz created successfully!", {
         id: toastId,
         description: "Redirecting to quiz configuration...",
+        duration: 2000,
       });
 
       onOpenChange(false);
