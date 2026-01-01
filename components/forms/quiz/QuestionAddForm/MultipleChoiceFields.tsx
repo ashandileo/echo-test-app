@@ -15,9 +15,10 @@ import { QuestionFormValues } from "./schema";
 
 interface MultipleChoiceFieldsProps {
   form: UseFormReturn<QuestionFormValues>;
+  quizId?: string; // Optional quiz ID for AI generation context
 }
 
-const MultipleChoiceFields = ({ form }: MultipleChoiceFieldsProps) => {
+const MultipleChoiceFields = ({ form, quizId }: MultipleChoiceFieldsProps) => {
   const [isGeneratingExplanation, setIsGeneratingExplanation] = useState(false);
 
   const currentQuestion = form.watch("question");
@@ -40,17 +41,41 @@ const MultipleChoiceFields = ({ form }: MultipleChoiceFieldsProps) => {
       return;
     }
 
+    // Check if all options are filled
+    const hasEmptyOptions = currentOptions?.some((opt) => !opt?.trim());
+    if (hasEmptyOptions) {
+      return;
+    }
+
     setIsGeneratingExplanation(true);
 
-    // Simulate AI generation (in production, this would call an actual API)
-    setTimeout(() => {
-      const generatedExplanation = `The correct answer is ${String.fromCharCode(
-        65 + (currentCorrectAnswer || 0)
-      )}. ${correctOption}. ${currentQuestion} because ${correctOption} is the most appropriate choice based on the concepts learned. This answer demonstrates correct understanding of the material being tested.`;
+    try {
+      const response = await fetch("/api/quiz/generate-explanation", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          question: currentQuestion,
+          options: currentOptions,
+          correctAnswer: currentCorrectAnswer || 0,
+          quizId: quizId, // Include quizId for context
+        }),
+      });
 
-      form.setValue("explanation", generatedExplanation);
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to generate explanation");
+      }
+
+      form.setValue("explanation", data.explanation);
+    } catch (error) {
+      console.error("Error generating explanation:", error);
+      // Optionally show error toast/notification here
+    } finally {
       setIsGeneratingExplanation(false);
-    }, 1500);
+    }
   };
 
   return (
@@ -124,8 +149,10 @@ const MultipleChoiceFields = ({ form }: MultipleChoiceFieldsProps) => {
             rows={3}
           />
           <p className="text-xs text-muted-foreground mt-1">
-            Click the &quot;Generate with AI&quot; button to create an automatic
-            explanation based on the question and correct answer
+            Click &quot;Generate with AI&quot; to create a structured
+            explanation in Markdown format (Bahasa Indonesia). Supports{" "}
+            <strong>bold</strong>, <em>lists</em>, and <code>`code`</code>{" "}
+            formatting for better readability.
           </p>
         </FieldContent>
       </Field>

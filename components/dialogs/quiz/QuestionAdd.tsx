@@ -25,12 +25,14 @@ interface QuestionAddDialogProps {
   open: boolean;
   onAddQuestion: (question: QuestionFormValues) => void;
   closeDialog: () => void;
+  quizId?: string; // Optional quiz ID for AI generation context
 }
 
 const QuestionAddDialog = ({
   open,
   onAddQuestion,
   closeDialog,
+  quizId,
 }: QuestionAddDialogProps) => {
   const form = useForm<QuestionFormValues>({
     resolver: zodResolver(questionFormSchema),
@@ -76,7 +78,7 @@ const QuestionAddDialog = ({
 
         {/* Scrollable Content */}
         <div className="flex-1 overflow-y-auto min-h-0 px-6 py-4">
-          <QuestionAddForm form={form} />
+          <QuestionAddForm form={form} quizId={quizId} />
         </div>
 
         {/* Footer */}

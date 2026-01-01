@@ -40,17 +40,13 @@ export async function POST(request: Request) {
       );
     }
 
-    // Get document context (use more chunks for better question generation)
-    const { fileName, context } = await getDocumentContext(
-      filePath,
-      user.id,
-      5
-    );
+    // Get ALL document context for comprehensive question generation
+    const { fileName, context } = await getDocumentContext(filePath, user.id);
 
     // Generate quiz title and description using AI
     const metadata = await generateQuizMetadata(
       fileName,
-      context.slice(0, 2000) // Limit to ~500 tokens
+      context.slice(0, 2000) // Use first ~500 tokens for metadata generation
     );
 
     // Create quiz in database

@@ -1,5 +1,9 @@
 "use client";
 
+import ReactMarkdown from "react-markdown";
+
+import remarkGfm from "remark-gfm";
+
 import { Card, CardContent } from "@/components/ui/card";
 import { Database } from "@/types/supabase";
 
@@ -42,12 +46,14 @@ const Essay = ({ question, questionNumber }: Props) => {
             {/* Rubric */}
             {question.rubric && (
               <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-900">
-                <p className="text-xs font-medium text-blue-700 dark:text-blue-400 mb-1">
+                <p className="text-xs font-medium text-blue-700 dark:text-blue-400 mb-2">
                   Sample Answer / Rubric:
                 </p>
-                <p className="text-sm text-blue-900 dark:text-blue-300 whitespace-pre-wrap">
-                  {question.rubric}
-                </p>
+                <div className="markdown-content text-blue-900 dark:text-blue-300">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    {question.rubric}
+                  </ReactMarkdown>
+                </div>
               </div>
             )}
           </div>

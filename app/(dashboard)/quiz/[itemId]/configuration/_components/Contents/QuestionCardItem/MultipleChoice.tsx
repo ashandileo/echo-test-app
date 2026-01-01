@@ -1,6 +1,9 @@
 "use client";
 
+import ReactMarkdown from "react-markdown";
+
 import { CheckCircle2 } from "lucide-react";
+import remarkGfm from "remark-gfm";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { type MultipleChoiceOption } from "@/lib/utils/jsonb";
@@ -71,9 +74,16 @@ const MultipleChoice = ({ question, questionNumber }: Props) => {
 
             {/* Explanation */}
             {question.explanation && (
-              <p className="text-sm text-muted-foreground mt-2 italic">
-                Explanation: {question.explanation}
-              </p>
+              <div className="text-sm text-muted-foreground mt-3 p-3 bg-muted/30 rounded-md border border-muted">
+                <p className="font-medium text-foreground mb-1.5">
+                  Explanation:
+                </p>
+                <div className="markdown-content">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    {question.explanation}
+                  </ReactMarkdown>
+                </div>
+              </div>
             )}
           </div>
           <ItemMoreMultipleChoice

@@ -166,7 +166,7 @@ const QuestionEditDialog = ({
 
         {/* Scrollable Content */}
         <div className="flex-1 overflow-y-auto min-h-0 px-6 py-4">
-          <QuestionAddForm form={form} isEditing={true} />
+          <QuestionAddForm form={form} isEditing={true} quizId={itemId} />
         </div>
 
         {/* Footer */}

@@ -21,9 +21,14 @@ import { QuestionFormValues } from "./schema";
 interface QuestionAddFormProps {
   form: UseFormReturn<QuestionFormValues>;
   isEditing?: boolean;
+  quizId?: string; // Optional quiz ID for AI generation context
 }
 
-const QuestionAddForm = ({ form, isEditing = false }: QuestionAddFormProps) => {
+const QuestionAddForm = ({
+  form,
+  isEditing = false,
+  quizId,
+}: QuestionAddFormProps) => {
   const questionType = form.watch("type");
   const currentQuestion = form.watch("question");
 
@@ -89,11 +94,11 @@ const QuestionAddForm = ({ form, isEditing = false }: QuestionAddFormProps) => {
 
       {/* Form for Multiple Choice */}
       {questionType === "multiple_choice" && (
-        <MultipleChoiceFields form={form} />
+        <MultipleChoiceFields form={form} quizId={quizId} />
       )}
 
       {/* Form for Essay */}
-      {questionType === "essay" && <EssayFields form={form} />}
+      {questionType === "essay" && <EssayFields form={form} quizId={quizId} />}
     </FieldGroup>
   );
 };

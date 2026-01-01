@@ -128,6 +128,7 @@ const Add = () => {
         open={isDialogOpen}
         onAddQuestion={handleAddQuestion}
         closeDialog={toggleDialogOpen}
+        quizId={itemId}
       />
     </>
   );
