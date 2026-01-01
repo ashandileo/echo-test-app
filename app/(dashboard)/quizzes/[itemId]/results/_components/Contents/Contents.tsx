@@ -6,6 +6,7 @@ import { useParams } from "next/navigation";
 import { ClipboardList } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import {
   useQuizQuestionEssay,
   useQuizQuestionMultipleChoice,
@@ -141,19 +142,16 @@ const Contents = () => {
   // If no submissions, show empty state
   if (!hasSubmissions) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 px-4">
-        <div className="rounded-full bg-muted p-6 mb-4">
-          <ClipboardList className="h-12 w-12 text-muted-foreground" />
-        </div>
-        <h3 className="text-xl font-semibold mb-2">No Results Yet</h3>
-        <p className="text-muted-foreground text-center mb-6 max-w-md">
-          You haven&apos;t taken this quiz yet. Start the quiz to see your
-          results here.
-        </p>
-        <Button asChild>
-          <Link href={`/take-quiz/${itemId}`}>Start Quiz</Link>
-        </Button>
-      </div>
+      <EmptyState
+        icon={ClipboardList}
+        title="No Results Yet"
+        description="You haven't taken this quiz yet. Start the quiz to see your results here."
+        action={
+          <Button asChild>
+            <Link href={`/take-quiz/${itemId}`}>Start Quiz</Link>
+          </Button>
+        }
+      />
     );
   }
 

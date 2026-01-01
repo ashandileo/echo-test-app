@@ -24,6 +24,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
 import {
   Table,
   TableBody,
@@ -121,20 +122,11 @@ const SubmissionsTable = ({ submissions }: SubmissionsTableProps) => {
 
   if (submissions.length === 0) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>No Submissions Yet</CardTitle>
-          <CardDescription>
-            No students have started this quiz yet.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="flex flex-col items-center justify-center py-12">
-          <FileText className="h-16 w-16 text-muted-foreground mb-4" />
-          <p className="text-muted-foreground text-center">
-            Submissions will appear here once students start taking the quiz.
-          </p>
-        </CardContent>
-      </Card>
+      <EmptyState
+        icon={FileText}
+        title="No Submissions Yet"
+        description="No students have started this quiz yet. Submissions will appear here once students start taking the quiz."
+      />
     );
   }
 

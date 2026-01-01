@@ -2,6 +2,9 @@
 
 import { useParams } from "next/navigation";
 
+import { FileText } from "lucide-react";
+
+import { EmptyState } from "@/components/ui/empty-state";
 import { useQuizQuestionMultipleChoice } from "@/lib/hooks/api/useQuizQuestion";
 import { type MultipleChoiceOption } from "@/lib/utils/jsonb";
 import { Database } from "@/types/supabase";
@@ -34,11 +37,11 @@ const QuestionContentMultipleChoices = () => {
 
   if (allQuestions?.length === 0) {
     return (
-      <div className="flex items-center justify-center py-8">
-        <p className="text-muted-foreground">
-          No multiple choice questions yet
-        </p>
-      </div>
+      <EmptyState
+        icon={FileText}
+        title="No Multiple Choice Questions Yet"
+        description="Start by adding multiple choice questions to this quiz."
+      />
     );
   }
 

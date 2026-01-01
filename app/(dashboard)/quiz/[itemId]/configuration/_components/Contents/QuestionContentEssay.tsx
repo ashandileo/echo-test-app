@@ -2,6 +2,9 @@
 
 import { useParams } from "next/navigation";
 
+import { FileText } from "lucide-react";
+
+import { EmptyState } from "@/components/ui/empty-state";
 import { useQuizQuestionEssay } from "@/lib/hooks/api/useQuizQuestion";
 
 import Essay from "./QuestionCardItem/Essay";
@@ -21,9 +24,11 @@ const QuestionContentEssay = () => {
 
   if (allQuestions?.length === 0) {
     return (
-      <div className="flex items-center justify-center py-8">
-        <p className="text-muted-foreground">No essay questions yet</p>
-      </div>
+      <EmptyState
+        icon={FileText}
+        title="No Essay Questions Yet"
+        description="Start by adding essay questions to this quiz."
+      />
     );
   }
 
