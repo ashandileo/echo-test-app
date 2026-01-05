@@ -48,7 +48,8 @@ export default function QuizDetailLayout({
     if (path === "information") {
       return pathname === `/quiz/${tabId}`;
     }
-    return pathname === `/quiz/${tabId}/${path}`;
+    // Check if current pathname starts with the path (includes sub-routes)
+    return pathname.startsWith(`/quiz/${tabId}/${path}`);
   };
 
   return (

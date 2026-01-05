@@ -14,24 +14,18 @@ const SubmissionDetailPage = () => {
 
   return (
     <div className="flex flex-1 flex-col gap-6 p-4 md:p-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => router.push(`/quiz/${itemId}`)}
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">
-              Student Submission
-            </h1>
-            <p className="text-muted-foreground">
-              Review and grade student answers
-            </p>
-          </div>
-        </div>
+      <div className="flex items-center gap-2">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => router.push(`/quiz/${itemId}/submissions`)}
+          className="h-8 w-8"
+        >
+          <ArrowLeft className="h-4 w-4" />
+        </Button>
+        <span className="text-sm text-muted-foreground">
+          Back to submissions
+        </span>
       </div>
       <Contents />
     </div>

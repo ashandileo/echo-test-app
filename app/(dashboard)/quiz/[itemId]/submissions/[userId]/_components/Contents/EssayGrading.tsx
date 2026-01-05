@@ -1,11 +1,21 @@
 "use client";
 
 import { useState } from "react";
+import ReactMarkdown from "react-markdown";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { CheckCircle2, FileText, Loader2, Save, Sparkles } from "lucide-react";
+import {
+  CheckCircle2,
+  FileText,
+  Loader2,
+  Mic,
+  Save,
+  Sparkles,
+} from "lucide-react";
+import remarkGfm from "remark-gfm";
 
+import { AudioPlayer } from "@/components/ui/audio-player";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,6 +34,8 @@ interface EssayGradingProps {
   questionNumber: number;
   questionText: string;
   answerText: string;
+  audioUrl?: string | null;
+  answerMode?: "text" | "voice";
   rubric: string | null;
   maxPoints: number;
   pointsEarned: number | null;
@@ -40,6 +52,8 @@ const EssayGrading = ({
   questionNumber,
   questionText,
   answerText,
+  audioUrl,
+  answerMode,
   rubric,
   maxPoints,
   pointsEarned,
@@ -57,6 +71,8 @@ const EssayGrading = ({
   );
 
   const queryClient = useQueryClient();
+
+  const isSpeakingTest = answerMode === "voice";
 
   // AI Generate mutation
   const aiGenerateMutation = useMutation({
@@ -149,6 +165,15 @@ const EssayGrading = ({
             </CardDescription>
           </div>
           <div className="flex flex-col items-end gap-2">
+            {isSpeakingTest && (
+              <Badge
+                variant="outline"
+                className="bg-orange-50 dark:bg-orange-950/20 text-orange-700 dark:text-orange-400 border-orange-200 dark:border-orange-800"
+              >
+                <Mic className="h-3 w-3 mr-1" />
+                Speaking Test
+              </Badge>
+            )}
             {isGraded ? (
               <Badge
                 variant="default"
@@ -173,9 +198,11 @@ const EssayGrading = ({
             <p className="text-sm font-medium text-purple-900 dark:text-purple-300 mb-1">
               Grading Rubric
             </p>
-            <p className="text-sm text-purple-800 dark:text-purple-400 whitespace-pre-wrap">
-              {rubric}
-            </p>
+            <div className="text-sm text-purple-800 dark:text-purple-400 markdown-content">
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                {rubric}
+              </ReactMarkdown>
+            </div>
           </div>
         )}
 
@@ -184,9 +211,27 @@ const EssayGrading = ({
           <Label className="text-base font-semibold">
             Student&apos;s Answer
           </Label>
-          <div className="p-4 rounded-lg border bg-muted/50">
-            <p className="text-sm whitespace-pre-wrap">{answerText}</p>
-          </div>
+          {isSpeakingTest && audioUrl ? (
+            // Render audio player for voice recordings
+            <div className="space-y-2">
+              <AudioPlayer audioUrl={audioUrl} />
+              <p className="text-xs text-muted-foreground italic">
+                Voice recording submitted by student
+              </p>
+            </div>
+          ) : answerText ? (
+            // Render text answer
+            <div className="p-4 rounded-lg border bg-muted/50">
+              <p className="text-sm whitespace-pre-wrap">{answerText}</p>
+            </div>
+          ) : (
+            // No answer submitted
+            <div className="p-4 rounded-lg border bg-muted/50">
+              <p className="text-sm text-muted-foreground italic">
+                No answer submitted
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Grading Section */}

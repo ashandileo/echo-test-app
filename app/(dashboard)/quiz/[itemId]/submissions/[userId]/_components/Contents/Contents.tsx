@@ -1,6 +1,10 @@
 "use client";
 
+import { useState } from "react";
+
 import { useParams } from "next/navigation";
+
+import { FileCheck, FileText } from "lucide-react";
 
 import {
   useQuizQuestionEssay,
@@ -11,6 +15,7 @@ import {
   useQuizSubmissionMultipleChoice,
 } from "@/lib/hooks/api/useQuizSubmission";
 import { useUserById } from "@/lib/hooks/api/useUser";
+import { cn } from "@/lib/utils";
 import { parseMultipleChoiceOptions } from "@/lib/utils/jsonb";
 import { Database } from "@/types/supabase";
 
@@ -34,6 +39,9 @@ interface QuestionWithSubmission {
 
 const Contents = () => {
   const { itemId, userId } = useParams<{ itemId: string; userId: string }>();
+  const [activeTab, setActiveTab] = useState<"multiple_choice" | "essay">(
+    "multiple_choice"
+  );
 
   // Fetch user data
   const { data: userData, isLoading: isLoadingUser } = useUserById(userId);
@@ -142,57 +150,116 @@ const Contents = () => {
         maxScore={maxScore}
       />
 
+      {/* Tabs */}
+      <div className="flex border-b bg-card rounded-t-lg overflow-hidden">
+        <button
+          onClick={() => setActiveTab("multiple_choice")}
+          className={cn(
+            "flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-colors",
+            activeTab === "multiple_choice"
+              ? "bg-primary text-primary-foreground border-b-2 border-primary"
+              : "text-muted-foreground hover:text-foreground hover:bg-accent"
+          )}
+        >
+          <FileCheck className="h-4 w-4" />
+          Multiple Choice
+          {mcQuestions && mcQuestions.length > 0 && (
+            <span
+              className={cn(
+                "ml-1 px-2 py-0.5 text-xs rounded-full",
+                activeTab === "multiple_choice"
+                  ? "bg-primary-foreground/20"
+                  : "bg-muted"
+              )}
+            >
+              {mcQuestions.length}
+            </span>
+          )}
+        </button>
+        <button
+          onClick={() => setActiveTab("essay")}
+          className={cn(
+            "flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-colors",
+            activeTab === "essay"
+              ? "bg-primary text-primary-foreground border-b-2 border-primary"
+              : "text-muted-foreground hover:text-foreground hover:bg-accent"
+          )}
+        >
+          <FileText className="h-4 w-4" />
+          Essay
+          {essayQuestions && essayQuestions.length > 0 && (
+            <span
+              className={cn(
+                "ml-1 px-2 py-0.5 text-xs rounded-full",
+                activeTab === "essay" ? "bg-primary-foreground/20" : "bg-muted"
+              )}
+            >
+              {essayQuestions.length}
+            </span>
+          )}
+        </button>
+      </div>
+
+      {/* Questions */}
       <div className="space-y-4">
-        {questionsWithSubmissions.map((item, index) => {
-          if (item.type === "multiple_choice") {
-            const question = item.question as MultipleChoiceQuestion;
-            const submission = item.submission as MCSubmission | null;
+        {activeTab === "multiple_choice" &&
+          questionsWithSubmissions
+            .filter((item) => item.type === "multiple_choice")
+            .map((item, index) => {
+              const question = item.question as MultipleChoiceQuestion;
+              const submission = item.submission as MCSubmission | null;
 
-            if (!submission) return null;
+              if (!submission) return null;
 
-            const options = parseMultipleChoiceOptions(question.options);
+              const options = parseMultipleChoiceOptions(question.options);
 
-            return (
-              <MultipleChoiceReview
-                key={question.id}
-                questionNumber={index + 1}
-                questionText={question.question_text}
-                options={options}
-                selectedAnswer={submission.selected_answer}
-                correctAnswer={question.correct_answer}
-                explanation={question.explanation}
-                points={question.points}
-                isCorrect={submission.is_correct}
-                questionMode={question.question_mode}
-                audioUrl={question.audio_url}
-              />
-            );
-          }
+              return (
+                <MultipleChoiceReview
+                  key={question.id}
+                  questionNumber={index + 1}
+                  questionText={question.question_text}
+                  options={options}
+                  selectedAnswer={submission.selected_answer}
+                  correctAnswer={question.correct_answer}
+                  explanation={question.explanation}
+                  points={question.points}
+                  isCorrect={submission.is_correct}
+                  questionMode={question.question_mode}
+                  audioUrl={question.audio_url}
+                />
+              );
+            })}
 
-          const question = item.question as EssayQuestion;
-          const submission = item.submission as EssaySubmission | null;
+        {activeTab === "essay" &&
+          questionsWithSubmissions
+            .filter((item) => item.type === "essay")
+            .map((item, index) => {
+              const question = item.question as EssayQuestion;
+              const submission = item.submission as EssaySubmission | null;
 
-          if (!submission) return null;
+              if (!submission) return null;
 
-          return (
-            <EssayGrading
-              key={question.id}
-              questionNumber={index + 1}
-              questionText={question.question_text}
-              answerText={submission.answer_text}
-              rubric={question.rubric}
-              maxPoints={question.points}
-              pointsEarned={submission.points_earned}
-              feedback={submission.feedback}
-              isGraded={submission.points_earned !== null}
-              gradedAt={submission.graded_at}
-              submissionId={submission.id}
-              quizId={itemId}
-              userId={userId}
-              studentName={studentName}
-            />
-          );
-        })}
+              return (
+                <EssayGrading
+                  key={question.id}
+                  questionNumber={index + 1}
+                  questionText={question.question_text}
+                  answerText={submission.answer_text || ""}
+                  audioUrl={submission.audio_url}
+                  answerMode={question.answer_mode as "text" | "voice"}
+                  rubric={question.rubric}
+                  maxPoints={question.points}
+                  pointsEarned={submission.points_earned}
+                  feedback={submission.feedback}
+                  isGraded={submission.points_earned !== null}
+                  gradedAt={submission.graded_at}
+                  submissionId={submission.id}
+                  quizId={itemId}
+                  userId={userId}
+                  studentName={studentName}
+                />
+              );
+            })}
       </div>
     </div>
   );

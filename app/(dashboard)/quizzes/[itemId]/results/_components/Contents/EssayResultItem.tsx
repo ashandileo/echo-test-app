@@ -1,7 +1,11 @@
 "use client";
 
-import { Clock, FileCheck, FileClock } from "lucide-react";
+import ReactMarkdown from "react-markdown";
 
+import { Clock, FileCheck, FileClock, Mic } from "lucide-react";
+import remarkGfm from "remark-gfm";
+
+import { AudioPlayer } from "@/components/ui/audio-player";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -16,7 +20,8 @@ interface EssayResultItemProps {
   questionNumber: number;
   questionText: string;
   answerText: string;
-  rubric: string | null;
+  audioUrl?: string | null;
+  answerMode?: "text" | "voice";
   points: number;
   pointsEarned: number | null;
   feedback: string | null;
@@ -28,13 +33,16 @@ const EssayResultItem = ({
   questionNumber,
   questionText,
   answerText,
-  rubric,
+  audioUrl,
+  answerMode,
   points,
   pointsEarned,
   feedback,
   isGraded,
   gradedAt,
 }: EssayResultItemProps) => {
+  const isSpeakingTest = answerMode === "voice";
+
   return (
     <Card>
       <CardHeader>
@@ -46,6 +54,15 @@ const EssayResultItem = ({
             </CardDescription>
           </div>
           <div className="flex flex-col items-end gap-2">
+            {isSpeakingTest && (
+              <Badge
+                variant="outline"
+                className="bg-orange-50 dark:bg-orange-950/20 text-orange-700 dark:text-orange-400 border-orange-200 dark:border-orange-800"
+              >
+                <Mic className="h-3 w-3 mr-1" />
+                Speaking Test
+              </Badge>
+            )}
             <Badge variant={isGraded ? "default" : "secondary"}>
               {isGraded ? (
                 <FileCheck className="h-3 w-3 mr-1" />
@@ -72,24 +89,28 @@ const EssayResultItem = ({
           <p className="text-sm font-medium text-muted-foreground">
             Your Answer
           </p>
-          <div className="p-4 bg-muted rounded-lg">
-            <p className="text-sm whitespace-pre-wrap">{answerText}</p>
-          </div>
-        </div>
-
-        {/* Rubric */}
-        {rubric && (
-          <div className="space-y-2">
-            <p className="text-sm font-medium text-muted-foreground">
-              Grading Rubric
-            </p>
-            <div className="p-4 bg-purple-50 dark:bg-purple-950/20 border-l-4 border-purple-500 rounded-r-lg">
-              <p className="text-sm text-purple-800 dark:text-purple-400 whitespace-pre-wrap">
-                {rubric}
+          {isSpeakingTest && audioUrl ? (
+            // Render audio player for voice recordings
+            <div className="space-y-2">
+              <AudioPlayer audioUrl={audioUrl} />
+              <p className="text-xs text-muted-foreground italic">
+                Voice recording submitted
               </p>
             </div>
-          </div>
-        )}
+          ) : answerText ? (
+            // Render text answer
+            <div className="p-4 bg-muted rounded-lg">
+              <p className="text-sm whitespace-pre-wrap">{answerText}</p>
+            </div>
+          ) : (
+            // No answer submitted
+            <div className="p-4 bg-muted rounded-lg">
+              <p className="text-sm text-muted-foreground italic">
+                No answer submitted
+              </p>
+            </div>
+          )}
+        </div>
 
         {/* Grading Status */}
         {isGraded ? (
@@ -109,9 +130,11 @@ const EssayResultItem = ({
             </div>
             {feedback ? (
               <div className="p-4 bg-green-50 dark:bg-green-950/20 border-l-4 border-green-500 rounded-r-lg">
-                <p className="text-sm text-green-800 dark:text-green-400 whitespace-pre-wrap">
-                  {feedback}
-                </p>
+                <div className="text-sm text-green-800 dark:text-green-400 markdown-content">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    {feedback}
+                  </ReactMarkdown>
+                </div>
               </div>
             ) : (
               <div className="p-4 bg-muted rounded-lg">

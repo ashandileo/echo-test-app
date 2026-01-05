@@ -205,8 +205,9 @@ const Contents = () => {
                 key={question.id}
                 questionNumber={index + 1}
                 questionText={question.question_text}
-                answerText={submission.answer_text}
-                rubric={question.rubric}
+                answerText={submission.answer_text || ""}
+                audioUrl={submission.audio_url}
+                answerMode={question.answer_mode as "text" | "voice"}
                 points={question.points}
                 pointsEarned={submission.points_earned}
                 feedback={submission.feedback}

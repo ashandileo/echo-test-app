@@ -1,13 +1,19 @@
 "use client";
 
-import { CheckCircle2, FileText, Headphones } from "lucide-react";
+import { CheckCircle2, FileText, Headphones, Mic } from "lucide-react";
 
 import { AudioPlayer } from "@/components/ui/audio-player";
 import { Badge } from "@/components/ui/badge";
 import { CardContent } from "@/components/ui/card";
+import { VoiceRecorder } from "@/components/ui/voice-recorder";
 import { cn } from "@/lib/utils";
+import { Database } from "@/types/supabase";
 
 import { useQuizTaking } from "../QuizTakingContext";
+
+type EssayQuestion = Database["public"]["Tables"]["quiz_question_essay"]["Row"];
+type MultipleChoiceQuestion =
+  Database["public"]["Tables"]["quiz_question_multiple_choice"]["Row"];
 
 const QuestionDisplay = () => {
   const {
@@ -17,6 +23,8 @@ const QuestionDisplay = () => {
     currentQuestionIndex,
     answers,
     handleAnswerSelect,
+    handleAudioRecording,
+    handleAudioDelete,
   } = useQuizTaking();
 
   if (currentQuestions.length === 0) {
@@ -44,6 +52,31 @@ const QuestionDisplay = () => {
     currentQuestion &&
     "question_mode" in currentQuestion &&
     currentQuestion.question_mode === "audio";
+
+  // Check if current question is a speaking test (audio answer mode)
+  // Type guard to check if it's an essay question
+  const isEssayQuestion = (
+    q: EssayQuestion | MultipleChoiceQuestion
+  ): q is EssayQuestion => {
+    return "answer_mode" in q;
+  };
+
+  const isSpeakingTest =
+    selectedTab === "essay" &&
+    currentQuestion &&
+    isEssayQuestion(currentQuestion) &&
+    currentQuestion.answer_mode === "voice";
+
+  console.log("Debug Speaking Test:", {
+    selectedTab,
+    currentQuestion,
+    hasAnswerMode: currentQuestion && "answer_mode" in currentQuestion,
+    answerMode:
+      currentQuestion && isEssayQuestion(currentQuestion)
+        ? currentQuestion.answer_mode
+        : "N/A",
+    isSpeakingTest,
+  });
 
   const audioUrl =
     isListeningTest && currentQuestion && "audio_url" in currentQuestion
@@ -80,6 +113,15 @@ const QuestionDisplay = () => {
                   >
                     <Headphones className="h-3 w-3 mr-1" />
                     Listening Test
+                  </Badge>
+                )}
+                {isSpeakingTest && (
+                  <Badge
+                    variant="secondary"
+                    className="shrink-0 bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
+                  >
+                    <Mic className="h-3 w-3 mr-1" />
+                    Speaking Test
                   </Badge>
                 )}
               </div>
@@ -156,29 +198,60 @@ const QuestionDisplay = () => {
           </div>
         ) : (
           <div className="space-y-2 flex-1 flex flex-col">
-            <div className="relative flex-1 min-h-[150px] md:min-h-[200px]">
-              <textarea
-                value={currentQuestion ? answers[currentQuestion.id] || "" : ""}
-                onChange={(e) =>
-                  currentQuestion &&
-                  handleAnswerSelect(currentQuestion.id, e.target.value)
+            {isSpeakingTest ? (
+              // Voice Recorder for Speaking Test
+              <VoiceRecorder
+                key={`${currentQuestion?.id}-${currentQuestion ? answers[currentQuestion.id] || "no-audio" : "no-question"}`} // Force remount when question or audio changes
+                onRecordingComplete={(blob) => {
+                  if (currentQuestion) {
+                    handleAudioRecording(currentQuestion.id, blob);
+                  }
+                }}
+                onRecordingDelete={() => {
+                  if (currentQuestion) {
+                    handleAudioDelete(currentQuestion.id);
+                  }
+                }}
+                existingAudioUrl={
+                  currentQuestion ? answers[currentQuestion.id] : null
                 }
-                placeholder="Type your detailed answer here..."
-                className="w-full h-full p-3 md:p-4 rounded-lg md:rounded-xl border-2 border-border focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none text-sm md:text-base"
               />
-            </div>
-            <div className="flex justify-between items-center text-xs">
-              <p className="text-muted-foreground">
-                {currentQuestion ? answers[currentQuestion.id]?.length || 0 : 0}{" "}
-                characters
-              </p>
-              {currentQuestion && answers[currentQuestion.id]?.length > 0 && (
-                <p className="text-muted-foreground">
-                  ~{Math.ceil((answers[currentQuestion.id]?.length || 0) / 5)}{" "}
-                  words
-                </p>
-              )}
-            </div>
+            ) : (
+              // Text Area for Essay Questions
+              <>
+                <div className="relative flex-1 min-h-37.5 md:min-h-50">
+                  <textarea
+                    value={
+                      currentQuestion ? answers[currentQuestion.id] || "" : ""
+                    }
+                    onChange={(e) =>
+                      currentQuestion &&
+                      handleAnswerSelect(currentQuestion.id, e.target.value)
+                    }
+                    placeholder="Type your detailed answer here..."
+                    className="w-full h-full p-3 md:p-4 rounded-lg md:rounded-xl border-2 border-border focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none text-sm md:text-base"
+                  />
+                </div>
+                <div className="flex justify-between items-center text-xs">
+                  <p className="text-muted-foreground">
+                    {currentQuestion
+                      ? answers[currentQuestion.id]?.length || 0
+                      : 0}{" "}
+                    characters
+                  </p>
+                  {currentQuestion &&
+                    answers[currentQuestion.id]?.length > 0 && (
+                      <p className="text-muted-foreground">
+                        ~
+                        {Math.ceil(
+                          (answers[currentQuestion.id]?.length || 0) / 5
+                        )}{" "}
+                        words
+                      </p>
+                    )}
+                </div>
+              </>
+            )}
           </div>
         )}
       </div>

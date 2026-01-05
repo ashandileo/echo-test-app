@@ -17,13 +17,6 @@ import {
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import {
   Table,
@@ -131,144 +124,130 @@ const SubmissionsTable = ({ submissions }: SubmissionsTableProps) => {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle className="flex items-center gap-2">
-              <FileText className="h-5 w-5" />
-              Submissions ({submissions.length})
-            </CardTitle>
-            <CardDescription>
-              View and manage student quiz submissions
-            </CardDescription>
-          </div>
-          {needsGrading > 0 && (
-            <Badge variant="destructive" className="flex items-center gap-1">
-              <AlertCircle className="h-3 w-3" />
-              {needsGrading} Need{needsGrading > 1 ? "" : "s"} Grading
-            </Badge>
-          )}
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Student</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-center">
-                  <div className="flex items-center justify-center gap-1">
-                    <TrendingUp className="h-4 w-4" />
-                    MC Score
-                  </div>
-                </TableHead>
-                <TableHead className="text-center">
-                  <div className="flex items-center justify-center gap-1">
-                    <FileText className="h-4 w-4" />
-                    Essay Score
-                  </div>
-                </TableHead>
-                <TableHead className="text-center">
-                  <div className="flex items-center justify-center gap-1">
-                    <Award className="h-4 w-4" />
-                    Total Score
-                  </div>
-                </TableHead>
-                <TableHead>Submitted At</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {submissions.map((submission) => {
-                const mcPercentage = submission.multiple_choice_percentage || 0;
-                const essayPercentage = submission.essay_percentage || 0;
-                const totalPercentage = submission.percentage || 0;
+    <>
+      {/* Summary Info */}
+      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <span>
+          {submissions.length} student{submissions.length > 1 ? "s" : ""}
+        </span>
+        <span>·</span>
+        {needsGrading > 0 ? (
+          <span className="text-orange-600 dark:text-orange-400 font-medium">
+            {needsGrading} need{needsGrading > 1 ? "" : "s"} grading
+          </span>
+        ) : (
+          <span className="text-emerald-600 dark:text-emerald-400 font-medium">
+            All graded
+          </span>
+        )}
+      </div>
 
-                // Check if this submission needs essay grading
-                // A submission needs grading if it's submitted but not completed
-                const needsEssayGrading = submission.status === "submitted";
+      {/* Table */}
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Student</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="text-center">
+                <div className="flex items-center justify-center gap-1">
+                  <TrendingUp className="h-4 w-4" />
+                  MC
+                </div>
+              </TableHead>
+              <TableHead className="text-center">
+                <div className="flex items-center justify-center gap-1">
+                  <FileText className="h-4 w-4" />
+                  Essay
+                </div>
+              </TableHead>
+              <TableHead className="text-center">
+                <div className="flex items-center justify-center gap-1">
+                  <Award className="h-4 w-4" />
+                  Total
+                </div>
+              </TableHead>
+              <TableHead>Submitted</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {submissions.map((submission) => {
+              const mcPercentage = submission.multiple_choice_percentage || 0;
+              const essayPercentage = submission.essay_percentage || 0;
+              const totalPercentage = submission.percentage || 0;
 
-                return (
-                  <TableRow key={submission.id}>
-                    <TableCell className="font-medium">
-                      <div>
-                        <p>{getUserName(submission)}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {submission.users?.email}
-                        </p>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex flex-col gap-1">
-                        {getStatusBadge(submission.status)}
-                        {needsEssayGrading && (
-                          <Badge
-                            variant="outline"
-                            className="text-xs border-orange-600 text-orange-600"
-                          >
-                            Essay grading required
-                          </Badge>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <div className="flex flex-col items-center">
-                        <span className="font-semibold">
-                          {submission.multiple_choice_score || 0}
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          {mcPercentage.toFixed(1)}%
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <div className="flex flex-col items-center">
-                        <span className="font-semibold">
-                          {submission.essay_score || 0}
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          {essayPercentage.toFixed(1)}%
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <div className="flex flex-col items-center">
-                        <span className="font-bold text-lg">
-                          {submission.total_score || 0}
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          {totalPercentage.toFixed(1)}%
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          of {submission.max_possible_score || 0}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell>{formatDate(submission.submitted_at)}</TableCell>
-                    <TableCell className="text-right">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => {
-                          router.push(
-                            `/quiz/${submission.quiz_id}/submissions/${submission.user_id}`
-                          );
-                        }}
-                      >
-                        <Eye className="h-4 w-4 mr-2" />
-                        View Details
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        </div>
-      </CardContent>
-    </Card>
+              return (
+                <TableRow key={submission.id}>
+                  <TableCell className="font-medium">
+                    <div>
+                      <p>{getUserName(submission)}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {submission.users?.email}
+                      </p>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex flex-col gap-1">
+                      {getStatusBadge(submission.status)}
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-center">
+                    <div className="flex flex-col items-center gap-0.5">
+                      <span className="font-semibold">
+                        {submission.multiple_choice_score || 0}
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        {mcPercentage.toFixed(0)}%
+                      </span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-center">
+                    <div className="flex flex-col items-center gap-0.5">
+                      <span className="font-semibold">
+                        {submission.essay_score || 0}
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        {essayPercentage.toFixed(0)}%
+                      </span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-center">
+                    <div className="flex flex-col items-center gap-0.5">
+                      <span className="font-bold">
+                        {submission.total_score || 0}
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        {totalPercentage.toFixed(0)}%
+                      </span>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <span className="text-sm">
+                      {formatDate(submission.submitted_at)}
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        router.push(
+                          `/quiz/${submission.quiz_id}/submissions/${submission.user_id}`
+                        );
+                      }}
+                    >
+                      <Eye className="h-4 w-4 mr-2" />
+                      View
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </div>
+    </>
   );
 };
 

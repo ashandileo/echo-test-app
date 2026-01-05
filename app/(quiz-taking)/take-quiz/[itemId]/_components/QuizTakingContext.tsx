@@ -11,9 +11,10 @@ import {
 
 import { useParams, useRouter } from "next/navigation";
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
+import { useUploadAudio } from "@/lib/hooks/api/useAudioStorage";
 import {
   useQuizSubmissionStatus,
   useStartQuiz,
@@ -43,7 +44,8 @@ type EssaySubmissionSafe = {
   quiz_id: string;
   question_id: string;
   user_id: string;
-  answer_text: string;
+  answer_text: string | null;
+  audio_url: string | null;
   submitted_at: string | null;
   updated_at: string | null;
 };
@@ -73,6 +75,8 @@ interface QuizTakingContextValue {
   // Actions
   setCurrentQuestionIndex: (index: number) => void;
   handleAnswerSelect: (questionId: string, answer: string) => void;
+  handleAudioRecording: (questionId: string, audioBlob: Blob) => void;
+  handleAudioDelete: (questionId: string) => void;
   handleNext: () => void;
   handlePrevious: () => void;
   handleTabSwitch: (tab: "multiple_choice" | "essay") => void;
@@ -110,9 +114,30 @@ export const QuizTakingProvider = ({ children }: QuizTakingProviderProps) => {
   const [userId, setUserId] = useState<string | null>(null);
   const [isSubmitDialogOpen, setIsSubmitDialogOpen] = useState(false);
 
+  const queryClient = useQueryClient();
+
   // React Query mutations
   const startQuizMutation = useStartQuiz();
   const submitQuizMutation = useSubmitQuiz();
+
+  // Audio upload mutation
+  const uploadAudioMutation = useUploadAudio({
+    onSuccess: async ({ audioUrl }, variables) => {
+      // Save the audio URL to the answers
+      setUserAnswers((prev) => ({
+        ...prev,
+        [variables.questionId]: audioUrl,
+      }));
+
+      // Save to database
+      await saveAnswer(variables.questionId, audioUrl);
+
+      // Invalidate essay submissions query to refresh the data
+      queryClient.invalidateQueries({
+        queryKey: ["quiz-essay-submissions", itemId, userId],
+      });
+    },
+  });
 
   // Fetch submission status
   const { data: submissionStatus } = useQuizSubmissionStatus(
@@ -211,7 +236,7 @@ export const QuizTakingProvider = ({ children }: QuizTakingProviderProps) => {
       const { data, error } = await supabase
         .from("quiz_submission_essay")
         .select(
-          "id, quiz_id, question_id, user_id, answer_text, submitted_at, updated_at"
+          "id, quiz_id, question_id, user_id, answer_text, audio_url, submitted_at, updated_at"
         )
         .eq("quiz_id", itemId)
         .eq("user_id", userId);
@@ -231,9 +256,13 @@ export const QuizTakingProvider = ({ children }: QuizTakingProviderProps) => {
       loadedAnswers[submission.question_id] = submission.selected_answer;
     });
 
-    // Load essay answers
+    // Load essay answers (text or audio URL)
     essaySubmissions?.forEach((submission) => {
-      loadedAnswers[submission.question_id] = submission.answer_text;
+      // Prefer audio_url if available (for speaking tests), otherwise use answer_text
+      const answer = submission.audio_url || submission.answer_text;
+      if (answer) {
+        loadedAnswers[submission.question_id] = answer;
+      }
     });
 
     return loadedAnswers;
@@ -335,30 +364,52 @@ export const QuizTakingProvider = ({ children }: QuizTakingProviderProps) => {
           );
         }
       } else {
+        // Essay question - check the answer mode
+        const essayQuestion = essayQuestions?.find((q) => q.id === questionId);
+        const isAudioAnswer = essayQuestion?.answer_mode === "voice";
+
         // Check if essay answer has changed from what's in the database
         const existingSubmission = essaySubmissions?.find(
           (s) => s.question_id === questionId
         );
 
+        // For audio answers, check audio_url; for text answers, check answer_text
+        const hasChanged = isAudioAnswer
+          ? !existingSubmission || existingSubmission.audio_url !== answer
+          : !existingSubmission || existingSubmission.answer_text !== answer;
+
         // Only upsert if answer is different or doesn't exist yet
-        if (!existingSubmission || existingSubmission.answer_text !== answer) {
-          // Essay question - save the answer text
-          const { error } = await supabase.from("quiz_submission_essay").upsert(
-            {
-              quiz_id: itemId,
-              question_id: questionId,
-              user_id: userId,
-              answer_text: answer,
-            },
-            {
+        if (hasChanged) {
+          // Essay question - save based on answer mode
+          const submissionData = isAudioAnswer
+            ? {
+                quiz_id: itemId,
+                question_id: questionId,
+                user_id: userId,
+                audio_url: answer,
+                answer_text: "", // Empty string for audio answers
+              }
+            : {
+                quiz_id: itemId,
+                question_id: questionId,
+                user_id: userId,
+                answer_text: answer,
+                audio_url: null,
+              };
+
+          const { error } = await supabase
+            .from("quiz_submission_essay")
+            .upsert(submissionData, {
               onConflict: "user_id,question_id",
-            }
-          );
+            });
 
           if (error) {
             console.error("Error saving essay answer:", error);
           } else {
-            console.log("Essay answer saved:", questionId);
+            console.log(
+              `Essay ${isAudioAnswer ? "audio" : "text"} answer saved:`,
+              questionId
+            );
             // Refetch submissions to update the cache
             await refetchEssaySubmissions();
           }
@@ -377,6 +428,57 @@ export const QuizTakingProvider = ({ children }: QuizTakingProviderProps) => {
       ...prev,
       [questionId]: answer,
     }));
+  };
+
+  // Handler for audio recording
+  const handleAudioRecording = (questionId: string, audioBlob: Blob) => {
+    if (!userId || !itemId) {
+      toast.error("Cannot save recording: User not authenticated");
+      return;
+    }
+
+    // Use mutation to upload audio
+    uploadAudioMutation.mutate({
+      audioBlob,
+      questionId,
+      quizId: itemId,
+      userId,
+    });
+  };
+
+  // Handler for audio deletion
+  const handleAudioDelete = async (questionId: string) => {
+    if (!userId || !itemId) {
+      return;
+    }
+
+    try {
+      // Remove from local state
+      setUserAnswers((prev) => {
+        const newAnswers = { ...prev };
+        delete newAnswers[questionId];
+        return newAnswers;
+      });
+
+      // Delete from database
+      const { error } = await supabase
+        .from("quiz_submission_essay")
+        .delete()
+        .eq("quiz_id", itemId)
+        .eq("question_id", questionId)
+        .eq("user_id", userId);
+
+      if (error) {
+        console.error("Error deleting audio submission:", error);
+      } else {
+        // Refetch submissions to update the cache
+        await refetchEssaySubmissions();
+        toast.success("Recording deleted successfully!");
+      }
+    } catch (error) {
+      console.error("Error deleting audio:", error);
+      toast.error("Failed to delete recording.");
+    }
   };
 
   const handleNext = async () => {
@@ -487,6 +589,8 @@ export const QuizTakingProvider = ({ children }: QuizTakingProviderProps) => {
     // Actions
     setCurrentQuestionIndex,
     handleAnswerSelect,
+    handleAudioRecording,
+    handleAudioDelete,
     handleNext,
     handlePrevious,
     handleTabSwitch,

@@ -1,6 +1,9 @@
 "use client";
 
+import ReactMarkdown from "react-markdown";
+
 import { CheckCircle2, Headphones, XCircle } from "lucide-react";
+import remarkGfm from "remark-gfm";
 
 import { AudioPlayer } from "@/components/ui/audio-player";
 import { Badge } from "@/components/ui/badge";
@@ -146,9 +149,11 @@ const MultipleChoiceReview = ({
             <p className="text-sm font-medium text-blue-900 dark:text-blue-300 mb-1">
               Explanation
             </p>
-            <p className="text-sm text-blue-800 dark:text-blue-400">
-              {explanation}
-            </p>
+            <div className="text-sm text-blue-800 dark:text-blue-400 markdown-content">
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                {explanation}
+              </ReactMarkdown>
+            </div>
           </div>
         )}
       </CardContent>
