@@ -53,7 +53,8 @@ export const useQuizQuestionMultipleChoice = (itemId: string) => {
         .select("*")
         .eq("quiz_id", itemId)
         .is("deleted_at", null)
-        .order("created_at", { ascending: true });
+        .order("created_at", { ascending: true })
+        .order("id", { ascending: true }); // Secondary sort by ID for consistency
 
       if (error) throw error;
 
@@ -66,6 +67,8 @@ export const useQuizQuestionMultipleChoice = (itemId: string) => {
       return parsedQuestions;
     },
     enabled: !!itemId,
+    refetchOnMount: true, // Always refetch on mount to ensure fresh data
+    refetchOnWindowFocus: false, // Don't refetch on window focus to avoid unnecessary requests
   });
 };
 
@@ -81,13 +84,16 @@ export const useQuizQuestionEssay = (itemId: string) => {
         .select("*")
         .eq("quiz_id", itemId)
         .is("deleted_at", null)
-        .order("created_at", { ascending: true });
+        .order("created_at", { ascending: true })
+        .order("id", { ascending: true }); // Secondary sort by ID for consistency
 
       if (error) throw error;
 
       return data;
     },
     enabled: !!itemId,
+    refetchOnMount: true, // Always refetch on mount to ensure fresh data
+    refetchOnWindowFocus: false, // Don't refetch on window focus to avoid unnecessary requests
   });
 };
 

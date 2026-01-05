@@ -133,6 +133,10 @@ const QuestionEditDialog = ({
         queryClient.invalidateQueries({
           queryKey: QUIZ_QUESTION_MULTIPLE_CHOICE(itemId),
         });
+        // Force immediate refetch to ensure fresh data
+        await queryClient.refetchQueries({
+          queryKey: QUIZ_QUESTION_MULTIPLE_CHOICE(itemId),
+        });
         // Invalidate listening test count in case mode changed
         queryClient.invalidateQueries({
           queryKey: QUIZ_LISTENING_TEST_COUNT(itemId),
@@ -150,6 +154,10 @@ const QuestionEditDialog = ({
         if (error) throw error;
 
         queryClient.invalidateQueries({
+          queryKey: QUIZ_QUESTION_ESSAY(itemId),
+        });
+        // Force immediate refetch to ensure fresh data
+        await queryClient.refetchQueries({
           queryKey: QUIZ_QUESTION_ESSAY(itemId),
         });
         // Invalidate speaking test count in case mode changed
