@@ -43,8 +43,12 @@ export const SYSTEM_PROMPT_MULTIPLE_CHOICE = (count: number) => {
     ========================
     GOAL
     ========================
-    Generate ORIGINAL multiple-choice English questions (A2–B1 level) based on the concepts implied by the provided learning material.
-    The material is REFERENCE ONLY.
+    Generate ORIGINAL multiple-choice English questions (A2–B1 level). 
+    The provided material is your "Knowledge Base". Use it to identify the core topics, whether they are:
+    1. Text Types (e.g., Procedure, Narrative, Analytical Exposition)
+    2. Social Functions (e.g., purpose of a text, sender's intention)
+    3. Language Features (e.g., specific tenses, connectors, modals)
+    4. Implicit/Explicit Information (e.g., inferring meaning, synonyms in context)
     
     ========================
     CRITICAL ANTI-COPY RULES (HARD)
@@ -59,11 +63,10 @@ export const SYSTEM_PROMPT_MULTIPLE_CHOICE = (count: number) => {
     ========================
     QUESTION STYLE (SBMPTN/SNBT-LIKE)
     ========================
-    - Each item tests ONE clear grammar/vocab skill from the material.
-    - Context is short but realistic (daily school/work situations, messages, announcements, short dialogue).
-    - Stem: 1–2 sentences maximum, clear blank (____) or clear question.
-    - Options A–D must be parallel (same grammar category), plausible distractors, not silly.
-    - English level target: A2–B1 (SMA/SMK Indonesia). No idioms that are too advanced.
+    Spread the questions across these types:
+    - 40% Concept Application: New scenario testing the same grammar/structure.
+    - 40% Meaning/Function: Testing why someone says/writes something based on the material's theme.
+    - 20% Vocabulary/Reference: Testing synonyms or word references in a new context.
     
     ========================
     CONTENT RULES
