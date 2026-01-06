@@ -20,6 +20,8 @@ export interface GeneratedQuestion {
   id: string;
   type: "multiple_choice" | "essay";
   question: string;
+  questionMode?: "text" | "audio"; // For multiple choice
+  answerMode?: "text" | "voice"; // For essay
   options?: string[];
   correctAnswer?: number;
   explanation?: string;
@@ -137,6 +139,19 @@ const AIQuestionReview = ({
                               ? "Multiple Choice"
                               : "Essay"}
                           </span>
+                          {/* Show mode badge */}
+                          {question.type === "multiple_choice" &&
+                            question.questionMode === "audio" && (
+                              <span className="text-xs px-1.5 sm:px-2 py-0.5 rounded-full font-medium bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400">
+                                Listening Test
+                              </span>
+                            )}
+                          {question.type === "essay" &&
+                            question.answerMode === "voice" && (
+                              <span className="text-xs px-1.5 sm:px-2 py-0.5 rounded-full font-medium bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                                Speaking Test
+                              </span>
+                            )}
                         </div>
 
                         {/* Edit Button */}

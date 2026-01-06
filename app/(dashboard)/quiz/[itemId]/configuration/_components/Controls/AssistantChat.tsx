@@ -31,244 +31,120 @@ interface AIGeneratorFormValues {
   additionalInstructions?: string;
 }
 
+interface ExtendedGeneratedQuestion extends GeneratedQuestion {
+  questionMode?: "text" | "audio";
+  answerMode?: "text" | "voice";
+  audioScript?: string | null; // Add audio_script field
+  expectedWordCount?: string; // Add expected_word_count field
+}
+
 const AssistantChat = () => {
   const [isGeneratorOpen, toggleGeneratorOpen] = useToggle(false);
   const [isReviewOpen, setIsReviewOpen] = useState(false);
   const [generatedQuestions, setGeneratedQuestions] = useState<
-    GeneratedQuestion[]
+    ExtendedGeneratedQuestion[]
   >([]);
-
   const { itemId } = useParams<{ itemId: string }>();
   const queryClient = useQueryClient();
 
-  // TODO: Replace with actual AI generation API call
+  // Generate questions using RAG
   const handleGenerate = async (values: AIGeneratorFormValues) => {
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    try {
+      const response = await fetch("/api/quiz/generate-ai-questions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          quizId: itemId,
+          questionCount: values.questionCount,
+          questionType: values.questionType,
+          questionMode: values.questionMode,
+          answerMode: values.answerMode,
+          additionalInstructions: values.additionalInstructions || "",
+          saveToDatabase: false, // Don't save directly, show review first
+        }),
+      });
 
-    // Mock generated questions with variety
-    const mockQuestions: GeneratedQuestion[] = [];
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to generate questions");
+      }
 
-    // Sample questions based on type
-    const mcTextQuestions = [
-      {
-        question: "What is the capital city of Indonesia?",
-        options: ["Jakarta", "Bandung", "Surabaya", "Yogyakarta"],
-        correctAnswer: 0,
-        explanation:
-          "Jakarta is the capital and largest city of Indonesia, located on the northwest coast of Java island.",
-      },
-      {
-        question: "Which of the following is a prime number?",
-        options: ["15", "21", "23", "27"],
-        correctAnswer: 2,
-        explanation:
-          "23 is a prime number because it can only be divided by 1 and itself without remainder.",
-      },
-      {
-        question: "What does HTML stand for?",
-        options: [
-          "Hyper Text Markup Language",
-          "High Tech Modern Language",
-          "Home Tool Markup Language",
-          "Hyperlinks and Text Markup Language",
-        ],
-        correctAnswer: 0,
-        explanation:
-          "HTML stands for Hyper Text Markup Language, which is the standard markup language for creating web pages.",
-      },
-    ];
+      const result = await response.json();
 
-    const mcListeningQuestions = [
-      {
-        question: "Based on the audio, what time does the train depart?",
-        options: ["8:30 AM", "9:00 AM", "9:30 AM", "10:00 AM"],
-        correctAnswer: 2,
-        explanation:
-          "In the audio, the announcement clearly states that the train will depart at 9:30 AM from platform 3.",
-      },
-      {
-        question: "What is the speaker's main concern in the conversation?",
-        options: [
-          "The weather forecast",
-          "Traffic conditions",
-          "Meeting schedule",
-          "Restaurant reservation",
-        ],
-        correctAnswer: 1,
-        explanation:
-          "The speaker repeatedly mentions being worried about heavy traffic on the highway.",
-      },
-    ];
-
-    const essayTextQuestions = [
-      {
-        question:
-          "Explain the difference between renewable and non-renewable energy sources. Provide at least two examples of each.",
-        sampleAnswer:
-          "Students should explain that renewable energy sources can be naturally replenished (e.g., solar, wind, hydro), while non-renewable sources are finite (e.g., coal, oil, natural gas). Award full marks for clear explanation with correct examples.",
-      },
-      {
-        question:
-          "Describe the water cycle and explain why it is important for life on Earth.",
-        sampleAnswer:
-          "Students should describe evaporation, condensation, precipitation, and collection. They should mention importance for freshwater supply, climate regulation, and ecosystem support. Award points for completeness and clarity.",
-      },
-    ];
-
-    const essaySpeakingQuestions = [
-      {
-        question:
-          "Introduce yourself and talk about your hobbies for 1-2 minutes. Include what you like to do in your free time and why you enjoy these activities.",
-        sampleAnswer:
-          "Evaluate based on: fluency (30%), pronunciation (30%), vocabulary range (20%), and content relevance (20%). Student should speak clearly for at least 1 minute covering the required topics.",
-      },
-      {
-        question:
-          "Describe your favorite place in your city. Explain what makes it special and why people should visit it.",
-        sampleAnswer:
-          "Assess: coherence and organization (25%), descriptive language use (25%), pronunciation and intonation (25%), time management (25%). Minimum 1.5 minutes speaking time.",
-      },
-    ];
-
-    // Generate based on selected type
-    if (values.questionType === "multiple_choice") {
-      const sourceQuestions =
-        values.questionMode === "audio"
-          ? mcListeningQuestions
-          : mcTextQuestions;
-      for (
-        let i = 0;
-        i < Math.min(values.questionCount, sourceQuestions.length);
-        i++
-      ) {
-        mockQuestions.push({
-          id: `temp-mc-${i}`,
-          type: "multiple_choice",
-          ...sourceQuestions[i],
+      // Transform to GeneratedQuestion format - match create-from-document response
+      const questions: ExtendedGeneratedQuestion[] = result.data.questions.map(
+        (q: {
+          id: string;
+          type: "multiple_choice" | "essay";
+          question_text: string;
+          question_mode?: "text" | "audio";
+          audio_script?: string | null;
+          answer_mode?: "text" | "voice";
+          options?: string[];
+          correct_answer?: string;
+          explanation?: string;
+          expected_word_count?: string;
+          rubric?: string;
+          points?: number;
+        }) => ({
+          id: q.id,
+          type: q.type,
+          question: q.question_text, // Map question_text to question for GeneratedQuestion interface
+          questionMode: q.question_mode,
+          audioScript: q.audio_script, // Store audio_script
+          answerMode: q.answer_mode,
+          expectedWordCount: q.expected_word_count, // Store expected_word_count
+          options: q.options,
+          correctAnswer:
+            q.correct_answer !== undefined
+              ? parseInt(q.correct_answer)
+              : undefined, // Convert string to number
+          explanation: q.explanation,
+          sampleAnswer: q.rubric, // Use rubric as sampleAnswer
           selected: true,
-        });
-      }
-      // Fill remaining with variations
-      for (let i = sourceQuestions.length; i < values.questionCount; i++) {
-        const base = sourceQuestions[i % sourceQuestions.length];
-        mockQuestions.push({
-          id: `temp-mc-${i}`,
-          type: "multiple_choice",
-          question: `${base.question} (Variation ${i + 1})`,
-          options: base.options,
-          correctAnswer: base.correctAnswer,
-          explanation: base.explanation,
-          selected: true,
-        });
-      }
-    } else if (values.questionType === "essay") {
-      const sourceQuestions =
-        values.answerMode === "voice"
-          ? essaySpeakingQuestions
-          : essayTextQuestions;
-      for (
-        let i = 0;
-        i < Math.min(values.questionCount, sourceQuestions.length);
-        i++
-      ) {
-        mockQuestions.push({
-          id: `temp-essay-${i}`,
-          type: "essay",
-          ...sourceQuestions[i],
-          selected: true,
-        });
-      }
-      // Fill remaining with variations
-      for (let i = sourceQuestions.length; i < values.questionCount; i++) {
-        const base = sourceQuestions[i % sourceQuestions.length];
-        mockQuestions.push({
-          id: `temp-essay-${i}`,
-          type: "essay",
-          question: `${base.question} (Variation ${i + 1})`,
-          sampleAnswer: base.sampleAnswer,
-          selected: true,
-        });
-      }
-    } else if (values.questionType === "mixed") {
-      // Mix of all types
-      const allQuestions = [
-        ...mcTextQuestions.map((q) => ({
-          ...q,
-          type: "multiple_choice" as const,
-        })),
-        ...mcListeningQuestions.map((q) => ({
-          ...q,
-          type: "multiple_choice" as const,
-        })),
-        ...essayTextQuestions.map((q) => ({ ...q, type: "essay" as const })),
-        ...essaySpeakingQuestions.map((q) => ({
-          ...q,
-          type: "essay" as const,
-        })),
-      ];
+        })
+      );
 
-      for (
-        let i = 0;
-        i < Math.min(values.questionCount, allQuestions.length);
-        i++
-      ) {
-        const q = allQuestions[i];
-        if (q.type === "multiple_choice") {
-          mockQuestions.push({
-            id: `temp-mixed-${i}`,
-            type: "multiple_choice",
-            question: q.question,
-            options: q.options,
-            correctAnswer: q.correctAnswer,
-            explanation: q.explanation,
-            selected: true,
-          });
-        } else {
-          mockQuestions.push({
-            id: `temp-mixed-${i}`,
-            type: "essay",
-            question: q.question,
-            sampleAnswer: q.sampleAnswer,
-            selected: true,
-          });
-        }
-      }
-
-      // Fill remaining with variations
-      for (let i = allQuestions.length; i < values.questionCount; i++) {
-        const base = allQuestions[i % allQuestions.length];
-        if (base.type === "multiple_choice") {
-          mockQuestions.push({
-            id: `temp-mixed-${i}`,
-            type: "multiple_choice",
-            question: `${base.question} (Variation ${i + 1})`,
-            options: base.options,
-            correctAnswer: base.correctAnswer,
-            explanation: base.explanation,
-            selected: true,
-          });
-        } else {
-          mockQuestions.push({
-            id: `temp-mixed-${i}`,
-            type: "essay",
-            question: `${base.question} (Variation ${i + 1})`,
-            sampleAnswer: base.sampleAnswer,
-            selected: true,
-          });
-        }
-      }
+      setGeneratedQuestions(questions);
+      toggleGeneratorOpen(); // Close generator
+      setIsReviewOpen(true); // Open review
+    } catch (error) {
+      console.error("Error generating questions:", error);
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Failed to generate questions. Please try again."
+      );
     }
-
-    setGeneratedQuestions(mockQuestions);
-    toggleGeneratorOpen(); // Close generator
-    setIsReviewOpen(true); // Open review
   };
 
   // Mutation for saving questions
   const saveMutation = useMutation({
-    mutationFn: async (questions: GeneratedQuestion[]) => {
+    mutationFn: async (questions: ExtendedGeneratedQuestion[]) => {
       const supabase = createClient();
+
+      // Get max order_number to determine starting point for new questions
+      // Using MAX instead of COUNT to handle cases where questions were deleted
+      const { data: mcMaxData } = await supabase
+        .from("quiz_question_multiple_choice")
+        .select("order_number")
+        .eq("quiz_id", itemId)
+        .order("order_number", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      const { data: essayMaxData } = await supabase
+        .from("quiz_question_essay")
+        .select("order_number")
+        .eq("quiz_id", itemId)
+        .order("order_number", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      const lastMcOrderNumber = mcMaxData?.order_number || 0;
+      const lastEssayOrderNumber = essayMaxData?.order_number || 0;
 
       // Insert multiple choice questions
       const mcQuestions = questions.filter((q) => q.type === "multiple_choice");
@@ -276,13 +152,15 @@ const AssistantChat = () => {
         const { error: mcError } = await supabase
           .from("quiz_question_multiple_choice")
           .insert(
-            mcQuestions.map((q) => ({
+            mcQuestions.map((q, index) => ({
               quiz_id: itemId,
               question_text: q.question,
               options: q.options || [],
               correct_answer: q.correctAnswer?.toString() || "0",
               explanation: q.explanation || null,
-              question_mode: "text",
+              question_mode: q.questionMode || "text",
+              audio_script: q.audioScript || null,
+              order_number: lastMcOrderNumber + index + 1, // Continue from last order_number
             }))
           );
 
@@ -295,11 +173,12 @@ const AssistantChat = () => {
         const { error: essayError } = await supabase
           .from("quiz_question_essay")
           .insert(
-            essayQuestions.map((q) => ({
+            essayQuestions.map((q, index) => ({
               quiz_id: itemId,
               question_text: q.question,
               rubric: q.sampleAnswer || null,
-              answer_mode: "text",
+              answer_mode: q.answerMode || "text",
+              order_number: lastEssayOrderNumber + index + 1, // Continue from last order_number
             }))
           );
 
@@ -340,7 +219,9 @@ const AssistantChat = () => {
   });
 
   const handleSave = async (selectedQuestions: GeneratedQuestion[]) => {
-    await saveMutation.mutateAsync(selectedQuestions);
+    await saveMutation.mutateAsync(
+      selectedQuestions as ExtendedGeneratedQuestion[]
+    );
   };
 
   return (
