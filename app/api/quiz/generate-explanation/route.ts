@@ -65,8 +65,6 @@ async function getRelevantContext(
       .map((chunk: { chunk_text: string }) => chunk.chunk_text)
       .join("\n\n");
 
-    console.log("context", context);
-
     return context;
   } catch (error) {
     console.error("Error getting relevant context:", error);

@@ -181,7 +181,9 @@ export const QuizTakingProvider = ({ children }: QuizTakingProviderProps) => {
         .from("quiz_question_multiple_choice")
         .select("*")
         .eq("quiz_id", itemId)
-        .order("created_at", { ascending: true });
+        .order("order_number", { ascending: true, nullsFirst: false })
+        .order("created_at", { ascending: true })
+        .order("id", { ascending: true });
 
       if (error) throw error;
       return data || [];
@@ -197,7 +199,9 @@ export const QuizTakingProvider = ({ children }: QuizTakingProviderProps) => {
         .from("quiz_question_essay")
         .select("*")
         .eq("quiz_id", itemId)
-        .order("created_at", { ascending: true });
+        .order("order_number", { ascending: true, nullsFirst: false })
+        .order("created_at", { ascending: true })
+        .order("id", { ascending: true });
 
       if (error) throw error;
       return data || [];
@@ -353,15 +357,9 @@ export const QuizTakingProvider = ({ children }: QuizTakingProviderProps) => {
           if (error) {
             console.error("Error saving multiple choice answer:", error);
           } else {
-            console.log("Multiple choice answer saved:", questionId);
             // Refetch submissions to update the cache
             await refetchMcSubmissions();
           }
-        } else {
-          console.log(
-            "Multiple choice answer unchanged, skipping save:",
-            questionId
-          );
         }
       } else {
         // Essay question - check the answer mode
@@ -406,15 +404,9 @@ export const QuizTakingProvider = ({ children }: QuizTakingProviderProps) => {
           if (error) {
             console.error("Error saving essay answer:", error);
           } else {
-            console.log(
-              `Essay ${isAudioAnswer ? "audio" : "text"} answer saved:`,
-              questionId
-            );
             // Refetch submissions to update the cache
             await refetchEssaySubmissions();
           }
-        } else {
-          console.log("Essay answer unchanged, skipping save:", questionId);
         }
       }
     } catch (error) {

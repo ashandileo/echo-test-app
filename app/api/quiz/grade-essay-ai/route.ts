@@ -186,8 +186,6 @@ export async function POST(request: Request) {
       studentName
     );
 
-    console.log("Generating AI grading suggestions...");
-
     // Call OpenAI API
     const response = await openai.chat.completions.create({
       model: "gpt-4o-mini",
@@ -206,8 +204,6 @@ export async function POST(request: Request) {
 
     // Parse AI response
     const result = parseAIResponse(responseText, maxPoints);
-
-    console.log("AI grading generated successfully:", result);
 
     return NextResponse.json<GradeEssayResponse>(result);
   } catch (error) {

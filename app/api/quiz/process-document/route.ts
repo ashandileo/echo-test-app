@@ -88,10 +88,6 @@ export async function POST(request: Request) {
     // Get public URL for the uploaded file
     const fileUrl = await getFilePublicUrl(filePath);
 
-    console.log(
-      `Successfully processed document with ${documentChunks.length} chunks`
-    );
-
     return NextResponse.json({
       success: true,
       message: "Document processed and embeddings generated successfully",

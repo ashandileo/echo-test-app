@@ -59,8 +59,8 @@ export async function POST(request: Request) {
 
     // Generate questions in parallel
     const [mcQuestions, essayQuestions] = await Promise.all([
-      generateMultipleChoiceQuestions(context, 5),
-      generateEssayQuestions(context, 3),
+      generateMultipleChoiceQuestions(context, 8), // Generate 8 questions (mix of text & listening)
+      generateEssayQuestions(context, 4),
     ]);
 
     // Save questions to database

@@ -53,8 +53,9 @@ export const useQuizQuestionMultipleChoice = (itemId: string) => {
         .select("*")
         .eq("quiz_id", itemId)
         .is("deleted_at", null)
+        .order("order_number", { ascending: true, nullsFirst: false })
         .order("created_at", { ascending: true })
-        .order("id", { ascending: true }); // Secondary sort by ID for consistency
+        .order("id", { ascending: true }); // Fallback for questions without order_number
 
       if (error) throw error;
 
@@ -84,8 +85,9 @@ export const useQuizQuestionEssay = (itemId: string) => {
         .select("*")
         .eq("quiz_id", itemId)
         .is("deleted_at", null)
+        .order("order_number", { ascending: true, nullsFirst: false })
         .order("created_at", { ascending: true })
-        .order("id", { ascending: true }); // Secondary sort by ID for consistency
+        .order("id", { ascending: true }); // Fallback for questions without order_number
 
       if (error) throw error;
 

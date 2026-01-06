@@ -29,6 +29,19 @@ const Add = () => {
   const addMultipleChoiceMutation = useMutation({
     mutationFn: async (question: QuestionFormValues) => {
       const supabase = createClient();
+
+      // Get the current max order_number for this quiz
+      const { data: maxOrderData } = await supabase
+        .from("quiz_question_multiple_choice")
+        .select("order_number")
+        .eq("quiz_id", itemId)
+        .is("deleted_at", null)
+        .order("order_number", { ascending: false, nullsFirst: false })
+        .limit(1)
+        .single();
+
+      const nextOrderNumber = (maxOrderData?.order_number ?? 0) + 1;
+
       const { data, error } = await supabase
         .from("quiz_question_multiple_choice")
         .insert({
@@ -39,6 +52,7 @@ const Add = () => {
           explanation: question.explanation || null,
           question_mode: question.questionMode || "text", // Save question mode
           audio_script: question.audioScript || null, // Save audio script
+          order_number: nextOrderNumber, // Set order number
         })
         .select()
         .single();
@@ -74,6 +88,19 @@ const Add = () => {
   const addEssayMutation = useMutation({
     mutationFn: async (question: QuestionFormValues) => {
       const supabase = createClient();
+
+      // Get the current max order_number for this quiz
+      const { data: maxOrderData } = await supabase
+        .from("quiz_question_essay")
+        .select("order_number")
+        .eq("quiz_id", itemId)
+        .is("deleted_at", null)
+        .order("order_number", { ascending: false, nullsFirst: false })
+        .limit(1)
+        .single();
+
+      const nextOrderNumber = (maxOrderData?.order_number ?? 0) + 1;
+
       const { data, error } = await supabase
         .from("quiz_question_essay")
         .insert({
@@ -81,6 +108,7 @@ const Add = () => {
           question_text: question.question,
           rubric: question.sampleAnswer || null,
           answer_mode: question.answerMode || "text", // Save answer mode
+          order_number: nextOrderNumber, // Set order number
         })
         .select()
         .single();

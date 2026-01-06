@@ -93,8 +93,6 @@ export const uploadFileToStorage = async (
     const timestamp = Date.now();
     const filePath = `${userId}/${timestamp}-${fileName}`;
 
-    console.log(`Uploading file: ${fileName} for user: ${userId}`);
-
     const { error: uploadError } = await supabase.storage
       .from(STORAGE_BUCKET_NAME)
       .upload(filePath, buffer, {
@@ -110,10 +108,8 @@ export const uploadFileToStorage = async (
       };
     }
 
-    console.log(`File uploaded successfully to: ${filePath}`);
     return { filePath };
   } catch (error) {
-    console.error("Upload file error:", error);
     return {
       filePath: "",
       error: ERROR_MESSAGES.STORAGE_UPLOAD_FAILED,

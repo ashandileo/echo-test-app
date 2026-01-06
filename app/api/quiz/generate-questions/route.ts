@@ -46,10 +46,6 @@ export async function POST(request: Request) {
       );
     }
 
-    console.log(
-      `Generating ${numQuestions} questions for quiz: ${quizId} at ${difficulty} difficulty`
-    );
-
     // Step 1: Get quiz
     const quiz = await getQuiz(quizId, user.id);
 
@@ -74,12 +70,8 @@ export async function POST(request: Request) {
       difficulty
     );
 
-    console.log(`Generated ${questions.length} questions`);
-
     // Step 5: Update quiz with questions
     const updatedQuiz = await updateQuizQuestions(quizId, questions);
-
-    console.log(`Quiz updated successfully: ${quizId}`);
 
     return NextResponse.json({
       success: true,

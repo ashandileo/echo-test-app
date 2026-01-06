@@ -31,17 +31,12 @@ export async function POST(request: Request) {
       );
     }
 
-    console.log("User authenticated:", user.id);
-    console.log("Fetching quiz:", quizId);
-
     // 1. Check if quiz exists and is not already published
     const { data: quiz, error: quizError } = await supabase
       .from("quiz")
       .select("id, name, status, created_by")
       .eq("id", quizId)
       .single();
-
-    console.log("Quiz query result:", { quiz, quizError });
 
     if (quizError || !quiz) {
       return NextResponse.json(
@@ -100,10 +95,6 @@ export async function POST(request: Request) {
           continue;
         }
 
-        console.log(
-          `Generating TTS for question ${question.id}: ${question.audio_script.substring(0, 50)}...`
-        );
-
         // Generate and upload TTS from audio_script
         const audioUrl = await generateAndUploadTTS(
           question.audio_script,
@@ -126,8 +117,6 @@ export async function POST(request: Request) {
           audioUrl,
           success: true,
         });
-
-        console.log(`✓ TTS generated for question ${question.id}`);
       } catch (error) {
         console.error(
           `Error generating TTS for question ${question.id}:`,

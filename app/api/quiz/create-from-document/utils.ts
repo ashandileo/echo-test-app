@@ -21,7 +21,9 @@ export interface QuizMetadata {
 }
 
 export interface MultipleChoiceQuestion {
+  question_mode: "text" | "audio";
   question_text: string;
+  audio_script?: string | null;
   options: string[];
   correct_answer: string;
   explanation: string;
@@ -29,7 +31,9 @@ export interface MultipleChoiceQuestion {
 }
 
 export interface EssayQuestion {
+  answer_mode: "text" | "voice";
   question_text: string;
+  expected_word_count?: string;
   rubric: string;
   points: number;
 }
@@ -90,11 +94,9 @@ export async function generateMultipleChoiceQuestions(
           content: USER_PROMPT_MULTIPLE_CHOICE(count, context),
         },
       ],
-      temperature: 0.5,
-      top_p: 0.9,
-      presence_penalty: 0.3,
-      frequency_penalty: 0.2,
+      temperature: 0.3,
       response_format: { type: "json_object" },
+      max_tokens: 4096,
     });
 
     const content = response.choices[0].message.content;
@@ -159,10 +161,6 @@ export async function generateEssayQuestions(
       points: q.points ?? 5, // Ensure points is always set
     }));
 
-    console.log(
-      "Generated Essay questions:",
-      JSON.stringify(validatedQuestions, null, 2)
-    );
     return validatedQuestions;
   } catch (error) {
     console.error("Error generating essay questions:", error);
@@ -237,14 +235,16 @@ export async function saveMultipleChoiceQuestions(
 ) {
   const supabase = await createClient();
 
-  const questionsToInsert = questions.map((q) => ({
+  const questionsToInsert = questions.map((q, index) => ({
     quiz_id: quizId,
+    question_mode: q.question_mode || "text",
     question_text: q.question_text,
+    audio_script: q.audio_script || null,
     options: q.options,
     correct_answer: q.correct_answer,
     explanation: q.explanation,
-    points: q.points ?? 1, // Default to 1 if not provided
-    question_mode: "text", // Default to text mode for AI-generated questions
+    points: q.points ?? 1,
+    order_number: index + 1, // Add order number starting from 1
   }));
 
   const { error } = await supabase
@@ -266,12 +266,13 @@ export async function saveEssayQuestions(
 ) {
   const supabase = await createClient();
 
-  const questionsToInsert = questions.map((q) => ({
+  const questionsToInsert = questions.map((q, index) => ({
     quiz_id: quizId,
+    answer_mode: q.answer_mode || "text",
     question_text: q.question_text,
     rubric: q.rubric,
-    points: q.points ?? 5, // Default to 5 if not provided
-    answer_mode: "text", // Default to text mode for AI-generated questions
+    points: q.points ?? 5,
+    order_number: index + 1, // Add order number starting from 1
   }));
 
   const { error } = await supabase

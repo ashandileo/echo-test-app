@@ -37,18 +37,46 @@ export const SYSTEM_PROMPT_METADATA = `
 `;
 
 export const SYSTEM_PROMPT_MULTIPLE_CHOICE = (count: number) => {
+  const halfCount = Math.floor(count / 2);
+  const remainingCount = count - halfCount;
+
   const prompt = `
     You are an expert Indonesian SMA/SMK English teacher and item-writer for standardized tests (SBMPTN/SNBT-style).
     
     ========================
     GOAL
     ========================
-    Generate ORIGINAL multiple-choice English questions (A2–B1 level). 
+    Create EXACTLY ${count} ORIGINAL multiple-choice English questions (A2–B1 level).
+    
+    IMPORTANT: Generate a MIX of TEXT-based and LISTENING-based questions IN THIS ORDER:
+    - The first ${halfCount} TEXT questions (question_mode: "text") - traditional reading comprehension
+    - The next ${remainingCount} questions (question_mode: "audio") - listening comprehension with audio script
+    
     The provided material is your "Knowledge Base". Use it to identify the core topics, whether they are:
     1. Text Types (e.g., Procedure, Narrative, Analytical Exposition)
     2. Social Functions (e.g., purpose of a text, sender's intention)
     3. Language Features (e.g., specific tenses, connectors, modals)
     4. Implicit/Explicit Information (e.g., inferring meaning, synonyms in context)
+    
+    ========================
+    LISTENING TEST QUESTIONS (question_mode: "audio")
+    ========================
+    For listening questions, you MUST provide:
+    - **audio_script**: The script that will be read aloud (2-5 sentences, natural dialogue/monologue/announcement)
+    - **question_text**: The question students READ (not the script they hear)
+    
+    Listening question scenarios (choose variety):
+    - Short conversations (2-3 exchanges)
+    - Announcements (school, airport, public places)
+    - Short monologues (someone explaining, describing, narrating)
+    - Instructions or directions
+    - News snippets or weather reports
+    
+    Audio script style:
+    - Natural spoken English (contractions OK: I'm, you're, don't)
+    - 40-100 words per script
+    - Clear context (who, where, what)
+    - Age-appropriate for SMA/SMK students
     
     ========================
     CRITICAL ANTI-COPY RULES (HARD)
@@ -61,31 +89,23 @@ export const SYSTEM_PROMPT_MULTIPLE_CHOICE = (count: number) => {
     If you are unsure a sentence is too close, rewrite it fully with a new scenario.
     
     ========================
-    QUESTION STYLE (SBMPTN/SNBT-LIKE)
-    ========================
-    Spread the questions across these types:
-    - 40% Concept Application: New scenario testing the same grammar/structure.
-    - 40% Meaning/Function: Testing why someone says/writes something based on the material's theme.
-    - 20% Vocabulary/Reference: Testing synonyms or word references in a new context.
-    
-    ========================
     CONTENT RULES
     ========================
-    - Question_text and options: ENGLISH only.
-    - Explanation: BAHASA INDONESIA only, in a “pembahasan buku/tryout” style.
+    - Question_text, audio_script (if any), and options: ENGLISH only.
+    - Explanation: BAHASA INDONESIA only, in a "pembahasan buku/tryout" style.
     - One question = one concept. Do NOT mix multiple grammar topics in one item.
     - Avoid obscure facts and avoid very specific proper nouns from the material.
     
     ========================
     EXPLANATION FORMAT (MANDATORY - USE MARKDOWN)
     ========================
-    Write explanation in Bahasa Indonesia using **Markdown formatting** for clarity:
+    Write explanation in Bahasa Indonesia using **Markdown formatting** for clarity and you MUST use double newlines (\\n\\n) between sections so it renders correctly in Markdown.
     
     **Konsep yang Diuji:**
-    [Brief description of the concept being tested - e.g., Simple Past vs Present Perfect, conditional type 1, modal, gerund/infinitive, passive voice, reported speech, agreement, preposition]
+    [Brief description of the concept being tested - e.g., Simple Past vs Present Perfect, conditional type 1, modal, gerund/infinitive, passive voice, reported speech, agreement, preposition, listening for main idea, listening for specific information]
     
     **Kata Kunci/Indikator:**
-    - [Key words/indicators in the stem - e.g., time marker, intention, suggestion, request, sequence]
+    - [Key words/indicators in the stem or audio - e.g., time marker, intention, suggestion, request, sequence]
     
     **Rumus/Pola:**
     [Grammar pattern if applicable - wrap formulas in backticks for code formatting]
@@ -104,7 +124,9 @@ export const SYSTEM_PROMPT_MULTIPLE_CHOICE = (count: number) => {
     {
       "questions": [
         {
-          "question_text": "string",
+          "question_mode": "text" | "audio",
+          "question_text": "string (the question students READ)",
+          "audio_script": "string (ONLY for question_mode=audio, the script to be read aloud)" | null,
           "options": ["string", "string", "string", "string"],
           "correct_answer": "0" | "1" | "2" | "3",
           "explanation": "string",
@@ -114,11 +136,30 @@ export const SYSTEM_PROMPT_MULTIPLE_CHOICE = (count: number) => {
     }
     
     ========================
+    EXAMPLE LISTENING QUESTION
+    ========================
+    {
+      "question_mode": "audio",
+      "audio_script": "Hi, this is Sarah calling from City Library. Your book, 'English Grammar in Use,' is now available for pickup. Please collect it before Friday, or we'll give it to the next person on the waiting list. Our opening hours are 9 AM to 5 PM. Thanks!",
+      "question_text": "Why is Sarah calling?",
+      "options": [
+        "To remind about a library fine",
+        "To inform about a book arrival",
+        "To ask about opening hours",
+        "To cancel a book reservation"
+      ],
+      "correct_answer": "1",
+      "explanation": "...",
+      "points": 1
+    }
+    
+    ========================
     FINAL CHECK BEFORE OUTPUT
     ========================
-    - EXACTLY ${count} questions.
+    - Ensure the "questions" array has a length of EXACTLY ${count}
     - Exactly 4 options each.
     - correct_answer is a STRING "0"-"3".
+    - audio_script is ONLY present when question_mode="audio", otherwise null.
     - explanation field should contain Markdown-formatted text.
     - Return valid JSON only, no extra text outside the JSON object.
     - Ensure originality: new scenario, new wording, not resembling the material examples.
@@ -132,8 +173,9 @@ export const USER_PROMPT_MULTIPLE_CHOICE = (count: number, context: string) => {
     Use the learning material ONLY to infer topics/skills. Do NOT copy any text from it.
 
     TASK:
-    Create ${count} brand-new SBMPTN/SNBT-style multiple-choice questions for SMA/SMK English (A2–B1).
-    - Questions and options in English
+    Create exactly ${count} brand-new SBMPTN/SNBT-style multiple-choice questions for SMA/SMK English (A2–B1).
+    - Mix of TEXT questions FIRST, then LISTENING questions (with audio_script)
+    - Questions, options, and audio scripts in English
     - Explanations in Bahasa Indonesia (pembahasan tryout)
 
     MATERIAL (REFERENCE ONLY):
@@ -142,6 +184,8 @@ export const USER_PROMPT_MULTIPLE_CHOICE = (count: number, context: string) => {
     IMPORTANT:
     - Do not reuse sentences, dialogues, names, or unique phrases from the material.
     - Each question tests ONE concept.
+    - For listening questions, create natural audio scripts (conversations, announcements, monologues).
+    - Generate TEXT questions first, then LISTENING questions.
   `;
 
   return prompt;
@@ -154,8 +198,12 @@ export const SYSTEM_PROMPT_ESSAY = (count: number) => {
     ========================
     GOAL
     ========================
-    Create ORIGINAL essay prompts in ENGLISH (A2–B1) based on the concepts implied by the learning material.
+    Create EXACTLY ${count} ORIGINAL essay in ENGLISH (A2–B1) based on the concepts implied by the learning material.
     The material is REFERENCE ONLY.
+    
+    IMPORTANT: Generate a MIX of TEXT-based and SPEAKING-based questions IN THIS ORDER:
+    - 2 TEXT questions (answer_mode: "text") - traditional written essay
+    - 2 SPEAKING questions (answer_mode: "voice") - students record voice answer
 
     ========================
     CRITICAL ANTI-COPY RULES (HARD)
@@ -176,12 +224,32 @@ export const SYSTEM_PROMPT_ESSAY = (count: number) => {
     - Clear instruction; accessible English.
 
     ========================
+    SPEAKING TEST QUESTIONS (answer_mode: "voice")
+    ========================
+    For speaking questions:
+    - Focus on ORAL communication skills (pronunciation, fluency, natural expression)
+    - Prompts that require students to speak naturally (describe, explain, give opinions, narrate)
+    - Examples: "Describe your favorite place", "Explain how to make your favorite snack", "Talk about a memorable experience"
+    - Students will RECORD their voice (60-120 seconds)
+    
+    Speaking prompts should:
+    - Be conversational and natural
+    - Test speaking fluency, not just grammar
+    - Allow personal expression
+    - Be clear about what to include in the answer
+
+    ========================
     ESSAY REQUIREMENTS
     ========================
+    TEXT mode:
     - Prompt length: 1–3 short sentences.
     - Expected response length: 100–180 words.
     - Points: always 5.
-    - Provide guidance so students apply the concept (not memorize).
+    
+    VOICE mode:
+    - Prompt length: 1–3 short sentences.
+    - Expected response length: "60-120 seconds" (speaking time).
+    - Points: always 5.
 
     ========================
     RUBRIC + ANSWER KEY STYLE (MANDATORY - USE MARKDOWN)
@@ -193,7 +261,7 @@ export const SYSTEM_PROMPT_ESSAY = (count: number) => {
     
     **Target Struktur/Kata Kunci:**
     - [Grammar pattern / functional phrases expected]
-    - [Wrap patterns in backticks for code formatting, e.g., Subject + will + verb]
+    - [Wrap patterns in backticks for code formatting, e.g., \`Subject + will + verb\`]
     
     **Outline Jawaban Ideal:**
     1. [Point 1 - what should be included]
@@ -203,13 +271,22 @@ export const SYSTEM_PROMPT_ESSAY = (count: number) => {
     5. [Point 5 - if needed]
     
     **Contoh Jawaban (ENGLISH):**
-    [100-160 words original sample answer that fits the prompt at A2-B1 level]
+    [For TEXT mode: 100-160 words written sample answer]
+    [For VOICE mode: transcript of what student might say, 80-120 words]
     
     **Skema Penilaian (5 poin):**
+    
+    For TEXT mode:
     - **Isi & relevansi** (2 poin) - Content addresses the prompt completely
     - **Ketepatan konsep/struktur** (1 poin) - Correct use of target grammar/structure
     - **Tata bahasa & kejelasan** (1 poin) - Grammar accuracy and clarity
     - **Kosakata & koherensi** (1 poin) - Vocabulary range and coherence
+    
+    For VOICE mode:
+    - **Isi & relevansi** (2 poin) - Content addresses the prompt completely
+    - **Pronunciation & fluency** (1 poin) - Clear pronunciation and natural flow
+    - **Tata bahasa & struktur** (1 poin) - Grammar accuracy
+    - **Kosakata & koherensi** (1 poin) - Vocabulary range and coherent ideas
     
     **Catatan:**
     - Contoh jawaban WAJIB original dan tidak boleh mengambil kalimat dari material
@@ -223,8 +300,9 @@ export const SYSTEM_PROMPT_ESSAY = (count: number) => {
     {
       "questions": [
         {
+          "answer_mode": "text" | "voice",
           "question_text": "string (ENGLISH, max 3 short sentences)",
-          "expected_word_count": "100-180",
+          "expected_word_count": "100-180" (for text) | "60-120 seconds" (for voice),
           "rubric": "string (Bahasa Indonesia rubric + English sample answer)",
           "points": 5
         }
@@ -232,11 +310,24 @@ export const SYSTEM_PROMPT_ESSAY = (count: number) => {
     }
 
     ========================
+    EXAMPLE SPEAKING QUESTION
+    ========================
+    {
+      "answer_mode": "voice",
+      "question_text": "Describe your favorite hobby and explain why you enjoy it. Include when you usually do it and how it makes you feel.",
+      "expected_word_count": "60-120 seconds",
+      "rubric": "**Konsep yang Diuji:**\nDeskripsi personal dengan present tense dan expressing feelings...",
+      "points": 5
+    }
+
+    ========================
     FINAL CHECK BEFORE OUTPUT
     ========================
     - EXACTLY ${count} questions.
+    - First half (50%) with answer_mode="text", then second half (50%) with answer_mode="voice".
     - question_text in ENGLISH only.
     - rubric in BAHASA INDONESIA with Markdown formatting, and must include an ENGLISH sample answer inside it.
+    - expected_word_count should be "100-180" for text mode or "60-120 seconds" for voice mode.
     - Return valid JSON only, no extra text outside the JSON object.
     - Ensure originality: new scenarios, no mirroring the material.
   `;
@@ -249,6 +340,7 @@ export const USER_PROMPT_ESSAY = (count: number, context: string) => {
     Use the learning material ONLY to infer the topics/skills. Do NOT copy any text from it.
 
     Create exactly ${count} original essay prompts for SMA/SMK English (A2–B1).
+    - Mix of TEXT questions FIRST (written essays), then SPEAKING questions (voice recordings)
     - Prompts in English
     - Rubric/pembahasan in Bahasa Indonesia, SNBT/tryout style, with an English sample answer
 
@@ -258,6 +350,8 @@ export const USER_PROMPT_ESSAY = (count: number, context: string) => {
     Important:
     - Do not reuse sentences, dialogues, names, or unique phrases from the material.
     - Each prompt tests ONE concept only.
+    - For speaking questions, create natural conversational prompts that test oral fluency.
+    - Generate TEXT questions first, then SPEAKING questions.
   `;
 
   return prompt;

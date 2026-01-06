@@ -38,9 +38,6 @@ export async function generateTTS(text: string): Promise<ArrayBuffer> {
     // Prepare text by replacing blanks with readable version
     const preparedText = prepareTextForTTS(text);
 
-    console.log(`Original text: "${text}"`);
-    console.log(`Prepared text for TTS: "${preparedText}"`);
-
     const mp3 = await openai.audio.speech.create({
       model: "tts-1",
       voice: "alloy", // Options: alloy, echo, fable, onyx, nova, shimmer
@@ -72,8 +69,6 @@ export async function uploadAudioToStorage(
     // Upload to Supabase Storage
     const filePath = `quiz/${quizId}/audio/${fileName}`;
 
-    console.log(`Uploading audio file to: ${filePath}`);
-
     const { error } = await supabase.storage
       .from("quiz-assets") // Make sure this bucket exists
       .upload(filePath, buffer, {
@@ -88,14 +83,10 @@ export async function uploadAudioToStorage(
       );
     }
 
-    console.log(`Audio file uploaded successfully: ${filePath}`);
-
     // Get public URL
     const {
       data: { publicUrl },
     } = supabase.storage.from("quiz-assets").getPublicUrl(filePath);
-
-    console.log(`Public URL generated: ${publicUrl}`);
 
     return publicUrl;
   } catch (error) {

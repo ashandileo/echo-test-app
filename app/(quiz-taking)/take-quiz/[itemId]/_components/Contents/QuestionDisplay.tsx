@@ -67,17 +67,6 @@ const QuestionDisplay = () => {
     isEssayQuestion(currentQuestion) &&
     currentQuestion.answer_mode === "voice";
 
-  console.log("Debug Speaking Test:", {
-    selectedTab,
-    currentQuestion,
-    hasAnswerMode: currentQuestion && "answer_mode" in currentQuestion,
-    answerMode:
-      currentQuestion && isEssayQuestion(currentQuestion)
-        ? currentQuestion.answer_mode
-        : "N/A",
-    isSpeakingTest,
-  });
-
   const audioUrl =
     isListeningTest && currentQuestion && "audio_url" in currentQuestion
       ? currentQuestion.audio_url

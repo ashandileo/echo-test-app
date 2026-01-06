@@ -44,8 +44,6 @@ interface SubmissionsTableProps {
 const SubmissionsTable = ({ submissions }: SubmissionsTableProps) => {
   const router = useRouter();
 
-  console.log("submissions", submissions);
-
   // Count submissions needing grading (essays not graded)
   const needsGrading = useMemo(() => {
     return submissions.filter(

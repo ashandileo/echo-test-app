@@ -64,8 +64,6 @@ export const uploadFileToMistral = async (file: File): Promise<string> => {
     body: formData,
   });
 
-  console.log("response", response);
-
   if (!response.ok) {
     const errorText = await response.text();
     throw new Error(`File upload failed: ${response.status} - ${errorText}`);
