@@ -58,7 +58,8 @@ export async function generateTTS(text: string): Promise<ArrayBuffer> {
 export async function uploadAudioToStorage(
   audioBuffer: ArrayBuffer,
   fileName: string,
-  quizId: string
+  quizId: string,
+  userId: string
 ): Promise<string> {
   try {
     const supabase = await createServerClient();
@@ -67,7 +68,8 @@ export async function uploadAudioToStorage(
     const buffer = Buffer.from(audioBuffer);
 
     // Upload to Supabase Storage
-    const filePath = `quiz/${quizId}/audio/${fileName}`;
+    // Path format: userId/quizId/audio/fileName (required by RLS policy)
+    const filePath = `${userId}/${quizId}/audio/${fileName}`;
 
     const { error } = await supabase.storage
       .from("quiz-assets") // Make sure this bucket exists
@@ -103,7 +105,8 @@ export async function uploadAudioToStorage(
 export async function generateAndUploadTTS(
   text: string,
   questionId: string,
-  quizId: string
+  quizId: string,
+  userId: string
 ): Promise<string> {
   // Generate TTS
   const audioBuffer = await generateTTS(text);
@@ -112,7 +115,12 @@ export async function generateAndUploadTTS(
   const fileName = `question-${questionId}.mp3`;
 
   // Upload to storage
-  const audioUrl = await uploadAudioToStorage(audioBuffer, fileName, quizId);
+  const audioUrl = await uploadAudioToStorage(
+    audioBuffer,
+    fileName,
+    quizId,
+    userId
+  );
 
   return audioUrl;
 }

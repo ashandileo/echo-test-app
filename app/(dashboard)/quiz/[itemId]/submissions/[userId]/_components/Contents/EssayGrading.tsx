@@ -69,6 +69,8 @@ const EssayGrading = ({
   const [teacherFeedback, setTeacherFeedback] = useState<string>(
     feedback || ""
   );
+  const [transcription, setTranscription] = useState<string>("");
+  const [isTranscribing, setIsTranscribing] = useState(false);
 
   const queryClient = useQueryClient();
 
@@ -77,6 +79,43 @@ const EssayGrading = ({
   // AI Generate mutation
   const aiGenerateMutation = useMutation({
     mutationFn: async () => {
+      let studentAnswerText = answerText;
+
+      // If it's a speaking test with audio, transcribe first
+      if (isSpeakingTest && audioUrl && !answerText) {
+        setIsTranscribing(true);
+
+        try {
+          const transcribeResponse = await fetch("/api/quiz/speech-to-text", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              audioUrl,
+            }),
+          });
+
+          if (!transcribeResponse.ok) {
+            const error = await transcribeResponse.json();
+            throw new Error(
+              error.error || "Failed to transcribe audio recording"
+            );
+          }
+
+          const { transcription: transcribedText } =
+            await transcribeResponse.json();
+          studentAnswerText = transcribedText;
+          setTranscription(transcribedText);
+        } catch (error) {
+          setIsTranscribing(false);
+          throw error;
+        }
+
+        setIsTranscribing(false);
+      }
+
+      // Now grade the answer (either original text or transcribed audio)
       const response = await fetch("/api/quiz/grade-essay-ai", {
         method: "POST",
         headers: {
@@ -85,9 +124,10 @@ const EssayGrading = ({
         body: JSON.stringify({
           questionText,
           rubric,
-          studentAnswer: answerText,
+          studentAnswer: studentAnswerText,
           maxPoints,
           studentName: studentName ? studentName.split(" ")[0] : "Student",
+          isSpeakingTest,
         }),
       });
 
@@ -151,6 +191,8 @@ const EssayGrading = ({
     points !== (pointsEarned?.toString() || "") ||
     teacherFeedback !== (feedback || "");
 
+  const canGenerateAI = isSpeakingTest ? !!audioUrl : !!answerText;
+
   return (
     <Card>
       <CardHeader>
@@ -213,11 +255,26 @@ const EssayGrading = ({
           </Label>
           {isSpeakingTest && audioUrl ? (
             // Render audio player for voice recordings
-            <div className="space-y-2">
+            <div className="space-y-3">
               <AudioPlayer audioUrl={audioUrl} />
               <p className="text-xs text-muted-foreground italic">
                 Voice recording submitted by student
               </p>
+
+              {/* Show transcription if available */}
+              {transcription && (
+                <div className="p-4 rounded-lg border bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Mic className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                    <span className="text-sm font-medium text-blue-900 dark:text-blue-300">
+                      AI Transcription
+                    </span>
+                  </div>
+                  <p className="text-sm text-blue-800 dark:text-blue-400 whitespace-pre-wrap">
+                    {transcription}
+                  </p>
+                </div>
+              )}
             </div>
           ) : answerText ? (
             // Render text answer
@@ -244,13 +301,13 @@ const EssayGrading = ({
               variant="outline"
               size="sm"
               onClick={handleAIGenerate}
-              disabled={aiGenerateMutation.isPending || !answerText}
+              disabled={aiGenerateMutation.isPending || !canGenerateAI}
               className="gap-2"
             >
               {aiGenerateMutation.isPending ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  Generating...
+                  {isTranscribing ? "Transcribing..." : "Generating..."}
                 </>
               ) : (
                 <>
@@ -261,6 +318,18 @@ const EssayGrading = ({
             </Button>
           </div>
 
+          {/* Info for Speaking Test */}
+          {isSpeakingTest && audioUrl && (
+            <div className="p-3 rounded-lg bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-900">
+              <p className="text-sm text-orange-700 dark:text-orange-400">
+                <Mic className="h-4 w-4 inline mr-1" />
+                <strong>Speaking Test Mode:</strong> AI will transcribe the
+                audio and evaluate based on speaking criteria (fluency, clarity,
+                content, and vocabulary).
+              </p>
+            </div>
+          )}
+
           {/* AI Error Message */}
           {aiGenerateMutation.isError && (
             <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20">
@@ -270,12 +339,27 @@ const EssayGrading = ({
             </div>
           )}
 
+          {/* Transcription in Progress */}
+          {isTranscribing && (
+            <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900">
+              <div className="flex items-center gap-2">
+                <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
+                <p className="text-sm text-blue-700 dark:text-blue-400">
+                  🎤 Transcribing audio recording using AI...
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* AI Success Message */}
           {aiGenerateMutation.isSuccess && (
             <div className="p-3 rounded-lg bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900">
               <p className="text-sm text-green-700 dark:text-green-400">
-                ✨ AI suggestions applied! Review and adjust as needed before
-                saving.
+                ✨ AI suggestions applied!{" "}
+                {isSpeakingTest &&
+                  transcription &&
+                  "Audio transcribed and graded. "}
+                Review and adjust as needed before saving.
               </p>
             </div>
           )}

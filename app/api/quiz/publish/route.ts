@@ -99,7 +99,8 @@ export async function POST(request: Request) {
         const audioUrl = await generateAndUploadTTS(
           question.audio_script,
           question.id,
-          quizId
+          quizId,
+          user.id
         );
 
         // Update question with audio URL

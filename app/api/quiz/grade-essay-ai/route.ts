@@ -14,6 +14,7 @@ interface GradeEssayRequest {
   studentAnswer: string;
   maxPoints: number;
   studentName?: string;
+  isSpeakingTest?: boolean;
 }
 
 interface GradeEssayResponse {
@@ -26,10 +27,74 @@ function buildGradingPrompt(
   rubric: string | null,
   studentAnswer: string,
   maxPoints: number,
-  studentName?: string
+  studentName?: string,
+  isSpeakingTest?: boolean
 ): string {
   const namePrefix = studentName || "Student";
 
+  // Different prompts for speaking test vs written essay
+  if (isSpeakingTest) {
+    let prompt = `You are an experienced and supportive English teacher for high school students. Your task is to grade a student's SPEAKING TEST response (transcribed from audio) with an educational and constructive score and feedback.
+
+## Speaking Test Question:
+${questionText}
+`;
+
+    if (rubric) {
+      prompt += `
+## Grading Rubric:
+${rubric}
+`;
+    }
+
+    prompt += `
+## Student's Spoken Response (Transcribed):
+${studentAnswer}
+
+## Maximum Points: ${maxPoints}
+
+## IMPORTANT - Speaking Test Grading Criteria:
+Evaluate the student's speaking performance based on:
+1. **Content & Comprehension** (40%) - Does the response answer the question correctly and completely?
+2. **Fluency & Coherence** (30%) - Is the speech natural, well-organized, and easy to follow?
+3. **Vocabulary & Grammar** (20%) - Appropriate word choice and grammatical accuracy
+4. **Clarity of Expression** (10%) - How clearly ideas are communicated
+
+NOTE: This is a TRANSCRIPTION of spoken English, so minor grammatical issues or informal language are ACCEPTABLE and should NOT be penalized heavily.
+
+## Scoring Instructions:
+- Give a WHOLE NUMBER (integer) score between 0 and ${maxPoints}, NO decimals allowed
+- Score 0 = no answer or completely incorrect
+- Maximum score = excellent speaking performance
+- Consider that spoken English is naturally less formal than written essays
+- Focus more on COMMUNICATION EFFECTIVENESS rather than perfect grammar
+
+## Feedback Instructions:
+- START by PRAISING the positive aspects of the student's speaking
+- Address the student by name (${namePrefix}) at the beginning
+- Use FRIENDLY, POLITE, and MOTIVATING language appropriate for high school students
+- Provide EDUCATIONAL and CONSTRUCTIVE feedback
+- First explain what the student did WELL in their speaking
+- Then provide SPECIFIC SUGGESTIONS for improvement in speaking skills
+- Be ENCOURAGING about their spoken English abilities
+- Acknowledge that this was a speaking test, not a written essay
+- Keep feedback concise: 3-5 sentences
+- Use simple, clear English suitable for high school level
+
+## Response Format:
+Respond with JSON containing:
+{
+  "score": <INTEGER between 0 and ${maxPoints}, MUST be whole number, NO decimals>,
+  "feedback": "<feedback in English, friendly for high school students, start with praise and address ${namePrefix}, acknowledge this is a speaking test>"
+}
+
+Example of good feedback:
+"${namePrefix}, excellent work on your speaking test! You communicated your ideas clearly and showed good fluency in your response. Your pronunciation was easy to understand and you answered the question well. To improve further, try to add more specific examples and use a wider range of vocabulary. Keep practicing your speaking skills - you're doing great!"`;
+
+    return prompt;
+  }
+
+  // Original prompt for written essays
   let prompt = `You are an experienced and supportive English teacher for high school students. Your task is to grade a student's essay answer with an educational and constructive score and feedback.
 
 ## Question:
@@ -156,8 +221,14 @@ export async function POST(request: Request) {
 
     // Parse request body
     const body: GradeEssayRequest = await request.json();
-    const { questionText, rubric, studentAnswer, maxPoints, studentName } =
-      body;
+    const {
+      questionText,
+      rubric,
+      studentAnswer,
+      maxPoints,
+      studentName,
+      isSpeakingTest,
+    } = body;
 
     // Validate input
     if (!questionText || !studentAnswer || !maxPoints) {
@@ -183,7 +254,8 @@ export async function POST(request: Request) {
       rubric,
       studentAnswer,
       maxPoints,
-      studentName
+      studentName,
+      isSpeakingTest
     );
 
     // Call OpenAI API
