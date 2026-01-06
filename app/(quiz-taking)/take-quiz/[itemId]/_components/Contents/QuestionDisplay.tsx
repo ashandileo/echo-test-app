@@ -174,7 +174,7 @@ const QuestionDisplay = () => {
                       </div>
                       <div className="flex-1 pt-0.5 min-w-0">
                         <span className="font-semibold mr-2 text-primary">
-                          {key}.
+                          {String.fromCharCode(65 + parseInt(key))}.
                         </span>
                         <span className="text-sm md:text-base">
                           {value as string}
