@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { ERROR_MESSAGES } from "./consts";
 import {
   createQuiz,
+  extractConceptsFromDocument,
   generateEssayQuestions,
   generateMultipleChoiceQuestions,
   generateQuizMetadata,
@@ -41,7 +42,14 @@ export async function POST(request: Request) {
     }
 
     // Get ALL document context for comprehensive question generation
-    const { fileName, context } = await getDocumentContext(filePath, user.id);
+    const { fileName, context, totalChunks } = await getDocumentContext(
+      filePath,
+      user.id
+    );
+
+    console.log(
+      `Processing document: ${fileName} (${totalChunks} total chunks, ${context.length} characters)`
+    );
 
     // Generate quiz title and description using AI
     const metadata = await generateQuizMetadata(
@@ -57,17 +65,42 @@ export async function POST(request: Request) {
       filePath
     );
 
-    // Generate questions in parallel
+    console.log(`Quiz created with ID: ${quiz.id}`);
+
+    // Extract concepts once (MAP PHASE) - will be shared by both question generators
+    const concepts = await extractConceptsFromDocument(context);
+
+    // Generate questions using extracted concepts or direct context
+    // If concepts is null (small doc), pass context directly
+    // If concepts exists (large doc), pass concepts array
+    const inputForGeneration = concepts || context;
+
+    console.log({
+      concepts,
+      context,
+    });
+
+    console.log(
+      `📊 Generation mode: ${concepts ? `Map-Reduce (${concepts.length} concepts)` : "Direct (small document)"}`
+    );
+
+    // Generate questions in parallel - REDUCE PHASE (or direct for small docs)
     const [mcQuestions, essayQuestions] = await Promise.all([
-      generateMultipleChoiceQuestions(context, 8), // Generate 8 questions (mix of text & listening)
-      generateEssayQuestions(context, 4),
+      generateMultipleChoiceQuestions(inputForGeneration, 8),
+      generateEssayQuestions(inputForGeneration, 4),
     ]);
 
     // Save questions to database
+    console.log(
+      `Saving ${mcQuestions.length} multiple-choice and ${essayQuestions.length} essay questions...`
+    );
+
     await Promise.all([
       saveMultipleChoiceQuestions(quiz.id, mcQuestions),
       saveEssayQuestions(quiz.id, essayQuestions),
     ]);
+
+    console.log(`Quiz generation completed successfully!`);
 
     return NextResponse.json({
       success: true,
@@ -79,6 +112,7 @@ export async function POST(request: Request) {
         sourceDocumentPath: filePath,
         multipleChoiceCount: mcQuestions.length,
         essayCount: essayQuestions.length,
+        totalChunksProcessed: totalChunks,
       },
     });
   } catch (error) {
