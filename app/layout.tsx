@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   title: "EchoTest - AI-Powered English Learning",
   description: "Master English with AI-powered personalized learning",
   verification: {
-    google: "googleb705dc1ec9bce183",
+    google: "PTvh6OFwjJiBzlyb3TyR-ktaMegedlUCzNSLRg4CyK4",
   },
 };
 
