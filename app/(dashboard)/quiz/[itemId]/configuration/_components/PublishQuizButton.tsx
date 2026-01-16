@@ -86,11 +86,15 @@ const PublishQuizButton = () => {
       toast.dismiss("publish-quiz");
 
       // Show success toast
+      const audioMessage =
+        data.ttsGenerated > 0
+          ? `${data.ttsGenerated} audio file${data.ttsGenerated > 1 ? "s" : ""} generated`
+          : data.ttsSkipped > 0
+            ? `${data.ttsSkipped} audio file${data.ttsSkipped > 1 ? "s" : ""} already exist`
+            : "Quiz is now available for students";
+
       toast.success("Quiz published successfully! 🎉", {
-        description:
-          data.ttsGenerated > 0
-            ? `${data.ttsGenerated} audio file${data.ttsGenerated > 1 ? "s" : ""} generated`
-            : "Quiz is now available for students",
+        description: audioMessage,
         duration: 5000,
       });
 

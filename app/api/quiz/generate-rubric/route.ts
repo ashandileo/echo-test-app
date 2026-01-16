@@ -9,66 +9,31 @@ const openai = new OpenAI({
 });
 
 /**
- * Get relevant document chunks using semantic search
+ * Get concepts from quiz for consistent rubric generation
  */
-async function getRelevantContext(
-  question: string,
-  userId: string,
-  sourceDocumentPath: string | null,
-  limit: number = 5
-): Promise<string> {
-  if (!sourceDocumentPath) {
-    return "";
-  }
-
+async function getQuizConcepts(
+  quizId: string,
+  userId: string
+): Promise<string[]> {
   const supabase = await createClient();
 
   try {
-    // Generate embedding for the question
-    const embeddingResponse = await openai.embeddings.create({
-      model: "text-embedding-3-small",
-      input: question,
-    });
+    const { data: quiz, error } = await supabase
+      .from("quiz")
+      .select("concepts")
+      .eq("id", quizId)
+      .eq("created_by", userId)
+      .single();
 
-    const queryEmbedding = embeddingResponse.data[0].embedding;
-
-    // Search for relevant chunks using vector similarity
-    const { data: chunks, error } = await supabase.rpc(
-      "search_document_chunks",
-      {
-        query_embedding: queryEmbedding,
-        match_user_id: userId,
-        match_count: limit,
-      }
-    );
-
-    if (error) {
-      console.error("Error searching document chunks:", error);
-      return "";
+    if (error || !quiz) {
+      console.error("Error fetching quiz concepts:", error);
+      return [];
     }
 
-    if (!chunks || chunks.length === 0) {
-      return "";
-    }
-
-    // Filter chunks to only those from the source document
-    const relevantChunks = chunks.filter(
-      (chunk: { file_path: string }) => chunk.file_path === sourceDocumentPath
-    );
-
-    if (relevantChunks.length === 0) {
-      return "";
-    }
-
-    // Combine relevant chunks into context
-    const context = relevantChunks
-      .map((chunk: { chunk_text: string }) => chunk.chunk_text)
-      .join("\n\n");
-
-    return context;
+    return quiz.concepts || [];
   } catch (error) {
-    console.error("Error getting relevant context:", error);
-    return "";
+    console.error("Error getting quiz concepts:", error);
+    return [];
   }
 }
 
@@ -78,17 +43,17 @@ TASK:
 Generate a comprehensive rubric/answer key in Bahasa Indonesia for an essay question.
 
 CONTEXT:
-You will be provided with relevant excerpts from the learning material. Use this context to make your rubric more specific and aligned with what students have learned. Tailor the expected content and sample answer to reflect the material studied.
+You will be provided with KEY CONCEPTS from the learning material that were used to generate this quiz. Use these concepts to make your rubric specific and aligned with what students have learned. Tailor the expected content and sample answer to reflect the material studied.
 
 RUBRIC FORMAT (MANDATORY - USE MARKDOWN):
-Write rubric in Bahasa Indonesia using **Markdown formatting** for clarity:
+Write rubric in Bahasa Indonesia using **Markdown formatting** for clarity and you MUST use double newlines (\\n\\n) between sections so it renders correctly in Markdown.
 
 **Konsep yang Diuji:**
 [Brief explanation of the concept/skill being tested - relate to the learning material when applicable]
 
 **Target Struktur/Kata Kunci:**
 - [Grammar pattern / functional phrases expected - reference the material]
-- [Wrap patterns in backticks for code formatting, e.g., Subject + will + verb]
+- [Wrap patterns in backticks for code formatting, e.g., \`Subject + will + verb\`]
 
 **Outline Jawaban Ideal:**
 1. [Point 1 - what should be included, aligned with material]
@@ -98,17 +63,27 @@ Write rubric in Bahasa Indonesia using **Markdown formatting** for clarity:
 5. [Point 5 - if needed]
 
 **Contoh Jawaban (ENGLISH):**
-[100-160 words original sample answer that fits the prompt at A2-B1 level, incorporating concepts from the learning material]
+[For TEXT mode: 100-160 words written sample answer]
+[For VOICE mode: transcript of what student might say, 80-120 words]
 
 **Skema Penilaian (5 poin):**
+
+For TEXT mode:
 - **Isi & relevansi** (2 poin) - Content addresses the prompt completely
 - **Ketepatan konsep/struktur** (1 poin) - Correct use of target grammar/structure
 - **Tata bahasa & kejelasan** (1 poin) - Grammar accuracy and clarity
 - **Kosakata & koherensi** (1 poin) - Vocabulary range and coherence
 
+For VOICE mode:
+- **Isi & relevansi** (2 poin) - Content addresses the prompt completely
+- **Pronunciation & fluency** (1 poin) - Clear pronunciation and natural flow
+- **Tata bahasa & struktur** (1 poin) - Grammar accuracy
+- **Kosakata & koherensi** (1 poin) - Vocabulary range and coherent ideas
+
 **Catatan:**
+- Contoh jawaban WAJIB original dan tidak boleh mengambil kalimat dari material
 - Level: A2–B1 (SMA/SMK Indonesia)
-- Expected word count: 100-180 words
+- Expected word count: 100-180 words (TEXT) or 60-120 seconds (VOICE)
 
 STYLE:
 - Professional but friendly (English Club vibe)
@@ -145,43 +120,36 @@ export async function POST(request: Request) {
       );
     }
 
-    // Get relevant context from learning document if quizId is provided
-    let context = "";
+    // Get concepts from quiz for consistent rubric generation
+    // This matches the initial generation approach (using same concepts)
+    let conceptsContext = "";
     if (quizId) {
       try {
-        // Fetch quiz to get source_document_path
-        const { data: quiz, error: quizError } = await supabase
-          .from("quiz")
-          .select("source_document_path")
-          .eq("id", quizId)
-          .single();
+        const concepts = await getQuizConcepts(quizId, user.id);
 
-        if (!quizError && quiz?.source_document_path) {
-          // Get relevant chunks using semantic search
-          context = await getRelevantContext(
-            question,
-            user.id,
-            quiz.source_document_path,
-            5 // Get top 5 relevant chunks
+        if (concepts.length > 0) {
+          conceptsContext = concepts.join("\n- ");
+          console.log(
+            `📚 Retrieved ${concepts.length} concepts for rubric generation`
           );
         }
       } catch (error) {
-        console.error("Error fetching quiz context:", error);
-        // Continue without context if there's an error
+        console.error("Error fetching quiz concepts:", error);
+        // Continue without concepts if there's an error
       }
     }
 
-    // Build user prompt with optional context
+    // Build user prompt with optional concepts
     let userPrompt = "";
-    if (context) {
-      userPrompt = `LEARNING MATERIAL CONTEXT (for reference):
-${context}
+    if (conceptsContext) {
+      userPrompt = `KEY CONCEPTS FROM LEARNING MATERIAL (for reference):
+- ${conceptsContext}
 
 ---
 
 Essay Question/Prompt: ${question}
 
-Generate a comprehensive rubric and sample answer in Bahasa Indonesia following the Markdown format specified. Use the learning material context to make the rubric and sample answer more specific and relevant to what students have studied.`;
+Generate a comprehensive rubric and sample answer in Bahasa Indonesia following the Markdown format specified. Use the key concepts to make the rubric and sample answer more specific and relevant to what students have studied.`;
     } else {
       userPrompt = `Essay Question/Prompt: ${question}
 

@@ -333,13 +333,14 @@ export async function getDocumentContext(
 }
 
 /**
- * Create quiz in database
+ * Create quiz in database with extracted concepts
  */
 export async function createQuiz(
   userId: string,
   title: string,
   description: string,
-  sourceDocumentPath: string
+  sourceDocumentPath: string,
+  concepts: string[] = []
 ) {
   const supabase = await createClient();
 
@@ -349,6 +350,7 @@ export async function createQuiz(
       name: title,
       description: description,
       source_document_path: sourceDocumentPath,
+      concepts: concepts, // Store concepts for consistency in explanation/rubric generation
       created_by: userId,
     })
     .select()
@@ -358,6 +360,8 @@ export async function createQuiz(
     console.error("Error creating quiz:", error);
     throw new Error(ERROR_MESSAGES.QUIZ_CREATION_FAILED);
   }
+
+  console.log(`✅ Quiz created with ${concepts.length} concepts stored`);
 
   return quiz;
 }

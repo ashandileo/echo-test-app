@@ -17,10 +17,10 @@ export type Database = {
     Functions: {
       graphql: {
         Args: {
-          extensions?: Json
           operationName?: string
-          query?: string
+          extensions?: Json
           variables?: Json
+          query?: string
         }
         Returns: Json
       }
@@ -122,6 +122,7 @@ export type Database = {
       }
       quiz: {
         Row: {
+          concepts: string[] | null
           created_at: string | null
           created_by: string | null
           deleted_at: string | null
@@ -134,6 +135,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          concepts?: string[] | null
           created_at?: string | null
           created_by?: string | null
           deleted_at?: string | null
@@ -146,6 +148,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          concepts?: string[] | null
           created_at?: string | null
           created_by?: string | null
           deleted_at?: string | null
@@ -545,18 +548,18 @@ export type Database = {
       search_document_chunks: {
         Args: {
           query_embedding: string
-          match_count?: number
           match_user_id: string
+          match_count?: number
         }
         Returns: {
-          total_chunks: number
-          chunk_index: number
           chunk_text: string
-          file_path: string
-          similarity: number
-          file_name: string
-          user_id: string
+          total_chunks: number
           id: string
+          user_id: string
+          file_name: string
+          similarity: number
+          file_path: string
+          chunk_index: number
         }[]
       }
       sparsevec_out: {

@@ -318,7 +318,7 @@ const MultipleChoiceFields = ({ form, quizId }: MultipleChoiceFieldsProps) => {
       </Field>
 
       <Field>
-        <FieldLabel>
+        <FieldLabel asChild>
           <div className="flex items-center justify-between w-full">
             <span>Explanation (Optional)</span>
             <Button

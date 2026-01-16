@@ -66,7 +66,7 @@ export async function POST(request: Request) {
     // 2. Get all listening test questions (question_mode = 'audio')
     const { data: listeningQuestions, error: questionsError } = await supabase
       .from("quiz_question_multiple_choice")
-      .select("id, audio_script, question_text")
+      .select("id, audio_script, audio_url, question_text")
       .eq("quiz_id", quizId)
       .eq("question_mode", "audio")
       .is("deleted_at", null);
@@ -79,12 +79,23 @@ export async function POST(request: Request) {
       );
     }
 
-    // 3. Generate TTS for each listening test question
+    // 3. Generate TTS only for questions without audio_url
     const ttsResults = [];
     const errors = [];
 
     for (const question of listeningQuestions || []) {
       try {
+        // Skip if audio_url already exists
+        if (question.audio_url && question.audio_url.trim() !== "") {
+          ttsResults.push({
+            questionId: question.id,
+            audioUrl: question.audio_url,
+            success: true,
+            skipped: true,
+          });
+          continue;
+        }
+
         // Check if audio_script exists
         if (!question.audio_script || question.audio_script.trim() === "") {
           errors.push({
@@ -117,6 +128,7 @@ export async function POST(request: Request) {
           questionId: question.id,
           audioUrl,
           success: true,
+          skipped: false,
         });
       } catch (error) {
         console.error(
@@ -159,10 +171,14 @@ export async function POST(request: Request) {
     }
 
     // 6. Return success response
+    const newlyGenerated = ttsResults.filter((r) => !r.skipped).length;
+    const skipped = ttsResults.filter((r) => r.skipped).length;
+
     return NextResponse.json({
       success: true,
       message: "Quiz published successfully",
-      ttsGenerated: ttsResults.length,
+      ttsGenerated: newlyGenerated,
+      ttsSkipped: skipped,
       audioFiles: ttsResults,
     });
   } catch (error) {

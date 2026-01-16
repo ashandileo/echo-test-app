@@ -318,6 +318,25 @@ const AIQuestionGenerator = ({
                     </div>
                   </div>
 
+                  {/* Custom Input */}
+                  <div>
+                    <Label className="text-xs text-muted-foreground mb-2 block">
+                      Or Enter Custom Amount
+                    </Label>
+                    <Input
+                      type="number"
+                      min={1}
+                      max={10}
+                      value={selectedCount}
+                      onChange={(e) => {
+                        const value = parseInt(e.target.value) || 1;
+                        setSelectedCount(value);
+                        form.setValue("questionCount", value);
+                      }}
+                      placeholder="Enter number of questions (1-10)"
+                    />
+                  </div>
+
                   <p className="text-xs text-muted-foreground">
                     Generate between 1-10 questions at once
                   </p>

@@ -3,9 +3,20 @@
 import { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
 
-import { CheckCircle2, Edit2, Loader2, Save, XCircle } from "lucide-react";
+import { useMutation } from "@tanstack/react-query";
+import {
+  CheckCircle2,
+  Edit2,
+  Headphones,
+  Loader2,
+  Save,
+  Sparkles,
+  XCircle,
+} from "lucide-react";
 import remarkGfm from "remark-gfm";
+import { toast } from "sonner";
 
+import { AudioPlayer } from "@/components/ui/audio-player";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -24,6 +35,8 @@ export interface GeneratedQuestion {
   question: string;
   questionMode?: "text" | "audio"; // For multiple choice
   answerMode?: "text" | "voice"; // For essay
+  audioScript?: string | null; // Audio script for listening tests
+  audioUrl?: string | null; // Generated audio URL from R2 storage
   options?: string[];
   correctAnswer?: number;
   explanation?: string;
@@ -35,6 +48,7 @@ interface AIQuestionReviewProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   questions: GeneratedQuestion[];
+  quizId: string; // Add quizId to pass to API
   onSave: (selectedQuestions: GeneratedQuestion[]) => Promise<void>;
   onEdit?: (question: GeneratedQuestion) => void;
 }
@@ -43,6 +57,7 @@ const AIQuestionReview = ({
   open,
   onOpenChange,
   questions,
+  quizId,
   onSave,
   onEdit,
 }: AIQuestionReviewProps) => {
@@ -50,6 +65,10 @@ const AIQuestionReview = ({
     GeneratedQuestion[]
   >([]);
   const [isSaving, setIsSaving] = useState(false);
+  const [generatingAudioFor, setGeneratingAudioFor] = useState<string | null>(
+    null
+  );
+  const [audioUrls, setAudioUrls] = useState<Record<string, string>>({});
 
   // Update selectedQuestions when questions prop changes
   useEffect(() => {
@@ -57,6 +76,70 @@ const AIQuestionReview = ({
       setSelectedQuestions(questions.map((q) => ({ ...q, selected: true })));
     }
   }, [questions]);
+
+  // Mutation for generating audio preview and uploading to R2
+  const generateAudioMutation = useMutation({
+    mutationFn: async ({
+      questionId,
+      audioScript,
+    }: {
+      questionId: string;
+      audioScript: string;
+    }) => {
+      const response = await fetch(
+        "/api/quiz/question/generate-audio-preview",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            audioScript,
+            questionId,
+            quizId,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to generate audio");
+      }
+
+      return { audioUrl: data.audioUrl, questionId };
+    },
+    onMutate: () => {
+      toast.loading("Generating audio...", {
+        id: "generate-audio-preview",
+      });
+    },
+    onSuccess: ({ audioUrl, questionId }) => {
+      // Store the generated audio URL
+      setAudioUrls((prev) => ({ ...prev, [questionId]: audioUrl }));
+
+      // Update the question with audio URL
+      setSelectedQuestions((prev) =>
+        prev.map((q) => (q.id === questionId ? { ...q, audioUrl } : q))
+      );
+
+      toast.dismiss("generate-audio-preview");
+      toast.success("Audio generated successfully! 🎉");
+      setGeneratingAudioFor(null);
+    },
+    onError: (error: Error) => {
+      toast.dismiss("generate-audio-preview");
+      toast.error("Failed to generate audio", {
+        description: error.message,
+      });
+      setGeneratingAudioFor(null);
+    },
+  });
+
+  const handleGenerateAudio = (questionId: string, audioScript: string) => {
+    setGeneratingAudioFor(questionId);
+    generateAudioMutation.mutate({ questionId, audioScript });
+  };
 
   const toggleSelection = (id: string) => {
     setSelectedQuestions((prev) =>
@@ -173,6 +256,60 @@ const AIQuestionReview = ({
                       <p className="text-xs sm:text-sm font-medium mb-2 sm:mb-3">
                         {question.question}
                       </p>
+
+                      {/* Audio Script for Listening Tests */}
+                      {question.type === "multiple_choice" &&
+                        question.questionMode === "audio" &&
+                        question.audioScript && (
+                          <div className="mb-3 p-3 bg-purple-50 dark:bg-purple-950/20 rounded-lg border border-purple-200 dark:border-purple-900">
+                            <div className="flex items-center gap-2 mb-2">
+                              <Headphones className="size-4 text-purple-600 dark:text-purple-400" />
+                              <p className="text-xs font-semibold text-purple-900 dark:text-purple-300">
+                                Audio Script (will be read aloud):
+                              </p>
+                            </div>
+                            <p className="text-xs sm:text-sm text-purple-800 dark:text-purple-300 italic mb-3 pl-6">
+                              &quot;{question.audioScript}&quot;
+                            </p>
+
+                            {/* Generate Audio Preview Button / Audio Player */}
+                            {audioUrls[question.id] ? (
+                              <div className="pl-6">
+                                <p className="text-xs text-purple-700 dark:text-purple-400 mb-2">
+                                  Preview:
+                                </p>
+                                <AudioPlayer
+                                  audioUrl={audioUrls[question.id]}
+                                />
+                              </div>
+                            ) : (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() =>
+                                  handleGenerateAudio(
+                                    question.id,
+                                    question.audioScript!
+                                  )
+                                }
+                                disabled={generatingAudioFor === question.id}
+                                className="gap-2 ml-6"
+                              >
+                                {generatingAudioFor === question.id ? (
+                                  <>
+                                    <Loader2 className="size-3 animate-spin" />
+                                    Generating...
+                                  </>
+                                ) : (
+                                  <>
+                                    <Sparkles className="size-3" />
+                                    Generate Audio Preview
+                                  </>
+                                )}
+                              </Button>
+                            )}
+                          </div>
+                        )}
 
                       {/* Multiple Choice Options */}
                       {question.type === "multiple_choice" &&

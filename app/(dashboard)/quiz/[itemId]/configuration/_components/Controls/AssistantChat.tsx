@@ -35,6 +35,7 @@ interface ExtendedGeneratedQuestion extends GeneratedQuestion {
   questionMode?: "text" | "audio";
   answerMode?: "text" | "voice";
   audioScript?: string | null; // Add audio_script field
+  audioUrl?: string | null; // Add audio_url field for generated audio
   expectedWordCount?: string; // Add expected_word_count field
 }
 
@@ -160,6 +161,7 @@ const AssistantChat = () => {
               explanation: q.explanation || null,
               question_mode: q.questionMode || "text",
               audio_script: q.audioScript || null,
+              audio_url: q.audioUrl || null, // Include audio URL if generated
               order_number: lastMcOrderNumber + index + 1, // Continue from last order_number
             }))
           );
@@ -241,6 +243,7 @@ const AssistantChat = () => {
         open={isReviewOpen}
         onOpenChange={setIsReviewOpen}
         questions={generatedQuestions}
+        quizId={itemId}
         onSave={handleSave}
       />
     </>

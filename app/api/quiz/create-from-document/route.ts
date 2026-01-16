@@ -65,12 +65,13 @@ export async function POST(request: Request) {
     // STEP 2: Generate quiz title and description from concepts
     const metadata = await generateQuizMetadata(fileName, concepts);
 
-    // STEP 3: Create quiz in database
+    // STEP 3: Create quiz in database WITH CONCEPTS for consistency
     const quiz = await createQuiz(
       user.id,
       metadata.title,
       metadata.description,
-      filePath
+      filePath,
+      concepts // Store concepts for future explanation/rubric generation
     );
 
     // STEP 4: Generate questions in parallel using concepts (REDUCE PHASE)
