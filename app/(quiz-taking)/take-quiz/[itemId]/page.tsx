@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+
 import { Menu } from "lucide-react";
 
 import { QuizSubmitConfirmDialog } from "@/components/dialogs/quiz/QuizSubmitConfirmDialog";
@@ -35,9 +37,11 @@ const QuizTakingContent = () => {
     totalQuestions,
   } = useQuizTaking();
 
+  const [isNavigationSheetOpen, setIsNavigationSheetOpen] = useState(false);
+
   if (isLoading) {
     return (
-      <div className="h-screen bg-gradient-to-br from-background to-muted/20 flex flex-col p-3 md:p-6 max-w-7xl mx-auto overflow-hidden">
+      <div className="h-screen bg-linear-to-br from-background to-muted/20 flex flex-col p-2 sm:p-3 md:p-6 max-w-7xl mx-auto overflow-hidden">
         <div className="shrink-0 mb-4 md:mb-6">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2 md:gap-4">
@@ -111,15 +115,15 @@ const QuizTakingContent = () => {
   }
 
   return (
-    <div className="h-screen bg-gradient-to-br from-background to-muted/20 flex flex-col p-3 md:p-6 max-w-7xl mx-auto overflow-hidden">
+    <div className="h-screen bg-linear-to-br from-background to-muted/20 flex flex-col p-2 sm:p-3 md:p-6 max-w-7xl mx-auto overflow-hidden">
       {/* Compact Header */}
       <QuizHeader />
 
       {/* Main Content - Flex row layout */}
-      <div className="flex-1 flex gap-3 md:gap-6 min-h-0 overflow-hidden">
+      <div className="flex-1 flex gap-2 sm:gap-3 md:gap-6 min-h-0 overflow-hidden">
         {/* Left: Main Quiz Card */}
         <Card className="flex-1 flex flex-col min-w-0 shadow-lg overflow-hidden py-0">
-          <CardHeader className="pb-3 pt-3 md:pb-4 shrink-0 border-b bg-muted/30">
+          <CardHeader className="pb-2 pt-2 sm:pb-3 sm:pt-3 md:pb-4 md:pt-4 px-3 sm:px-4 md:px-6 shrink-0 border-b bg-muted/30">
             <TabSwitch />
           </CardHeader>
 
@@ -134,22 +138,30 @@ const QuizTakingContent = () => {
         </div>
 
         {/* Mobile: Question Navigation in Sheet */}
-        <Sheet>
+        <Sheet
+          open={isNavigationSheetOpen}
+          onOpenChange={setIsNavigationSheetOpen}
+        >
           <SheetTrigger asChild>
             <Button
               variant="outline"
               size="icon"
-              className="fixed bottom-24 right-4 lg:hidden h-14 w-14 rounded-full shadow-lg z-50"
+              className="fixed bottom-6 right-4 lg:hidden h-12 w-12 sm:h-14 sm:w-14 rounded-full shadow-lg z-50 bg-primary text-primary-foreground hover:bg-primary/90 border-primary"
             >
-              <Menu className="h-6 w-6" />
+              <Menu className="h-5 w-5 sm:h-6 sm:w-6" />
             </Button>
           </SheetTrigger>
-          <SheetContent side="bottom" className="h-[80vh]">
-            <SheetHeader>
-              <SheetTitle>Question Navigation</SheetTitle>
-            </SheetHeader>
-            <div className="mt-4">
-              <QuestionNavigation />
+          <SheetContent side="bottom" className="h-[85vh] p-0">
+            <div className="h-full flex flex-col">
+              <SheetHeader className="px-6 py-4 border-b">
+                <SheetTitle>Question Navigation</SheetTitle>
+              </SheetHeader>
+              <div className="flex-1 overflow-hidden p-4">
+                <QuestionNavigation
+                  isMobile={true}
+                  onQuestionSelect={() => setIsNavigationSheetOpen(false)}
+                />
+              </div>
             </div>
           </SheetContent>
         </Sheet>

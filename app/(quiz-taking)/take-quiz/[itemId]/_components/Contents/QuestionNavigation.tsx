@@ -8,7 +8,15 @@ import { cn } from "@/lib/utils";
 
 import { useQuizTaking } from "../QuizTakingContext";
 
-const QuestionNavigation = () => {
+interface QuestionNavigationProps {
+  isMobile?: boolean;
+  onQuestionSelect?: () => void;
+}
+
+const QuestionNavigation = ({
+  isMobile = false,
+  onQuestionSelect,
+}: QuestionNavigationProps) => {
   const {
     currentQuestions,
     currentQuestionIndex,
@@ -19,7 +27,12 @@ const QuestionNavigation = () => {
   const answeredCount = currentQuestions.filter((q) => answers[q.id]).length;
 
   return (
-    <Card className="w-80 flex flex-col shrink-0 shadow-lg">
+    <Card
+      className={cn(
+        "flex flex-col shrink-0 shadow-lg",
+        isMobile ? "w-full border-0 shadow-none" : "w-80"
+      )}
+    >
       <CardHeader className="pb-4 border-b">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -32,8 +45,18 @@ const QuestionNavigation = () => {
         </div>
       </CardHeader>
       <CardContent className="flex-1 p-4">
-        <div className="h-[calc(100vh-250px)] overflow-y-auto">
-          <div className="grid grid-cols-6 gap-2 pr-4">
+        <div
+          className={cn(
+            "overflow-y-auto",
+            isMobile ? "max-h-[calc(100vh-300px)]" : "h-[calc(100vh-250px)]"
+          )}
+        >
+          <div
+            className={cn(
+              "grid gap-2 pr-2",
+              isMobile ? "grid-cols-5 sm:grid-cols-6" : "grid-cols-6"
+            )}
+          >
             {currentQuestions.map((question, index) => {
               const isAnswered = !!answers[question.id];
               const isCurrent = currentQuestionIndex === index;
@@ -41,9 +64,14 @@ const QuestionNavigation = () => {
               return (
                 <button
                   key={question.id}
-                  onClick={() => setCurrentQuestionIndex(index)}
+                  onClick={() => {
+                    setCurrentQuestionIndex(index);
+                    if (onQuestionSelect) {
+                      onQuestionSelect();
+                    }
+                  }}
                   className={cn(
-                    "relative aspect-square rounded-lg border-2 flex items-center justify-center text-sm font-semibold transition-all hover:scale-105",
+                    "relative aspect-square rounded-lg border-2 flex items-center justify-center text-sm font-semibold transition-all hover:scale-105 active:scale-95",
                     isCurrent &&
                       !isAnswered &&
                       "border-primary bg-primary text-primary-foreground shadow-md",

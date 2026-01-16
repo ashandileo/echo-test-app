@@ -29,13 +29,13 @@ const NavigationButtons = () => {
   const totalQuestions = currentQuestions.length;
 
   return (
-    <CardFooter className="shrink-0 flex flex-col md:flex-row justify-between items-stretch md:items-center gap-3 border-t pt-4 md:pt-6 pb-3 md:pb-4 px-4 md:px-6 bg-muted/30">
+    <CardFooter className="shrink-0 flex flex-col md:flex-row justify-between items-stretch md:items-center gap-2 sm:gap-3 border-t pt-3 sm:pt-4 md:pt-6 pb-2 sm:pb-3 md:pb-4 px-3 sm:px-4 md:px-6 bg-muted/30">
       <Button
         variant="outline"
         size="default"
         onClick={handlePrevious}
         disabled={isFirstQuestion || hasNoQuestions}
-        className="w-full md:w-auto md:min-w-[120px]"
+        className="w-full md:w-auto md:min-w-30"
       >
         <ArrowLeft className="h-4 w-4 mr-2" />
         Previous
@@ -56,7 +56,7 @@ const NavigationButtons = () => {
           <Button
             onClick={handleSubmitQuiz}
             size="default"
-            className="w-full md:w-auto md:min-w-[140px] bg-green-600 hover:bg-green-700 hover:scale-105 active:scale-95 transition-all duration-200"
+            className="w-full md:w-auto md:min-w-35 bg-green-600 hover:bg-green-700 hover:scale-105 active:scale-95 transition-all duration-200"
           >
             <Send className="h-4 w-4 mr-2" />
             Submit Quiz
@@ -66,7 +66,7 @@ const NavigationButtons = () => {
             size="default"
             onClick={handleNext}
             disabled={hasNoQuestions}
-            className="w-full md:w-auto md:min-w-[120px]"
+            className="w-full md:w-auto md:min-w-30"
           >
             Next
             <ArrowRight className="h-4 w-4 ml-2" />
