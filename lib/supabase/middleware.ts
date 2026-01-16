@@ -46,12 +46,24 @@ export async function updateSession(request: NextRequest) {
 
   // Public routes that don't require authentication
   const publicRoutes = ["/", "/login", "/register", "/privacy", "/terms"];
+  const authCallbackRoutes = ["/auth/v1/callback"];
 
   const isPublicRoute = publicRoutes.some(
     (route) =>
       request.nextUrl.pathname === route ||
       request.nextUrl.pathname.startsWith(route + "/")
   );
+
+  const isAuthCallback = authCallbackRoutes.some(
+    (route) =>
+      request.nextUrl.pathname === route ||
+      request.nextUrl.pathname.startsWith(route)
+  );
+
+  // Allow auth callback to proceed
+  if (isAuthCallback) {
+    return supabaseResponse;
+  }
 
   // Protected routes - redirect to login if not authenticated
   if (!user && !isPublicRoute) {
@@ -66,8 +78,15 @@ export async function updateSession(request: NextRequest) {
     (request.nextUrl.pathname.startsWith("/login") ||
       request.nextUrl.pathname.startsWith("/register"))
   ) {
+    // Get user role from database
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+
     const url = request.nextUrl.clone();
-    url.pathname = "/quiz";
+    url.pathname = profile?.role === "admin" ? "/quiz" : "/quizzes";
     return NextResponse.redirect(url);
   }
 

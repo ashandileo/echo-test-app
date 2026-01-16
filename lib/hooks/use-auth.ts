@@ -19,7 +19,6 @@ export interface RegisterCredentials {
 
 // Login Mutation
 export function useLogin() {
-  const router = useRouter();
   const supabase = createClient();
 
   return useMutation({
@@ -46,8 +45,8 @@ export function useLogin() {
       });
       // Redirect based on role
       const redirectPath = data.role === "admin" ? "/quiz" : "/quizzes";
-      router.push(redirectPath);
-      router.refresh();
+      // Use window.location.href for full page reload to ensure session is updated
+      window.location.href = redirectPath;
     },
     onError: (error: Error) => {
       toast.error("Login failed", {
@@ -59,7 +58,6 @@ export function useLogin() {
 
 // Register Mutation
 export function useRegister() {
-  const router = useRouter();
   const supabase = createClient();
 
   return useMutation({
@@ -84,8 +82,8 @@ export function useRegister() {
           description: "Welcome to EchoTest. Redirecting...",
         });
         // New users are always "user" role, redirect to /quizzes
-        router.push("/quizzes");
-        router.refresh();
+        // Use window.location.href for full page reload to ensure session is updated
+        window.location.href = "/quizzes";
       }
     },
     onError: (error: Error) => {
@@ -105,10 +103,10 @@ export function useGoogleLogin() {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
+          redirectTo: `${window.location.origin}/auth/v1/callback`,
           queryParams: {
-            access_type: 'offline',
-            prompt: 'select_account', // Selalu tampilkan account picker
+            access_type: "offline",
+            prompt: "select_account", // Selalu tampilkan account picker
           },
         },
       });
