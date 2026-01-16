@@ -15,7 +15,7 @@ export const AudioPlayer = ({ audioUrl, className }: AudioPlayerProps) => {
         className
       )}
     >
-      <audio controls className="w-full">
+      <audio key={audioUrl} controls className="w-full">
         <source src={audioUrl} type="audio/mpeg" />
         <source src={audioUrl} type="audio/ogg" />
         <source src={audioUrl} type="audio/wav" />
