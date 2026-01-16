@@ -2,10 +2,10 @@
 
 import { CheckCircle2, FileText, Headphones, Mic } from "lucide-react";
 
+import { AudioAnswer } from "@/components/ui/audio-answer";
 import { AudioPlayer } from "@/components/ui/audio-player";
 import { Badge } from "@/components/ui/badge";
 import { CardContent } from "@/components/ui/card";
-import { VoiceRecorder } from "@/components/ui/voice-recorder";
 import { cn } from "@/lib/utils";
 import { Database } from "@/types/supabase";
 
@@ -188,8 +188,8 @@ const QuestionDisplay = () => {
         ) : (
           <div className="space-y-2 flex-1 flex flex-col">
             {isSpeakingTest ? (
-              // Voice Recorder for Speaking Test
-              <VoiceRecorder
+              // Audio Answer (Record or Upload) for Speaking Test
+              <AudioAnswer
                 key={`${currentQuestion?.id}-${currentQuestion ? answers[currentQuestion.id] || "no-audio" : "no-question"}`} // Force remount when question or audio changes
                 onRecordingComplete={(blob) => {
                   if (currentQuestion) {

@@ -118,8 +118,8 @@ const QuizTakingContent = () => {
       {/* Main Content - Flex row layout */}
       <div className="flex-1 flex gap-3 md:gap-6 min-h-0 overflow-hidden">
         {/* Left: Main Quiz Card */}
-        <Card className="flex-1 flex flex-col min-w-0 shadow-lg overflow-hidden">
-          <CardHeader className="pb-3 md:pb-4 shrink-0 border-b bg-muted/30">
+        <Card className="flex-1 flex flex-col min-w-0 shadow-lg overflow-hidden py-0">
+          <CardHeader className="pb-3 pt-3 md:pb-4 shrink-0 border-b bg-muted/30">
             <TabSwitch />
           </CardHeader>
 
