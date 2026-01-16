@@ -19,6 +19,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "EchoTest - AI-Powered English Learning",
   description: "Master English with AI-powered personalized learning",
+  verification: {
+    google: "googleb705dc1ec9bce183",
+  },
 };
 
 export default function RootLayout({
