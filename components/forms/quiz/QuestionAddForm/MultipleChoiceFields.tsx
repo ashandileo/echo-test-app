@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Field, FieldContent, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { MarkdownEditor } from "@/components/ui/markdown-editor";
 import { Textarea } from "@/components/ui/textarea";
 
 import { QuestionFormValues } from "./schema";
@@ -20,6 +21,7 @@ interface MultipleChoiceFieldsProps {
 
 const MultipleChoiceFields = ({ form, quizId }: MultipleChoiceFieldsProps) => {
   const [isGeneratingExplanation, setIsGeneratingExplanation] = useState(false);
+  const [editorKey, setEditorKey] = useState(0); // Key to force remount
 
   const currentQuestion = form.watch("question");
   const currentOptions = form.watch("options");
@@ -71,6 +73,9 @@ const MultipleChoiceFields = ({ form, quizId }: MultipleChoiceFieldsProps) => {
       }
 
       form.setValue("explanation", data.explanation);
+      
+      // Force remount the editor to show new content
+      setEditorKey((prev) => prev + 1);
     } catch (error) {
       console.error("Error generating explanation:", error);
       // Optionally show error toast/notification here
@@ -343,11 +348,12 @@ const MultipleChoiceFields = ({ form, quizId }: MultipleChoiceFieldsProps) => {
           </div>
         </FieldLabel>
         <FieldContent>
-          <Textarea
-            placeholder="Enter explanation for the correct answer..."
+          <MarkdownEditor
+            key={editorKey}
             value={form.watch("explanation") || ""}
-            onChange={(e) => form.setValue("explanation", e.target.value)}
-            rows={3}
+            onChange={(value) => form.setValue("explanation", value)}
+            placeholder="Enter explanation for the correct answer..."
+            rows={8}
           />
           <p className="text-xs text-muted-foreground mt-1">
             Click &quot;Generate with AI&quot; to create a structured

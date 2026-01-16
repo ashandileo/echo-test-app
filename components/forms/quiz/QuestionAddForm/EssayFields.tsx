@@ -7,7 +7,7 @@ import { FileText, Loader2, Mic, Sparkles } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Field, FieldContent, FieldLabel } from "@/components/ui/field";
-import { Textarea } from "@/components/ui/textarea";
+import { MarkdownEditor } from "@/components/ui/markdown-editor";
 
 import { QuestionFormValues } from "./schema";
 
@@ -18,6 +18,7 @@ interface EssayFieldsProps {
 
 const EssayFields = ({ form, quizId }: EssayFieldsProps) => {
   const [isGeneratingRubric, setIsGeneratingRubric] = useState(false);
+  const [editorKey, setEditorKey] = useState(0); // Key to force remount
 
   const currentQuestion = form.watch("question");
   const answerMode = form.watch("answerMode") || "text";
@@ -48,6 +49,9 @@ const EssayFields = ({ form, quizId }: EssayFieldsProps) => {
       }
 
       form.setValue("sampleAnswer", data.rubric);
+      
+      // Force remount the editor to show new content
+      setEditorKey((prev) => prev + 1);
     } catch (error) {
       console.error("Error generating rubric:", error);
       // Optionally show error toast/notification here
@@ -227,11 +231,12 @@ const EssayFields = ({ form, quizId }: EssayFieldsProps) => {
           </div>
         </FieldLabel>
         <FieldContent>
-          <Textarea
-            placeholder="Enter sample answer or grading rubric to help with assessment..."
+          <MarkdownEditor
+            key={editorKey}
             value={form.watch("sampleAnswer") || ""}
-            onChange={(e) => form.setValue("sampleAnswer", e.target.value)}
-            rows={5}
+            onChange={(value) => form.setValue("sampleAnswer", value)}
+            placeholder="Enter sample answer or grading rubric to help with assessment..."
+            rows={10}
           />
           <p className="text-xs text-muted-foreground mt-1">
             Click &quot;Generate with AI&quot; to create a comprehensive rubric
