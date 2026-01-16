@@ -146,7 +146,9 @@ const Contents = () => {
   const hasSubmissions = answeredQuestions > 0;
 
   // Check if quiz is completed
-  const isCompleted = submissionStatus?.status === "submitted";
+  const isCompleted =
+    submissionStatus?.status === "submitted" ||
+    submissionStatus?.status === "completed";
 
   // If no submissions, show empty state
   if (!hasSubmissions) {
