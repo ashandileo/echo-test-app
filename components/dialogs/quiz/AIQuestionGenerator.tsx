@@ -36,7 +36,7 @@ import { Textarea } from "@/components/ui/textarea";
 
 // Schema for AI generation form
 const aiGeneratorSchema = z.object({
-  questionCount: z.number().min(1).max(20),
+  questionCount: z.number().min(1).max(10),
   questionType: z.enum(["multiple_choice", "essay", "mixed"]),
   questionMode: z.enum(["text", "audio"]).optional(), // For multiple choice (listening test)
   answerMode: z.enum(["text", "voice"]).optional(), // For essay (speaking test)
@@ -86,7 +86,7 @@ const AIQuestionGenerator = ({
   };
 
   // Quick action buttons for common counts
-  const quickCounts = [3, 5, 10, 15, 20];
+  const quickCounts = [3, 5, 10];
 
   // Watch form values
   const questionType = form.watch("questionType");

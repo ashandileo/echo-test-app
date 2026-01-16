@@ -6,7 +6,7 @@ export interface UploadAudioResult {
 }
 
 /**
- * Upload audio file to Supabase Storage
+ * Upload audio file to R2 Storage via API route
  */
 export async function uploadAudio(
   audioBlob: Blob,
@@ -33,39 +33,34 @@ export async function uploadAudio(
     throw new Error("Unauthorized: User ID mismatch");
   }
 
-  // Convert blob to array buffer
-  const arrayBuffer = await audioBlob.arrayBuffer();
+  // Create FormData for API request
+  const formData = new FormData();
+  formData.append("audio", audioBlob);
+  formData.append("questionId", options.questionId);
+  formData.append("quizId", options.quizId);
+  formData.append("userId", options.userId);
 
-  // Generate unique filename
-  const timestamp = Date.now();
-  const fileName = `${options.userId}/${options.quizId}/${options.questionId}_${timestamp}.webm`;
+  // Upload via API route (which has access to R2 credentials)
+  const response = await fetch("/api/audio/upload", {
+    method: "POST",
+    body: formData,
+  });
 
-  // Upload to Supabase storage
-  const { data: uploadData, error: uploadError } = await supabase.storage
-    .from("quiz-assets")
-    .upload(fileName, arrayBuffer, {
-      contentType: "audio/webm",
-      upsert: true,
-    });
-
-  if (uploadError) {
-    console.error("Upload error:", uploadError);
-    throw new Error("Failed to upload audio");
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || "Failed to upload audio");
   }
 
-  // Get public URL
-  const {
-    data: { publicUrl },
-  } = supabase.storage.from("quiz-assets").getPublicUrl(uploadData.path);
+  const result = await response.json();
 
   return {
-    audioUrl: publicUrl,
-    path: uploadData.path,
+    audioUrl: result.audioUrl,
+    path: result.path,
   };
 }
 
 /**
- * Delete audio file from Supabase Storage
+ * Delete audio file from R2 Storage via API route
  */
 export async function deleteAudio(filePath: string): Promise<void> {
   const supabase = createClient();
@@ -87,14 +82,17 @@ export async function deleteAudio(filePath: string): Promise<void> {
     );
   }
 
-  // Delete from storage
-  const { error: deleteError } = await supabase.storage
-    .from("quiz-assets")
-    .remove([filePath]);
+  // Delete via API route (which has access to R2 credentials)
+  const response = await fetch(
+    `/api/audio/delete?filePath=${encodeURIComponent(filePath)}`,
+    {
+      method: "DELETE",
+    }
+  );
 
-  if (deleteError) {
-    console.error("Delete error:", deleteError);
-    throw new Error("Failed to delete audio");
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || "Failed to delete audio");
   }
 }
 

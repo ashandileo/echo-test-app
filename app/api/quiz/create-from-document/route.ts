@@ -51,13 +51,21 @@ export async function POST(request: Request) {
       `Processing document: ${fileName} (${totalChunks} total chunks, ${context.length} characters)`
     );
 
-    // Generate quiz title and description using AI
-    const metadata = await generateQuizMetadata(
-      fileName,
-      context.slice(0, 2000) // Use first ~500 tokens for metadata generation
+    // STEP 1: Extract concepts first (MAP PHASE) - more efficient for AI
+    // This reduces token usage and improves question quality
+    // The extracted concepts will be used for BOTH metadata and questions
+    const concepts = await extractConceptsFromDocument(context);
+
+    console.log(
+      `Extracted ${concepts.length} concepts for metadata & question generation`
     );
 
-    // Create quiz in database
+    console.log("concepts", concepts);
+
+    // STEP 2: Generate quiz title and description from concepts
+    const metadata = await generateQuizMetadata(fileName, concepts);
+
+    // STEP 3: Create quiz in database
     const quiz = await createQuiz(
       user.id,
       metadata.title,
@@ -65,32 +73,13 @@ export async function POST(request: Request) {
       filePath
     );
 
-    console.log(`Quiz created with ID: ${quiz.id}`);
-
-    // Extract concepts once (MAP PHASE) - will be shared by both question generators
-    const concepts = await extractConceptsFromDocument(context);
-
-    // Generate questions using extracted concepts or direct context
-    // If concepts is null (small doc), pass context directly
-    // If concepts exists (large doc), pass concepts array
-    const inputForGeneration = concepts || context;
-
-    console.log({
-      concepts,
-      context,
-    });
-
-    console.log(
-      `📊 Generation mode: ${concepts ? `Map-Reduce (${concepts.length} concepts)` : "Direct (small document)"}`
-    );
-
-    // Generate questions in parallel - REDUCE PHASE (or direct for small docs)
+    // STEP 4: Generate questions in parallel using concepts (REDUCE PHASE)
     const [mcQuestions, essayQuestions] = await Promise.all([
-      generateMultipleChoiceQuestions(inputForGeneration, 8),
-      generateEssayQuestions(inputForGeneration, 4),
+      generateMultipleChoiceQuestions(concepts, 4),
+      generateEssayQuestions(concepts, 4),
     ]);
 
-    // Save questions to database
+    // STEP 5: Save questions to database
     console.log(
       `Saving ${mcQuestions.length} multiple-choice and ${essayQuestions.length} essay questions...`
     );

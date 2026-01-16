@@ -7,8 +7,6 @@ import {
   SYSTEM_PROMPT_ESSAY,
   SYSTEM_PROMPT_METADATA,
   SYSTEM_PROMPT_MULTIPLE_CHOICE,
-  USER_PROMPT_ESSAY,
-  USER_PROMPT_MULTIPLE_CHOICE,
 } from "./consts";
 
 const openai = new OpenAI({
@@ -39,13 +37,20 @@ export interface EssayQuestion {
 }
 
 /**
- * Generate quiz title and description from document content
+ * Generate quiz title and description from extracted concepts
+ * Uses the same concepts that will be used for question generation
  */
 export async function generateQuizMetadata(
   fileName: string,
-  context: string
+  concepts: string[]
 ): Promise<QuizMetadata> {
   try {
+    console.log(
+      `📝 Generating quiz metadata from ${concepts.length} concepts...`
+    );
+
+    const conceptsSummary = concepts.join("\n- ");
+
     const response = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
@@ -55,7 +60,7 @@ export async function generateQuizMetadata(
         },
         {
           role: "user",
-          content: `Learning Material: ${fileName}\n\nContent:\n${context}`,
+          content: `Learning Material: ${fileName}\n\nKey Concepts:\n- ${conceptsSummary}\n\nGenerate a catchy title and informative description for this quiz.`,
         },
       ],
       temperature: 0.7,
@@ -67,7 +72,10 @@ export async function generateQuizMetadata(
       throw new Error("No content returned from OpenAI");
     }
 
-    return JSON.parse(content);
+    const metadata = JSON.parse(content);
+    console.log(`✅ Metadata generated: "${metadata.title}"`);
+
+    return metadata;
   } catch (error) {
     console.error("Error generating quiz metadata:", error);
     throw new Error(ERROR_MESSAGES.OPENAI_GENERATION_FAILED);
@@ -152,17 +160,11 @@ Return ONLY a JSON array of concept strings:
 /**
  * Extract all concepts from document context (MAP phase)
  * This is called ONCE and the result is shared between MC and Essay generation
+ * ALWAYS extracts concepts for efficient AI processing
  */
 export async function extractConceptsFromDocument(
   context: string
-): Promise<string[] | null> {
-  const CHUNK_SIZE_THRESHOLD = 8000; // characters
-
-  // If context is small, return null (will use direct generation)
-  if (context.length <= CHUNK_SIZE_THRESHOLD) {
-    return null;
-  }
-
+): Promise<string[]> {
   // MAP PHASE: Extract concepts from batches
   const chunks = splitIntoChunks(context, 2000); // ~500 tokens per chunk
   const BATCH_SIZE = 5;
@@ -189,29 +191,18 @@ export async function extractConceptsFromDocument(
 }
 
 /**
- * Generate multiple choice questions from document content or extracted concepts
+ * Generate multiple choice questions from extracted concepts
+ * ALWAYS uses concept-based generation (REDUCE phase)
  */
 export async function generateMultipleChoiceQuestions(
-  contextOrConcepts: string | string[],
+  concepts: string[],
   count: number = 10
 ): Promise<MultipleChoiceQuestion[]> {
   try {
-    // If string (full context), use direct generation
-    if (typeof contextOrConcepts === "string") {
-      console.log("📝 Generating MC questions directly from context...");
-      const result = await generateQuestionsDirectly(
-        contextOrConcepts,
-        count,
-        "multiple_choice"
-      );
-      return result as MultipleChoiceQuestion[];
-    }
-
-    // If array (concepts), use REDUCE phase
     console.log(
-      `🎯 REDUCE PHASE: Generating ${count} MC questions from ${contextOrConcepts.length} concepts...`
+      `🎯 REDUCE PHASE: Generating ${count} MC questions from ${concepts.length} concepts...`
     );
-    const conceptsSummary = contextOrConcepts.join("\n- ");
+    const conceptsSummary = concepts.join("\n- ");
 
     const response = await openai.chat.completions.create({
       model: "gpt-4o-mini",
@@ -235,6 +226,8 @@ export async function generateMultipleChoiceQuestions(
       throw new Error("No content returned from OpenAI");
     }
 
+    console.log("MC Content", content);
+
     const parsed = JSON.parse(content);
     const questions = parsed.questions || [];
 
@@ -253,81 +246,18 @@ export async function generateMultipleChoiceQuestions(
 }
 
 /**
- * Direct generation for smaller contexts (backward compatibility)
- */
-async function generateQuestionsDirectly(
-  context: string,
-  count: number,
-  type: "multiple_choice" | "essay"
-): Promise<MultipleChoiceQuestion[] | EssayQuestion[]> {
-  const isMultipleChoice = type === "multiple_choice";
-
-  const response = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
-    messages: [
-      {
-        role: "system",
-        content: isMultipleChoice
-          ? SYSTEM_PROMPT_MULTIPLE_CHOICE(count)
-          : SYSTEM_PROMPT_ESSAY(count),
-      },
-      {
-        role: "user",
-        content: isMultipleChoice
-          ? USER_PROMPT_MULTIPLE_CHOICE(count, context)
-          : USER_PROMPT_ESSAY(count, context),
-      },
-    ],
-    temperature: isMultipleChoice ? 0.3 : 0.5,
-    response_format: { type: "json_object" },
-    max_tokens: 4096,
-  });
-
-  const content = response.choices[0].message.content;
-  if (!content) {
-    throw new Error("No content returned from OpenAI");
-  }
-
-  const parsed = JSON.parse(content);
-  const questions = parsed.questions || [];
-
-  if (isMultipleChoice) {
-    return questions.map((q: MultipleChoiceQuestion) => ({
-      ...q,
-      points: q.points ?? 1,
-    }));
-  } else {
-    return questions.map((q: EssayQuestion) => ({
-      ...q,
-      points: q.points ?? 5,
-    }));
-  }
-}
-
-/**
- * Generate essay questions from document content or extracted concepts
+ * Generate essay questions from extracted concepts
+ * ALWAYS uses concept-based generation (REDUCE phase)
  */
 export async function generateEssayQuestions(
-  contextOrConcepts: string | string[],
+  concepts: string[],
   count: number = 5
 ): Promise<EssayQuestion[]> {
   try {
-    // If string (full context), use direct generation
-    if (typeof contextOrConcepts === "string") {
-      console.log("📝 Generating Essay questions directly from context...");
-      const result = await generateQuestionsDirectly(
-        contextOrConcepts,
-        count,
-        "essay"
-      );
-      return result as EssayQuestion[];
-    }
-
-    // If array (concepts), use REDUCE phase
     console.log(
-      `🎯 REDUCE PHASE: Generating ${count} Essay questions from ${contextOrConcepts.length} concepts...`
+      `🎯 REDUCE PHASE: Generating ${count} Essay questions from ${concepts.length} concepts...`
     );
-    const conceptsSummary = contextOrConcepts.join("\n- ");
+    const conceptsSummary = concepts.join("\n- ");
 
     const response = await openai.chat.completions.create({
       model: "gpt-4o-mini",

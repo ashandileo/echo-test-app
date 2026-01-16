@@ -14,7 +14,7 @@ export const ERROR_MESSAGES = {
 
 export const DEFAULT_NUM_QUESTIONS = 5;
 export const MIN_QUESTIONS = 1;
-export const MAX_QUESTIONS = 20;
+export const MAX_QUESTIONS = 10;
 export const MAX_CONTEXT_LENGTH = 12000; // Characters to send to OpenAI
 export const RAG_MATCH_COUNT = 10; // Number of similar chunks to retrieve
 export const SIMILARITY_THRESHOLD = 0.5; // Minimum similarity score

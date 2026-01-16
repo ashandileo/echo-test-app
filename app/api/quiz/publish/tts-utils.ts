@@ -1,6 +1,6 @@
 import OpenAI from "openai";
 
-import { createClient as createServerClient } from "@/lib/supabase/server";
+import { uploadAudioToR2 } from "@/lib/utils/r2-audio-storage";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -53,7 +53,7 @@ export async function generateTTS(text: string): Promise<ArrayBuffer> {
 }
 
 /**
- * Upload audio file to Supabase Storage
+ * Upload audio file to R2 Storage
  */
 export async function uploadAudioToStorage(
   audioBuffer: ArrayBuffer,
@@ -62,35 +62,15 @@ export async function uploadAudioToStorage(
   userId: string
 ): Promise<string> {
   try {
-    const supabase = await createServerClient();
+    // Upload to R2 Storage
+    const result = await uploadAudioToR2(audioBuffer, {
+      fileName,
+      userId,
+      quizId,
+      contentType: "audio/mpeg",
+    });
 
-    // Convert ArrayBuffer to Buffer for upload
-    const buffer = Buffer.from(audioBuffer);
-
-    // Upload to Supabase Storage
-    // Path format: userId/quizId/audio/fileName (required by RLS policy)
-    const filePath = `${userId}/${quizId}/audio/${fileName}`;
-
-    const { error } = await supabase.storage
-      .from("quiz-assets") // Make sure this bucket exists
-      .upload(filePath, buffer, {
-        contentType: "audio/mpeg",
-        upsert: true, // Overwrite if exists
-      });
-
-    if (error) {
-      console.error("Error uploading to storage:", error);
-      throw new Error(
-        `Failed to upload audio file: ${error.message || "Unknown storage error"}`
-      );
-    }
-
-    // Get public URL
-    const {
-      data: { publicUrl },
-    } = supabase.storage.from("quiz-assets").getPublicUrl(filePath);
-
-    return publicUrl;
+    return result.audioUrl;
   } catch (error) {
     console.error("Error uploading audio:", error);
     throw error instanceof Error

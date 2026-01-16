@@ -172,7 +172,9 @@ export type Database = {
           answer_mode: string
           created_at: string | null
           deleted_at: string | null
+          expected_word_count: string | null
           id: string
+          order_number: number | null
           points: number
           question_text: string
           quiz_id: string
@@ -183,7 +185,9 @@ export type Database = {
           answer_mode?: string
           created_at?: string | null
           deleted_at?: string | null
+          expected_word_count?: string | null
           id?: string
+          order_number?: number | null
           points?: number
           question_text: string
           quiz_id: string
@@ -194,7 +198,9 @@ export type Database = {
           answer_mode?: string
           created_at?: string | null
           deleted_at?: string | null
+          expected_word_count?: string | null
           id?: string
+          order_number?: number | null
           points?: number
           question_text?: string
           quiz_id?: string
@@ -221,6 +227,7 @@ export type Database = {
           explanation: string | null
           id: string
           options: Json
+          order_number: number | null
           points: number
           question_mode: string
           question_text: string
@@ -236,6 +243,7 @@ export type Database = {
           explanation?: string | null
           id?: string
           options: Json
+          order_number?: number | null
           points?: number
           question_mode?: string
           question_text: string
@@ -251,6 +259,7 @@ export type Database = {
           explanation?: string | null
           id?: string
           options?: Json
+          order_number?: number | null
           points?: number
           question_mode?: string
           question_text?: string
