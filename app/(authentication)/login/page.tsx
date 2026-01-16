@@ -1,7 +1,8 @@
+import Image from "next/image";
 import Link from "next/link";
-import { GraduationCap } from "lucide-react";
 
 import { LoginForm } from "@/components/forms/auth/login-form";
+import logo from "@/public/logo.webp";
 
 export default function LoginPage() {
   return (
@@ -12,8 +13,14 @@ export default function LoginPage() {
             href="/"
             className="flex items-center gap-2 font-medium text-lg"
           >
-            <div className="bg-primary text-primary-foreground flex size-6 items-center justify-center rounded-md">
-              <GraduationCap className="size-4" />
+            <div className="relative w-6 h-6 rounded-md overflow-hidden">
+              <Image
+                src={logo}
+                alt="EchoTest Logo"
+                fill
+                className="object-contain"
+                priority
+              />
             </div>
             EchoTest
           </Link>

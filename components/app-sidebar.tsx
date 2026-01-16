@@ -2,9 +2,10 @@
 
 import * as React from "react";
 
+import Image from "next/image";
 import Link from "next/link";
 
-import { ClipboardList, GraduationCap } from "lucide-react";
+import { ClipboardList } from "lucide-react";
 
 import { NavMain } from "@/components/nav-main";
 import { NavUser } from "@/components/nav-user";
@@ -20,6 +21,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useProfile, type UserProfile } from "@/lib/hooks/use-profile";
+import logo from "@/public/logo.webp";
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   initialProfile?: UserProfile;
@@ -71,8 +73,14 @@ export function AppSidebar({ initialProfile, ...props }: AppSidebarProps) {
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
               <Link href="/" className="flex items-center gap-2">
-                <div className="bg-primary text-primary-foreground flex size-8 items-center justify-center rounded-lg">
-                  <GraduationCap className="size-4" />
+                <div className="relative w-8 h-8 rounded-lg overflow-hidden">
+                  <Image
+                    src={logo}
+                    alt="EchoTest Logo"
+                    fill
+                    className="object-contain"
+                    priority
+                  />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold">EchoTest</span>
