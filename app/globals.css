@@ -273,3 +273,28 @@
 .lexical-editor pre {
   @apply bg-muted p-2 rounded font-mono text-sm block mb-2 overflow-x-auto;
 }
+
+/* Prose variants for AI Review Dialog */
+.prose-blue {
+  @apply text-blue-700 dark:text-blue-400;
+}
+
+.prose-blue strong {
+  @apply text-blue-900 dark:text-blue-300;
+}
+
+.prose-blue code {
+  @apply bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200;
+}
+
+.prose-purple {
+  @apply text-purple-700 dark:text-purple-400;
+}
+
+.prose-purple strong {
+  @apply text-purple-900 dark:text-purple-300;
+}
+
+.prose-purple code {
+  @apply bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200;
+}

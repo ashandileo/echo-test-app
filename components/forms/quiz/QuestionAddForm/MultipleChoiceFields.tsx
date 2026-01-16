@@ -73,7 +73,7 @@ const MultipleChoiceFields = ({ form, quizId }: MultipleChoiceFieldsProps) => {
       }
 
       form.setValue("explanation", data.explanation);
-      
+
       // Force remount the editor to show new content
       setEditorKey((prev) => prev + 1);
     } catch (error) {

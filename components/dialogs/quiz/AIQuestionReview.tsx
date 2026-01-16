@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import ReactMarkdown from "react-markdown";
 
 import { CheckCircle2, Edit2, Loader2, Save, XCircle } from "lucide-react";
+import remarkGfm from "remark-gfm";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -79,7 +81,7 @@ const AIQuestionReview = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="!max-w-[1600px] w-[98vw] h-[95vh] flex flex-col p-0 gap-0">
+      <DialogContent className="max-w-400! w-[98vw] h-[95vh] flex flex-col p-0 gap-0">
         <DialogHeader className="bg-background border-b p-4 sm:p-6 pb-3 sm:pb-4 shrink-0">
           <DialogTitle className="text-base sm:text-lg">
             Review Generated Questions
@@ -205,9 +207,11 @@ const AIQuestionReview = ({
                           <p className="text-xs font-semibold text-blue-900 dark:text-blue-300 mb-1">
                             Explanation:
                           </p>
-                          <p className="text-xs text-blue-700 dark:text-blue-400">
-                            {question.explanation}
-                          </p>
+                          <div className="prose prose-xs sm:prose-sm dark:prose-invert max-w-none prose-blue">
+                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                              {question.explanation}
+                            </ReactMarkdown>
+                          </div>
                         </div>
                       )}
 
@@ -216,9 +220,11 @@ const AIQuestionReview = ({
                           <p className="text-xs font-semibold text-purple-900 dark:text-purple-300 mb-1">
                             Sample Answer Rubric:
                           </p>
-                          <p className="text-xs text-purple-700 dark:text-purple-400">
-                            {question.sampleAnswer}
-                          </p>
+                          <div className="prose prose-xs sm:prose-sm dark:prose-invert max-w-none prose-purple">
+                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                              {question.sampleAnswer}
+                            </ReactMarkdown>
+                          </div>
                         </div>
                       )}
                     </div>

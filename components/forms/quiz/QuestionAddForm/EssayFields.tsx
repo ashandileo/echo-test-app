@@ -49,7 +49,7 @@ const EssayFields = ({ form, quizId }: EssayFieldsProps) => {
       }
 
       form.setValue("sampleAnswer", data.rubric);
-      
+
       // Force remount the editor to show new content
       setEditorKey((prev) => prev + 1);
     } catch (error) {
