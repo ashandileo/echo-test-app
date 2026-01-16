@@ -6,7 +6,7 @@ export interface UploadAudioResult {
 }
 
 /**
- * Upload audio file to R2 Storage via API route
+ * Upload audio file to Supabase Storage via API route
  */
 export async function uploadAudio(
   audioBlob: Blob,
@@ -40,7 +40,7 @@ export async function uploadAudio(
   formData.append("quizId", options.quizId);
   formData.append("userId", options.userId);
 
-  // Upload via API route (which has access to R2 credentials)
+  // Upload via API route (which has access to Supabase server client)
   const response = await fetch("/api/audio/upload", {
     method: "POST",
     body: formData,
@@ -60,7 +60,7 @@ export async function uploadAudio(
 }
 
 /**
- * Delete audio file from R2 Storage via API route
+ * Delete audio file from Supabase Storage via API route
  */
 export async function deleteAudio(filePath: string): Promise<void> {
   const supabase = createClient();
@@ -82,7 +82,7 @@ export async function deleteAudio(filePath: string): Promise<void> {
     );
   }
 
-  // Delete via API route (which has access to R2 credentials)
+  // Delete via API route (which has access to Supabase server client)
   const response = await fetch(
     `/api/audio/delete?filePath=${encodeURIComponent(filePath)}`,
     {
@@ -101,7 +101,7 @@ export async function deleteAudio(filePath: string): Promise<void> {
  */
 export async function deleteAudioByUrl(audioUrl: string): Promise<void> {
   // Extract path from public URL
-  // Example URL: https://xxx.supabase.co/storage/v1/object/public/quiz-assets/userId/quizId/file.webm
+  // Example URL: https://xxx.supabase.co/storage/v1/object/public/quiz-assets/userId/quizId/audio/file.webm
   const pathMatch = audioUrl.match(/quiz-assets\/(.+)$/);
 
   if (!pathMatch || !pathMatch[1]) {

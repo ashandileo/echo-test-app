@@ -1,18 +1,4 @@
-import {
-  DeleteObjectCommand,
-  PutObjectCommand,
-  S3Client,
-} from "@aws-sdk/client-s3";
-
-// Initialize R2 Client
-const R2 = new S3Client({
-  region: "auto",
-  endpoint: `https://${process.env.NEXT_PUBLIC_R2_ACCOUNT_ID || process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
-  credentials: {
-    accessKeyId: process.env.R2_ACCESS_KEY_ID || "",
-    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY || "",
-  },
-});
+import { createClient } from "@/lib/supabase/server";
 
 export interface UploadAudioResult {
   audioUrl: string;
@@ -20,7 +6,8 @@ export interface UploadAudioResult {
 }
 
 /**
- * Upload audio file to R2 Storage
+ * Upload audio file to Supabase Storage
+ * Bucket name: quiz-assets (already exists from previous migration)
  */
 export async function uploadAudioToR2(
   audioBuffer: ArrayBuffer,
@@ -32,75 +19,64 @@ export async function uploadAudioToR2(
   }
 ): Promise<UploadAudioResult> {
   try {
-    // Validate environment variables
-    if (
-      !process.env.R2_ACCOUNT_ID ||
-      !process.env.R2_ACCESS_KEY_ID ||
-      !process.env.R2_SECRET_ACCESS_KEY ||
-      !process.env.R2_BUCKET_NAME
-    ) {
-      throw new Error("R2 configuration is missing");
-    }
+    const supabase = await createClient();
 
-    // Convert ArrayBuffer to Buffer
-    const buffer = Buffer.from(audioBuffer);
+    // Convert ArrayBuffer to Uint8Array for Supabase
+    const uint8Array = new Uint8Array(audioBuffer);
 
     // Create file path: userId/quizId/audio/fileName
     const filePath = `${options.userId}/${options.quizId}/audio/${options.fileName}`;
 
-    // Upload to R2
-    const command = new PutObjectCommand({
-      Bucket: process.env.R2_BUCKET_NAME,
-      Key: filePath,
-      Body: buffer,
-      ContentType: options.contentType || "audio/webm",
-    });
+    // Upload to Supabase Storage
+    const { error } = await supabase.storage
+      .from("quiz-assets")
+      .upload(filePath, uint8Array, {
+        contentType: options.contentType || "audio/webm",
+        upsert: true, // Replace if exists
+      });
 
-    await R2.send(command);
+    if (error) {
+      console.error("Supabase upload error:", error);
+      throw new Error(`Failed to upload to Supabase: ${error.message}`);
+    }
 
-    // Generate public URL
-    const publicUrl = process.env.R2_PUBLIC_URL
-      ? `${process.env.R2_PUBLIC_URL}/${filePath}`
-      : `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com/${process.env.R2_BUCKET_NAME}/${filePath}`;
+    // Get public URL
+    const {
+      data: { publicUrl },
+    } = supabase.storage.from("quiz-assets").getPublicUrl(filePath);
 
     return {
       audioUrl: publicUrl,
       path: filePath,
     };
   } catch (error) {
-    console.error("Error uploading to R2:", error);
+    console.error("Error uploading to Supabase Storage:", error);
     throw error instanceof Error
       ? error
-      : new Error("Failed to upload audio to R2");
+      : new Error("Failed to upload audio to Supabase Storage");
   }
 }
 
 /**
- * Delete audio file from R2 Storage
+ * Delete audio file from Supabase Storage
  */
 export async function deleteAudioFromR2(filePath: string): Promise<void> {
   try {
-    // Validate environment variables
-    if (
-      !process.env.R2_ACCOUNT_ID ||
-      !process.env.R2_ACCESS_KEY_ID ||
-      !process.env.R2_SECRET_ACCESS_KEY ||
-      !process.env.R2_BUCKET_NAME
-    ) {
-      throw new Error("R2 configuration is missing");
+    const supabase = await createClient();
+
+    // Delete from Supabase Storage
+    const { error } = await supabase.storage
+      .from("quiz-assets")
+      .remove([filePath]);
+
+    if (error) {
+      console.error("Supabase delete error:", error);
+      throw new Error(`Failed to delete from Supabase: ${error.message}`);
     }
-
-    // Delete from R2
-    const command = new DeleteObjectCommand({
-      Bucket: process.env.R2_BUCKET_NAME,
-      Key: filePath,
-    });
-
-    await R2.send(command);
   } catch (error) {
-    console.error("Error deleting from R2:", error);
+    console.error("Error deleting from Supabase Storage:", error);
     throw error instanceof Error
       ? error
-      : new Error("Failed to delete audio from R2");
+      : new Error("Failed to delete audio from Supabase Storage");
   }
 }
