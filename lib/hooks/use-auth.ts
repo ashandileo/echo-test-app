@@ -96,6 +96,30 @@ export function useRegister() {
   });
 }
 
+// Google Login Mutation
+export function useGoogleLogin() {
+  const supabase = createClient();
+
+  return useMutation({
+    mutationFn: async () => {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+
+      if (error) throw error;
+      return data;
+    },
+    onError: (error: Error) => {
+      toast.error("Google login failed", {
+        description: error.message,
+      });
+    },
+  });
+}
+
 // Logout Mutation
 export function useLogout() {
   const router = useRouter();
