@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 
-import { ClipboardList } from "lucide-react";
+import { ClipboardList, Clock } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -15,6 +15,7 @@ import {
   useQuizSubmissionEssay,
   useQuizSubmissionMultipleChoice,
 } from "@/lib/hooks/api/useQuizSubmission";
+import { useQuizSubmissionStatus } from "@/lib/hooks/api/useQuizSubmissionStatus";
 import { useUser } from "@/lib/hooks/api/useUser";
 import { Database } from "@/types/supabase";
 
@@ -46,6 +47,10 @@ const Contents = () => {
 
   const userId = userData?.id;
 
+  // Fetch submission status
+  const { data: submissionStatus, isLoading: isLoadingStatus } =
+    useQuizSubmissionStatus(String(userId), itemId);
+
   // Fetch multiple choice questions
   const { data: mcQuestions, isLoading: isLoadingMCQuestions } =
     useQuizQuestionMultipleChoice(itemId);
@@ -63,6 +68,7 @@ const Contents = () => {
     useQuizSubmissionEssay(itemId, String(userId));
 
   const isLoading =
+    isLoadingStatus ||
     isLoadingMCQuestions ||
     isLoadingEssayQuestions ||
     isLoadingMCSubmissions ||
@@ -139,6 +145,9 @@ const Contents = () => {
   // Check if user has any submissions
   const hasSubmissions = answeredQuestions > 0;
 
+  // Check if quiz is completed
+  const isCompleted = submissionStatus?.status === "submitted";
+
   // If no submissions, show empty state
   if (!hasSubmissions) {
     return (
@@ -149,6 +158,22 @@ const Contents = () => {
         action={
           <Button asChild>
             <Link href={`/take-quiz/${itemId}`}>Start Quiz</Link>
+          </Button>
+        }
+      />
+    );
+  }
+
+  // If quiz is still in progress, show in-progress state
+  if (!isCompleted) {
+    return (
+      <EmptyState
+        icon={Clock}
+        title="Quiz In Progress"
+        description="You haven't completed this quiz yet. Finish the quiz to see your results here."
+        action={
+          <Button asChild>
+            <Link href={`/take-quiz/${itemId}`}>Continue Quiz</Link>
           </Button>
         }
       />
