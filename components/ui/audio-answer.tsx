@@ -7,7 +7,6 @@ import {
   FileAudio,
   Mic,
   Pause,
-  Play,
   Square,
   Trash2,
   Upload,
@@ -25,6 +24,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "./alert-dialog";
+import { AudioPlayer } from "./audio-player";
 import { Button } from "./button";
 
 interface AudioAnswerProps {
@@ -50,14 +50,12 @@ export const AudioAnswer = ({
     existingAudioUrl || null
   );
   const [audioFileName, setAudioFileName] = useState<string>("");
-  const [isPlaying, setIsPlaying] = useState(false);
   const [audioDuration, setAudioDuration] = useState(0);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
-  const audioElementRef = useRef<HTMLAudioElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const isRecordingRef = useRef<boolean>(false);
   const isPausedRef = useRef<boolean>(false);
@@ -221,11 +219,6 @@ export const AudioAnswer = ({
     setAudioFileName("");
     setRecordingTime(0);
     setAudioDuration(0);
-    setIsPlaying(false);
-    if (audioElementRef.current) {
-      audioElementRef.current.pause();
-      audioElementRef.current.currentTime = 0;
-    }
 
     // Notify parent component about deletion
     if (onRecordingDelete) {
@@ -234,18 +227,6 @@ export const AudioAnswer = ({
 
     // Close dialog
     setShowDeleteDialog(false);
-  };
-
-  const togglePlayback = () => {
-    if (!audioElementRef.current) return;
-
-    if (isPlaying) {
-      audioElementRef.current.pause();
-      setIsPlaying(false);
-    } else {
-      audioElementRef.current.play();
-      setIsPlaying(true);
-    }
   };
 
   return (
@@ -290,51 +271,7 @@ export const AudioAnswer = ({
               </div>
 
               {/* Audio Player */}
-              <audio
-                ref={audioElementRef}
-                src={audioUrl}
-                onLoadedMetadata={(e) => {
-                  const audio = e.currentTarget;
-                  if (audio.duration && !isNaN(audio.duration)) {
-                    setAudioDuration(Math.floor(audio.duration));
-                  }
-                }}
-                onEnded={() => setIsPlaying(false)}
-                onTimeUpdate={(e) => {
-                  const audio = e.currentTarget;
-                  if (audioElementRef.current) {
-                    const progress = (audio.currentTime / audio.duration) * 100;
-                    const progressBar =
-                      document.getElementById("audio-progress");
-                    if (progressBar) {
-                      progressBar.style.width = `${progress}%`;
-                    }
-                  }
-                }}
-                className="hidden"
-              />
-              <div className="flex items-center gap-3">
-                <Button
-                  onClick={togglePlayback}
-                  size="sm"
-                  className="shrink-0 bg-indigo-600 hover:bg-indigo-700"
-                >
-                  {isPlaying ? (
-                    <Pause className="h-4 w-4" />
-                  ) : (
-                    <Play className="h-4 w-4" />
-                  )}
-                </Button>
-                <div className="flex-1">
-                  <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                    <div
-                      id="audio-progress"
-                      className="h-full bg-indigo-500 transition-all"
-                      style={{ width: "0%" }}
-                    />
-                  </div>
-                </div>
-              </div>
+              <AudioPlayer audioUrl={audioUrl} />
             </>
           ) : (
             // No recording - Show ready status
