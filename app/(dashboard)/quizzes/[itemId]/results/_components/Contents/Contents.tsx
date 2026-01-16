@@ -118,6 +118,7 @@ const Contents = () => {
 
   const essayGraded =
     essaySubmissions?.filter((s) => s.points_earned !== null).length || 0;
+  const essayTotal = essayQuestions?.reduce((sum, q) => sum + q.points, 0) || 0;
   const essayScore =
     essaySubmissions?.reduce((sum, s) => sum + (s.points_earned || 0), 0) || 0;
 
@@ -190,7 +191,7 @@ const Contents = () => {
         multipleChoiceScore={multipleChoiceScore}
         multipleChoiceTotal={multipleChoiceTotal}
         essayGraded={essayGraded}
-        essayTotal={essayQuestions?.length || 0}
+        essayTotal={essayTotal}
         essayScore={essayScore}
       />
 
