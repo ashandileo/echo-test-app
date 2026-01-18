@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import Link from "next/link";
+import { Eye, EyeOff } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -22,12 +22,16 @@ import { Input } from "@/components/ui/input";
 import { useGoogleLogin, useLogin } from "@/lib/hooks/use-auth";
 import { cn } from "@/lib/utils";
 
+type LoginMode = "admin" | "student";
+
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
+  const [loginMode, setLoginMode] = useState<LoginMode>("student");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const loginMutation = useLogin();
   const googleLoginMutation = useGoogleLogin();
 
@@ -46,53 +50,94 @@ export function LoginForm({
         <CardHeader className="text-center">
           <CardTitle className="text-xl">Sign in to your account</CardTitle>
           <CardDescription>
-            Welcome back! Please enter your details.
+            {loginMode === "admin"
+              ? "Sign in as Admin to manage quizzes"
+              : "Sign in as Student to take quizzes"}
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit}>
-            <FieldGroup>
-              <Field>
-                <FieldLabel htmlFor="email">Email</FieldLabel>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="m@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  disabled={loginMutation.isPending}
-                />
-              </Field>
-              <Field>
-                <div className="flex items-center">
+          {/* Switch Mode */}
+          <div className="mb-6">
+            <div className="flex rounded-lg bg-muted p-1">
+              <button
+                type="button"
+                onClick={() => setLoginMode("student")}
+                className={cn(
+                  "flex-1 rounded-md py-2 text-sm font-medium transition-all cursor-pointer",
+                  loginMode === "student"
+                    ? "bg-background text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                Student
+              </button>
+              <button
+                type="button"
+                onClick={() => setLoginMode("admin")}
+                className={cn(
+                  "flex-1 rounded-md py-2 text-sm font-medium transition-all cursor-pointer",
+                  loginMode === "admin"
+                    ? "bg-background text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                Admin
+              </button>
+            </div>
+          </div>
+
+          {loginMode === "admin" ? (
+            /* Admin Login Form */
+            <form onSubmit={handleSubmit}>
+              <FieldGroup>
+                <Field>
+                  <FieldLabel htmlFor="email">Email</FieldLabel>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="admin@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    disabled={loginMutation.isPending}
+                  />
+                </Field>
+                <Field>
                   <FieldLabel htmlFor="password">Password</FieldLabel>
-                  <a
-                    href="#"
-                    className="ml-auto text-sm underline-offset-4 hover:underline"
-                  >
-                    Forgot your password?
-                  </a>
-                </div>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  disabled={loginMutation.isPending}
-                />
-              </Field>
-              <Field>
-                <Button type="submit" disabled={loginMutation.isPending}>
-                  {loginMutation.isPending ? "Signing in..." : "Sign in"}
-                </Button>
-              </Field>
-              <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
-                <span className="relative z-10 bg-background px-2 text-muted-foreground">
-                  Or continue with
-                </span>
-              </div>
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      disabled={loginMutation.isPending}
+                      className="pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                      tabIndex={-1}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </button>
+                  </div>
+                </Field>
+                <Field>
+                  <Button type="submit" disabled={loginMutation.isPending}>
+                    {loginMutation.isPending ? "Signing in..." : "Sign in"}
+                  </Button>
+                </Field>
+              </FieldGroup>
+            </form>
+          ) : (
+            /* Student Login - Google Only */
+            <FieldGroup>
               <Field>
                 <Button
                   type="button"
@@ -123,22 +168,16 @@ export function LoginForm({
                     ? "Connecting..."
                     : "Sign in with Google"}
                 </Button>
-                <FieldDescription className="text-center">
-                  Don&apos;t have an account?{" "}
-                  <Link
-                    href="/register"
-                    className="underline-offset-4 hover:underline"
-                  >
-                    Sign up
-                  </Link>
-                </FieldDescription>
               </Field>
+              <FieldDescription className="text-center text-muted-foreground">
+                Use your school Google account to sign in
+              </FieldDescription>
             </FieldGroup>
-          </form>
+          )}
         </CardContent>
       </Card>
       <FieldDescription className="px-6 text-center">
-        © 2025 EchoTest. All rights reserved.
+        © {new Date().getFullYear()} EchoTest. All rights reserved.
       </FieldDescription>
     </div>
   );
