@@ -44,11 +44,8 @@ export default function LandingPage() {
           </div>
           <nav className="flex items-center gap-4">
             <Link href="/login">
-              <Button variant="ghost">Login</Button>
-            </Link>
-            <Link href="/register">
               <Button className="gap-2">
-                Get Started <ArrowRight className="h-4 w-4" />
+                Sign In <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
           </nav>
@@ -75,19 +72,14 @@ export default function LandingPage() {
         </h2>
 
         <p className="text-xl md:text-2xl text-muted-foreground mb-10 max-w-3xl mx-auto leading-relaxed">
-          A web-based platform to create and take quizzes with AI assistance.
-          Designed for educational purposes and learning management.
+          A web-based platform for teachers to create quizzes with AI assistance
+          and for students to take interactive assessments.
         </p>
 
         <div className="flex gap-4 justify-center flex-wrap mb-16">
-          <Link href="/register">
-            <Button size="lg" className="gap-2">
-              Get Started <ArrowRight className="h-4 w-4" />
-            </Button>
-          </Link>
           <Link href="/login">
-            <Button size="lg" variant="outline">
-              Sign In
+            <Button size="lg" className="gap-2">
+              Sign In <ArrowRight className="h-4 w-4" />
             </Button>
           </Link>
         </div>
@@ -103,7 +95,7 @@ export default function LandingPage() {
               </div>
               <h3 className="font-semibold mb-2">AI-Powered</h3>
               <p className="text-sm text-muted-foreground">
-                Generate questions automatically
+                Teachers generate questions with AI
               </p>
             </div>
           </div>
@@ -131,7 +123,7 @@ export default function LandingPage() {
               </div>
               <h3 className="font-semibold mb-2">Analytics</h3>
               <p className="text-sm text-muted-foreground">
-                Track your progress
+                Track student progress
               </p>
             </div>
           </div>
@@ -145,7 +137,7 @@ export default function LandingPage() {
               </div>
               <h3 className="font-semibold mb-2">Audio Support</h3>
               <p className="text-sm text-muted-foreground">
-                Record voice responses
+                Students record voice responses
               </p>
             </div>
           </div>
@@ -179,18 +171,16 @@ export default function LandingPage() {
                       1
                     </span>
                   </div>
-                  <CardTitle className="text-2xl mb-3">
-                    Create Account
-                  </CardTitle>
+                  <CardTitle className="text-2xl mb-3">Sign In</CardTitle>
                   <CardDescription className="text-base">
-                    Register with your email to get started on your learning
-                    journey
+                    Sign in with your Google account to get started on your
+                    learning journey
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="text-center">
                   <div className="p-4 bg-muted/50 rounded-lg">
                     <p className="text-sm text-muted-foreground">
-                      Quick and easy registration process
+                      Quick and easy sign in with Google
                     </p>
                   </div>
                 </CardContent>
@@ -205,17 +195,16 @@ export default function LandingPage() {
                       2
                     </span>
                   </div>
-                  <CardTitle className="text-2xl mb-3">
-                    Create or Take Quiz
-                  </CardTitle>
+                  <CardTitle className="text-2xl mb-3">Take Quiz</CardTitle>
                   <CardDescription className="text-base">
-                    Make new quizzes with AI or participate in existing ones
+                    Students take quizzes created by teachers with various
+                    question types
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="text-center">
                   <div className="p-4 bg-muted/50 rounded-lg">
                     <p className="text-sm text-muted-foreground">
-                      Flexible quiz creation and taking options
+                      MCQ, essay, and audio response options
                     </p>
                   </div>
                 </CardContent>
@@ -258,13 +247,13 @@ export default function LandingPage() {
                   Ready to Get Started?
                 </CardTitle>
                 <CardDescription className="text-base md:text-lg">
-                  Create your account and explore the quiz platform features
+                  Sign in and explore the quiz platform features
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <Link href="/register">
+                <Link href="/login">
                   <Button size="lg" className="w-full max-w-xs gap-2">
-                    Create Account <ArrowRight className="h-4 w-4" />
+                    Sign In <ArrowRight className="h-4 w-4" />
                   </Button>
                 </Link>
                 <p className="text-sm text-muted-foreground mt-4">
@@ -279,8 +268,9 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className="border-t py-12 bg-muted/30 mt-24">
         <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-4 gap-8 mb-8">
-            <div className="md:col-span-2">
+          <div className="flex flex-col md:flex-row justify-between gap-8 mb-8">
+            {/* Left Side */}
+            <div className="flex-1">
               <div className="flex items-center gap-2 mb-4">
                 <div className="relative w-10 h-10 rounded-lg overflow-hidden">
                   <Image
@@ -293,85 +283,26 @@ export default function LandingPage() {
                 <h1 className="text-2xl font-bold">EchoTest</h1>
               </div>
               <p className="text-muted-foreground mb-6 max-w-md leading-relaxed">
-                An interactive quiz platform with AI assistance for educational
-                purposes. Developed as an undergraduate thesis project to
-                support modern learning and assessment.
+                An interactive quiz platform where teachers create quizzes with
+                AI assistance and students take assessments. Developed as an
+                undergraduate thesis project.
               </p>
-              <div className="flex gap-4">
-                <Link href="/register">
-                  <Button size="sm" className="gap-2">
-                    Get Started <ArrowRight className="h-4 w-4" />
-                  </Button>
-                </Link>
-                <Link href="/login">
-                  <Button size="sm" variant="outline">
-                    Sign In
-                  </Button>
-                </Link>
-              </div>
             </div>
 
-            <div>
-              <h4 className="font-semibold mb-4 text-lg">Quick Links</h4>
-              <ul className="space-y-3 text-sm text-muted-foreground">
-                <li>
-                  <Link
-                    href="/register"
-                    className="hover:text-foreground transition-colors flex items-center gap-2"
-                  >
-                    <ArrowRight className="h-3 w-3" />
-                    Create Account
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/login"
-                    className="hover:text-foreground transition-colors flex items-center gap-2"
-                  >
-                    <ArrowRight className="h-3 w-3" />
-                    Login
-                  </Link>
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="font-semibold mb-4 text-lg">Legal</h4>
-              <ul className="space-y-3 text-sm text-muted-foreground">
-                <li>
-                  <Link
-                    href="/privacy"
-                    className="hover:text-foreground transition-colors flex items-center gap-2"
-                  >
-                    <ArrowRight className="h-3 w-3" />
-                    Privacy Policy
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/terms"
-                    className="hover:text-foreground transition-colors flex items-center gap-2"
-                  >
-                    <ArrowRight className="h-3 w-3" />
-                    Terms of Service
-                  </Link>
-                </li>
-              </ul>
+            {/* Right Side */}
+            <div className="flex flex-col items-start md:items-end justify-center">
+              <Badge variant="outline" className="gap-1">
+                <GraduationCap className="h-3 w-3" />
+                Thesis Project
+              </Badge>
             </div>
           </div>
 
           <div className="border-t pt-8">
-            <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
-              <p className="text-sm text-muted-foreground">
-                © 2026 EchoTest. Educational project for academic purposes.
-              </p>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Badge variant="outline" className="gap-1">
-                  <GraduationCap className="h-3 w-3" />
-                  Thesis Project
-                </Badge>
-              </div>
-            </div>
+            <p className="text-sm text-muted-foreground text-center md:text-left">
+              © {new Date().getFullYear()} EchoTest. Educational project for
+              academic purposes.
+            </p>
           </div>
         </div>
       </footer>
