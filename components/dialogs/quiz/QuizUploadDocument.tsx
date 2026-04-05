@@ -145,7 +145,7 @@ export function QuizUploadDocument({
       toast(
         <ProgressToast
           step={2}
-          message="Processing document and generating embeddings..."
+          message="Processing document..."
           description="Step 2 of 3 • Analyzing your content"
         />,
         {
